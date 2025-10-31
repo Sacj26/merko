@@ -1,0 +1,224 @@
+/* Estilos para el módulo de usuarios */
+
+/* Lista de usuarios */
+.usuarios-container {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: var(--sombra-suave);
+}
+
+/* Grid de usuarios */
+.usuarios-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+/* Tarjeta de usuario */
+.usuario-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: var(--sombra-suave);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+}
+
+.usuario-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--sombra-media);
+}
+
+/* Avatar de usuario */
+.usuario-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-bottom: 1rem;
+    object-fit: cover;
+    border: 3px solid var(--color-primario);
+}
+
+/* Información del usuario */
+.usuario-info {
+    text-align: center;
+}
+
+.usuario-nombre {
+    font-size: 1.2rem;
+    color: var(--color-texto);
+    margin-bottom: 0.5rem;
+}
+
+.usuario-rol {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+}
+
+.rol-admin {
+    background-color: var(--alert-info-bg);
+    color: var(--alert-info-text);
+}
+
+.rol-cliente {
+    background-color: var(--alert-success-bg);
+    color: var(--alert-success-text);
+}
+
+.rol-empleado {
+    background-color: var(--alert-warning-bg);
+    color: var(--alert-warning-text);
+}
+
+/* Detalles y estadísticas */
+.usuario-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin: 1rem 0;
+    text-align: center;
+}
+
+.stat-item {
+    padding: 0.5rem;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-primario);
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+/* Estado del usuario */
+.usuario-estado {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.estado-online {
+    background-color: var(--color-exito);
+    box-shadow: 0 0 0 3px var(--alert-success-bg);
+}
+
+.estado-offline {
+    background-color: #666;
+    box-shadow: 0 0 0 3px #eee;
+}
+
+/* Acciones de usuario */
+.usuario-acciones {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.btn-usuario {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.btn-editar {
+    background-color: var(--color-primario);
+    color: white;
+}
+
+.btn-editar:hover {
+    background-color: var(--color-secundario);
+}
+
+.btn-suspender {
+    background-color: var(--alert-warning-bg);
+    color: var(--alert-warning-text);
+}
+
+.btn-suspender:hover {
+    background-color: var(--alert-warning-border);
+    color: white;
+}
+
+/* Formulario de usuario */
+.usuario-form {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.form-avatar-upload {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.avatar-preview {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    margin-bottom: 1rem;
+    object-fit: cover;
+    border: 3px solid var(--color-primario);
+}
+
+.avatar-upload-btn {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background-color: var(--color-fondo);
+    border: 1px solid var(--color-borde);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.avatar-upload-btn:hover {
+    background-color: var(--color-primario);
+    color: white;
+    border-color: var(--color-primario);
+}
+
+/* Filtros y búsqueda */
+.usuarios-filtros {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.filtro-busqueda {
+    flex: 1;
+    min-width: 200px;
+}
+
+.filtro-rol {
+    width: 200px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .usuarios-filtros {
+        flex-direction: column;
+    }
+
+    .usuario-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .filtro-rol {
+        width: 100%;
+    }
+}

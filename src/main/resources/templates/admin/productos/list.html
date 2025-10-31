@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{shared/layouts/admin}"
+      lang="es">
+<head>
+    <title>Productos</title>
+    <link rel="stylesheet" th:href="@{/css/pages/productos.css}">
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="header-with-actions">
+        <div class="title-group">
+            <h1 class="page-title">Productos</h1>
+            <p class="page-subtitle">Gestiona tu catálogo de productos</p>
+        </div>
+        <div class="actions"><!-- Botón Nuevo Producto ocultado por solicitud --></div>
+    </div>
+
+    <div class="filters">
+        <form id="productosFilterForm" method="get" action="">
+            <select name="proveedorId" class="form-control" style="min-width: 240px;">
+                <option value="">Todos los proveedores</option>
+                <option th:each="prov : ${proveedores}"
+                        th:value="${prov.id}"
+                        th:selected="${selectedProveedorId != null and selectedProveedorId == prov.id}"
+                        th:text="${prov.nombre}"></option>
+            </select>
+            <input type="text" name="q" th:value="${q}" class="form-control" placeholder="Buscar por nombre o descripción" style="min-width: 260px;" />
+            <button type="submit" class="btn btn-primary">Filtrar</button>
+            <a th:href="@{/admin/productos}" class="btn btn-secondary">Limpiar</a>
+            <a th:href="@{/admin/productos/export(proveedorId=${selectedProveedorId}, q=${q})}"
+               class="btn btn-secondary" download>
+                Exportar CSV
+            </a>
+
+            <label class="hide-sm" style="margin-left:0.5rem; color:#64748b;">Mostrar</label>
+            <select name="size" class="form-control" style="min-width: 100px;">
+                <option th:value="10" th:selected="${size == 10}">10</option>
+                <option th:value="25" th:selected="${size == 25}">25</option>
+                <option th:value="50" th:selected="${size == 50}">50</option>
+                <option th:value="100" th:selected="${size == 100}">100</option>
+            </select>
+        </form>
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+            <label for="toggleDense" class="hide-sm" style="color:#64748b;">Vista compacta</label>
+            <input id="toggleDense" type="checkbox" />
+        </div>
+    </div>
+
+    <div class="table-container table-scroll">
+        <table class="table-admin">
+            <thead>
+                <tr>
+                    <th>Imagen</th>
+                    <th>
+                        <a style="text-decoration:none; color:inherit;"
+                           th:href="@{/admin/productos(
+                            proveedorId=${selectedProveedorId},
+                            q=${q},
+                            page=${page.number},
+                            size=${size},
+                            sort='nombre',
+                            dir=${sort=='nombre' and dir=='asc' ? 'desc' : 'asc'})}">Nombre</a>
+                    </th>
+                    <th>Tipo</th>
+                    <th>Estado</th>
+                    <th>Proveedor</th>
+                    <th>
+                        <a style="text-decoration:none; color:inherit;"
+                           th:href="@{/admin/productos(
+                            proveedorId=${selectedProveedorId},
+                            q=${q},
+                            page=${page.number},
+                            size=${size},
+                            sort='precioVenta',
+                            dir=${sort=='precioVenta' and dir=='asc' ? 'desc' : 'asc'})}">Precio</a>
+                    </th>
+                    <th>
+                        <a style="text-decoration:none; color:inherit;"
+                           th:href="@{/admin/productos(
+                            proveedorId=${selectedProveedorId},
+                            q=${q},
+                            page=${page.number},
+                            size=${size},
+                            sort='stock',
+                            dir=${sort=='stock' and dir=='asc' ? 'desc' : 'asc'})}">Stock</a>
+                    </th>
+                    <th class="actions-col">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="producto : ${productos}">
+                    <td>
+                        <img th:if="${producto.imagenUrl != null}"
+                             th:src="${producto.imagenUrl}"
+                             alt="img"
+                             style="width:40px;height:40px;object-fit:cover;border-radius:4px;">
+                    </td>
+                    <td>
+                        <div class="cell-text-ellipsis">
+                            <div class="cell-title" th:text="${producto.nombre}">Producto</div>
+                            <small class="cell-subtitle" th:if="${producto.sku != null}" th:text="'SKU: ' + ${producto.sku}"></small>
+                        </div>
+                    </td>
+                    <td>
+                        <span th:switch="${producto.tipo}" class="badge" 
+                              th:classappend="${producto.tipo == T(merko.merko.Entity.TipoProducto).MATERIA_PRIMA} ? 'badge-info' : 'badge-success'">
+                            <span th:case="${T(merko.merko.Entity.TipoProducto).MATERIA_PRIMA}">Materia Prima</span>
+                            <span th:case="${T(merko.merko.Entity.TipoProducto).PRODUCTO_TERMINADO}">Producto Terminado</span>
+                            <span th:case="*">—</span>
+                        </span>
+                    </td>
+                    <td>
+                        <span th:switch="${producto.estado}" class="badge"
+                              th:classappend="${producto.estado == T(merko.merko.Entity.EstadoProducto).ACTIVO} ? 'badge-success' : 'badge-danger'">
+                            <span th:case="${T(merko.merko.Entity.EstadoProducto).ACTIVO}">Activo</span>
+                            <span th:case="${T(merko.merko.Entity.EstadoProducto).INACTIVO}">Inactivo</span>
+                            <span th:case="*">—</span>
+                        </span>
+                    </td>
+                    <td>
+                        <span th:text="${producto.proveedor != null ? producto.proveedor.nombre : '—'}">Proveedor</span>
+                    </td>
+                    <td th:text="${'$' + #numbers.formatDecimal(producto.precioVenta, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
+                    <td>
+                        <span th:classappend="${producto.stock != null and producto.stockMinimo != null and producto.stock <= producto.stockMinimo} ? 'badge badge-warning' : 
+                                              (${producto.stock != null and producto.stock <= 5} ? 'badge badge-warning' : 'badge badge-success')"
+                              th:text="${producto.stock}">0</span>
+                    </td>
+                    <td class="actions-col">
+                        <div class="actions-cell">
+                            <a th:if="${producto.id != null}"
+                               th:href="@{'/admin/productos/ver/' + ${producto.id}}"
+                               class="btn-icon btn-icon-secondary"
+                               title="Ver producto">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <button th:if="${producto.id == null}"
+                                    class="btn-icon btn-icon-secondary" title="Ver producto" disabled>
+                                <i class="fas fa-eye"></i>
+                            </button>
+
+                            <a th:href="@{'/admin/productos/editar/' + ${producto.id}}" class="btn-icon btn-icon-primary" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </a>
+
+                            <form th:action="@{'/admin/productos/eliminar/' + ${producto.id}}" method="post" style="display:inline;">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                <button type="submit" class="btn-icon btn-icon-danger" title="Eliminar"
+                                        onclick="return confirm('¿Eliminar este producto?')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(productos)}">
+                    <td colspan="9" class="empty-message">No hay productos registrados todavía.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Paginación -->
+        <div class="pagination" th:if="${page != null and page.totalPages > 1}" style="margin-top:1rem; display:flex; gap:0.5rem; align-items:center; flex-wrap: wrap;">
+            <a class="btn btn-secondary" th:if="${!page.first}"
+               th:href="@{/admin/productos(
+                    proveedorId=${selectedProveedorId}, q=${q}, page=${page.number - 1}, size=${size}, sort=${sort}, dir=${dir})}">Anterior</a>
+
+            <span th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}">
+                <a class="btn" th:classappend="${i == page.number} ? ' btn-primary' : ' btn-secondary'"
+                   th:text="${i + 1}"
+                   th:href="@{/admin/productos(
+                        proveedorId=${selectedProveedorId}, q=${q}, page=${i}, size=${size}, sort=${sort}, dir=${dir})}"></a>
+            </span>
+
+            <a class="btn btn-secondary" th:if="${!page.last}"
+               th:href="@{/admin/productos(
+                    proveedorId=${selectedProveedorId}, q=${q}, page=${page.number + 1}, size=${size}, sort=${sort}, dir=${dir})}">Siguiente</a>
+        </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <h2 class="section-title">Historial de Compras a Proveedores</h2>
+
+    <div class="table-controls">
+        <div class="table-controls-left">
+            <span class="hide-sm">Compras recientes</span>
+        </div>
+        <div class="table-controls-right">
+            <label for="toggleDenseComprasHistory" class="hide-sm">Vista compacta</label>
+            <input id="toggleDenseComprasHistory" type="checkbox" />
+        </div>
+    </div>
+
+    <div class="table-container table-scroll history-scroll">
+        <table class="table-admin" id="comprasHistoryTable">
+            <thead>
+                <tr>
+                    <th># Compra</th>
+                    <th>Fecha</th>
+                    <th>Proveedor</th>
+                    <th>Producto</th>
+                    <th>Ítems</th>
+                    <th>Cantidad</th>
+                    <th>Total Pagado</th>
+                    <th class="actions-col">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="compra : ${compras}">
+                    <td th:text="${'#' + compra.id}">#0</td>
+                    <td th:text="${#temporals.format(compra.fecha, 'dd/MM/yyyy')}">01/01/2025</td>
+                    <td th:text="${compra.proveedor != null ? compra.proveedor.nombre : '—'}">Proveedor</td>
+                    <td>
+                        <span th:text="${compra.producto != null ? compra.producto.nombre : 'Múltiples'}">Producto</span>
+                    </td>
+                    <td th:text="${compra.detalles != null ? #lists.size(compra.detalles) : (compra.producto != null ? 1 : 0)}">0</td>
+                    <td th:text="${compra.cantidad > 0 ? compra.cantidad : '-'}">0</td>
+                    <td th:text="${'$' + #numbers.formatDecimal(compra.total, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
+                    <td class="actions-col">
+                        <div class="actions-cell">
+                            <a th:href="@{'/admin/compras/detalle/' + ${compra.id}}" class="btn-icon btn-icon-secondary" title="Ver detalles">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${compras == null or #lists.isEmpty(compras)}">
+                    <td colspan="7" class="empty-message">No hay compras registradas todavía.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Se removió el modal de producto; Ver ahora navega a detalles del proveedor -->
+
+<th:block layout:fragment="scripts">
+    <script th:src="@{/js/pages/productos/list.js}"></script>
+</th:block>
+</body>
+</html>

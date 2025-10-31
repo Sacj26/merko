@@ -1,0 +1,148 @@
+/* Estilos para detalles en el módulo de compras */
+
+/* Contenedor de detalles */
+.detail-container {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: var(--sombra-suave);
+    margin-top: 20px;
+}
+
+/* Secciones de detalles */
+.detail-section {
+    margin-bottom: 20px;
+}
+
+.detail-section h2 {
+    color: var(--color-primario);
+    font-size: 1.5em;
+    margin-bottom: 15px;
+}
+
+/* Grid de detalles */
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+/* Items de detalle */
+.detail-item {
+    padding: 15px;
+    background: var(--color-fondo);
+    border-radius: 6px;
+    transition: transform 0.3s ease;
+}
+
+.detail-item:hover {
+    transform: translateY(-2px);
+}
+
+.detail-item strong {
+    display: block;
+    color: #666;
+    margin-bottom: 5px;
+    font-size: 0.9em;
+}
+
+.detail-item span {
+    color: var(--color-texto);
+    font-size: 1.1em;
+    display: block;
+}
+
+/* Contenedor de botones */
+.btn-container {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Estilos para datos específicos */
+.detail-item.total {
+    background-color: var(--color-primario);
+    color: white;
+}
+
+.detail-item.total strong,
+.detail-item.total span {
+    color: white;
+}
+
+.detail-item.estado {
+    border-left: 4px solid;
+}
+
+.detail-item.estado.pendiente {
+    border-color: var(--alert-warning-border);
+}
+
+.detail-item.estado.completado {
+    border-color: var(--color-exito);
+}
+
+.detail-item.estado.cancelado {
+    border-color: var(--color-error);
+}
+
+/* Tabla de productos */
+.productos-table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.productos-table th {
+    background: var(--color-fondo);
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+}
+
+.productos-table td {
+    padding: 12px;
+    border-bottom: 1px solid var(--color-borde);
+}
+
+.productos-table tr:hover {
+    background-color: var(--color-fondo);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .btn-container {
+        flex-direction: column;
+    }
+
+    .btn-container .btn {
+        width: 100%;
+    }
+
+    .productos-table {
+        display: block;
+        overflow-x: auto;
+    }
+}
+
+/* Animaciones */
+.detail-container {
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

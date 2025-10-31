@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{shared/layouts/admin}"
+      lang="es">
+<head>
+    <title>Producto - Detalle</title>
+    <link rel="stylesheet" th:href="@{/css/pages/productos.css}">
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="header-with-actions">
+        <div class="title-group">
+            <h1 class="page-title" th:text="${producto.nombre}">Producto</h1>
+            <p class="page-subtitle">Información detallada del producto</p>
+        </div>
+        <div class="actions">
+            <a th:href="@{/admin/productos}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+            <a th:if="${producto.id != null}" th:href="@{/admin/productos/editar/{id}(id=${producto.id})}" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Editar
+            </a>
+        </div>
+    </div>
+
+    <div class="producto-info">
+        <!-- Sección: Información General -->
+        <div class="info-section">
+            <h3 class="info-section-title">
+                <i class="fas fa-box"></i> Información General
+            </h3>
+            <div class="info-section-content">
+                <div class="info-row">
+                    <div class="info-field" th:if="${producto.imagenUrl != null}">
+                        <span class="info-label">Imagen</span>
+                        <div class="producto-imagen">
+                            <img th:src="${producto.imagenUrl}" alt="Producto" />
+                        </div>
+                    </div>
+                    <div class="info-field">
+                        <span class="info-label">SKU</span>
+                        <span class="info-value" th:text="${producto.sku ?: 'Sin SKU'}">--</span>
+                    </div>
+                    <div class="info-field">
+                        <span class="info-label">Estado</span>
+                        <span class="info-value">
+                            <span th:if="${producto.estado == T(merko.merko.Entity.EstadoProducto).ACTIVO}" class="badge badge-success">
+                                <i class="fas fa-check-circle"></i> Activo
+                            </span>
+                            <span th:unless="${producto.estado == T(merko.merko.Entity.EstadoProducto).ACTIVO}" class="badge badge-danger">
+                                <i class="fas fa-times-circle"></i> Inactivo
+                            </span>
+                        </span>
+                    </div>
+                    <div class="info-field">
+                        <span class="info-label">Tipo de Producto</span>
+                        <span class="info-value">
+                            <span th:if="${producto.tipo == T(merko.merko.Entity.TipoProducto).MATERIA_PRIMA}" class="badge badge-info">Materia Prima</span>
+                            <span th:if="${producto.tipo == T(merko.merko.Entity.TipoProducto).PRODUCTO_TERMINADO}" class="badge badge-success">Producto Terminado</span>
+                            <span th:if="${producto.tipo == null}">--</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-field info-field-full">
+                        <span class="info-label">Descripción</span>
+                        <span class="info-value" th:text="${producto.descripcion ?: 'Sin descripción'}">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección: Proveedor -->
+        <div class="info-section" th:if="${producto.proveedor != null}">
+            <h3 class="info-section-title">
+                <i class="fas fa-building"></i> Proveedor
+            </h3>
+            <div class="info-section-content">
+                <div class="info-row">
+                    <div class="info-field">
+                        <span class="info-label">Nombre</span>
+                        <span class="info-value" th:text="${producto.proveedor.nombre}">--</span>
+                    </div>
+                    <div class="info-field">
+                        <span class="info-label">NIT</span>
+                        <span class="info-value" th:text="${producto.proveedor.nit}">--</span>
+                    </div>
+                    <div class="info-field">
+                        <span class="info-label">Teléfono</span>
+                        <span class="info-value">
+                            <i class="fas fa-phone"></i> <span th:text="${producto.proveedor.telefono}">--</span>
+                        </span>
+                    </div>
+                    <div class="info-field">
+                        <span class="info-label"></span>
+                        <span class="info-value">
+                            <a th:href="@{/admin/proveedores/ver/{id}(id=${producto.proveedor.id})}" class="btn btn-sm btn-secondary">
+                                <i class="fas fa-external-link-alt"></i> Ver proveedor
+                            </a>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección: Precios y Stock -->
+        <div class="info-section">
+            <h3 class="info-section-title">
+                <i class="fas fa-dollar-sign"></i> Precios y Stock
+            </h3>
+            <div class="info-section-content">
+                <div class="info-row">
+                    <div class="info-field">
+                        <span class="info-label">Precio de Compra</span>
+                        <span class="info-value precio" th:text="${'$' + #numbers.formatDecimal(producto.precioCompra, 1, 'COMMA', 2, 'POINT')}">$0.00</span>
+                    </div>
+                    <div class="info-field">
+                        <span class="info-label">Precio de Venta</span>
+                        <span class="info-value precio" th:text="${'$' + #numbers.formatDecimal(producto.precioVenta, 1, 'COMMA', 2, 'POINT')}">$0.00</span>
+                    </div>
+                    <div class="info-field">
+                        <span class="info-label">Stock Actual</span>
+                        <span class="info-value">
+                            <span th:classappend="${producto.stock != null and producto.stockMinimo != null and producto.stock <= producto.stockMinimo} ? 'badge badge-warning' : 
+                                              (${producto.stock != null and producto.stock <= 5} ? 'badge badge-warning' : 'badge badge-success')"
+                                  th:text="${producto.stock}">0</span>
+                        </span>
+                    </div>
+                    <div class="info-field">
+                        <span class="info-label">Stock Mínimo</span>
+                        <span class="info-value" th:text="${producto.stockMinimo ?: '--'}">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección: Características del Producto -->
+        <div class="info-section">
+            <h3 class="info-section-title">
+                <i class="fas fa-cogs"></i> Características del Producto
+            </h3>
+            <div class="info-section-content">
+                <div class="info-row">
+                    <div class="info-field">
+                        <span class="info-label">Contenido</span>
+                        <span class="info-value" th:text="${producto.contenidoNeto != null ? producto.contenidoNeto + ' ' + (producto.contenidoUoM != null ? producto.contenidoUoM : '') : 'No especificado'}">--</span>
+                    </div>
+                    <div class="info-field">
+                        <span class="info-label">Unidad de Medida Base</span>
+                        <span class="info-value" th:text="${producto.unidadMedida != null ? producto.unidadMedida : 'No especificada'}">--</span>
+                    </div>
+                    <div class="info-field">
+                        <span class="info-label">Almacenamiento</span>
+                        <span class="info-value" th:text="${producto.almacenamiento != null ? producto.almacenamiento : 'No especificado'}">--</span>
+                    </div>
+                    <div class="info-field">
+                        <span class="info-label">Vida Útil (días)</span>
+                        <span class="info-value" th:text="${producto.vidaUtilDias != null ? producto.vidaUtilDias : 'No aplica'}">--</span>
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-field">
+                        <span class="info-label">Requiere Vencimiento</span>
+                        <span class="info-value">
+                            <span th:if="${producto.requiereVencimiento}" class="badge badge-warning">
+                                <i class="fas fa-exclamation-triangle"></i> Sí
+                            </span>
+                            <span th:unless="${producto.requiereVencimiento}" class="badge badge-secondary">No</span>
+                        </span>
+                    </div>
+                    <div class="info-field">
+                        <span class="info-label">Gestiona Lotes</span>
+                        <span class="info-value">
+                            <span th:if="${producto.gestionaLotes}" class="badge badge-info">
+                                <i class="fas fa-tag"></i> Sí
+                            </span>
+                            <span th:unless="${producto.gestionaLotes}" class="badge badge-secondary">No</span>
+                        </span>
+                    </div>
+                    <div class="info-field" th:if="${producto.codigoBarras != null}">
+                        <span class="info-label">Código de Barras</span>
+                        <span class="info-value" th:text="${producto.codigoBarras}">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

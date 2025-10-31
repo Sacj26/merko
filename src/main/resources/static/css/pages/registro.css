@@ -1,0 +1,223 @@
+/* Estilos para la página de registro */
+
+/* Contenedor principal */
+.registro-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: url('/img/fondo-mercado.jpg') center/cover fixed;
+    padding: 2rem;
+}
+
+/* Capa de superposición oscura */
+.registro-container::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1;
+}
+
+/* Formulario de registro */
+.registro-form-container {
+    position: relative;
+    z-index: 2;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 2.5rem;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(8px);
+}
+
+/* Encabezado del formulario */
+.registro-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.registro-logo {
+    width: 80px;
+    height: auto;
+    margin-bottom: 1rem;
+}
+
+.registro-titulo {
+    color: var(--color-texto);
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.registro-subtitulo {
+    color: #666;
+    font-size: 1rem;
+}
+
+/* Campos del formulario */
+.registro-form-group {
+    margin-bottom: 1.5rem;
+}
+
+.registro-form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--color-texto);
+    font-weight: 500;
+}
+
+.registro-form-group input {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--color-borde);
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.registro-form-group input:focus {
+    border-color: var(--color-primario);
+    box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.1);
+    outline: none;
+}
+
+/* Grupo de contraseña con indicador de fuerza */
+.password-group {
+    position: relative;
+}
+
+.password-strength {
+    height: 4px;
+    background: #eee;
+    margin-top: 0.5rem;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.strength-bar {
+    height: 100%;
+    width: 0;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.strength-weak {
+    background-color: var(--color-error);
+    width: 33%;
+}
+
+.strength-medium {
+    background-color: var(--alert-warning-border);
+    width: 66%;
+}
+
+.strength-strong {
+    background-color: var(--color-exito);
+    width: 100%;
+}
+
+/* Términos y condiciones */
+.terminos-grupo {
+    margin: 1.5rem 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.terminos-grupo input[type="checkbox"] {
+    margin-top: 0.25rem;
+}
+
+.terminos-grupo label {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.terminos-grupo a {
+    color: var(--color-primario);
+    text-decoration: none;
+}
+
+.terminos-grupo a:hover {
+    text-decoration: underline;
+}
+
+/* Botón de registro */
+.btn-registro {
+    width: 100%;
+    padding: 1rem;
+    background-color: var(--color-primario);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-registro:hover {
+    background-color: var(--color-secundario);
+}
+
+/* Link para iniciar sesión */
+.login-link {
+    text-align: center;
+    margin-top: 1.5rem;
+    color: #666;
+}
+
+.login-link a {
+    color: var(--color-primario);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.login-link a:hover {
+    text-decoration: underline;
+}
+
+/* Mensajes de error */
+.error-feedback {
+    color: var(--color-error);
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.registro-form-container {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .registro-container {
+        padding: 1rem;
+    }
+
+    .registro-form-container {
+        padding: 1.5rem;
+    }
+
+    .registro-titulo {
+        font-size: 1.5rem;
+    }
+
+    .registro-form-group input {
+        padding: 0.7rem;
+    }
+}

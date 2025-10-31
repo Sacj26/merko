@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{shared/layouts/admin}"
+      lang="es">
+<head>
+    <title>Proveedor - Detalle</title>
+    <link rel="stylesheet" th:href="@{/css/pages/proveedores.css}">
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="header-with-actions">
+        <div class="title-group">
+            <h1 class="page-title" th:text="${proveedor.nombre}">Proveedor</h1>
+            <p class="page-subtitle">Información del proveedor</p>
+        </div>
+        <div class="actions">
+            <a th:href="@{/admin/proveedores}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+        </div>
+    </div>
+
+    <div class="proveedor-info">
+        <!-- Sección: Información General -->
+        <div class="info-section">
+            <h3 class="info-section-title">
+                <i class="fas fa-building"></i> Información General
+            </h3>
+            <div class="info-section-content">
+                <div class="info-row">
+                    <div class="info-field">
+                        <span class="info-label">NIT / RUC</span>
+                        <span class="info-value" th:text="${proveedor.nit}">--</span>
+                    </div>
+                    <div class="info-field">
+                        <span class="info-label">Estado</span>
+                        <span class="info-value">
+                            <span th:if="${proveedor.activo}" class="badge badge-success">
+                                <i class="fas fa-check-circle"></i> Activo
+                            </span>
+                            <span th:unless="${proveedor.activo}" class="badge badge-danger">
+                                <i class="fas fa-times-circle"></i> Inactivo
+                            </span>
+                        </span>
+                    </div>
+                    <div class="info-field">
+                        <span class="info-label">Fecha Registro</span>
+                        <span class="info-value" th:text="${#temporals.format(proveedor.fechaRegistro, 'dd/MM/yyyy')}">--</span>
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-field info-field-full">
+                        <span class="info-label">Descripción</span>
+                        <span class="info-value" th:text="${proveedor.descripcion ?: 'Sin descripción'}">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección: Ubicación -->
+        <div class="info-section">
+            <h3 class="info-section-title">
+                <i class="fas fa-map-marker-alt"></i> Ubicación
+            </h3>
+            <div class="info-section-content">
+                <div class="info-row">
+                    <div class="info-field">
+                        <span class="info-label">Ciudad</span>
+                        <span class="info-value" th:text="${proveedor.ciudad ?: '--'}">--</span>
+                    </div>
+                    <div class="info-field">
+                        <span class="info-label">País</span>
+                        <span class="info-value" th:text="${proveedor.pais ?: '--'}">--</span>
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-field info-field-full">
+                        <span class="info-label">Dirección</span>
+                        <span class="info-value" th:text="${proveedor.direccion}">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección: Contacto -->
+        <div class="info-section">
+            <h3 class="info-section-title">
+                <i class="fas fa-address-book"></i> Información de Contacto
+            </h3>
+            <div class="info-section-content">
+                <div class="info-row">
+                    <div class="info-field">
+                        <span class="info-label">Teléfono Principal</span>
+                        <span class="info-value">
+                            <i class="fas fa-phone"></i> <span th:text="${proveedor.telefono}">--</span>
+                        </span>
+                    </div>
+                    <div class="info-field">
+                        <span class="info-label">Email</span>
+                        <span class="info-value">
+                            <i class="fas fa-envelope"></i> <span th:text="${proveedor.email ?: '--'}">--</span>
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="contact-person" th:if="${proveedor.nombreContacto}">
+                    <h4 class="contact-person-title">Persona de Contacto</h4>
+                    <div class="info-row">
+                        <div class="info-field">
+                            <span class="info-label">Nombre</span>
+                            <span class="info-value" th:text="${proveedor.nombreContacto}">--</span>
+                        </div>
+                        <div class="info-field">
+                            <span class="info-label">Cargo</span>
+                            <span class="info-value" th:text="${proveedor.cargoContacto ?: '--'}">--</span>
+                        </div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-field">
+                            <span class="info-label">Teléfono</span>
+                            <span class="info-value">
+                                <i class="fas fa-phone"></i> <span th:text="${proveedor.telefonoContacto ?: '--'}">--</span>
+                            </span>
+                        </div>
+                        <div class="info-field">
+                            <span class="info-label">Email</span>
+                            <span class="info-value">
+                                <i class="fas fa-envelope"></i> <span th:text="${proveedor.emailContacto ?: '--'}">--</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="empty-contact" th:unless="${proveedor.nombreContacto}">
+                    <i class="fas fa-user-slash"></i>
+                    <p>No hay persona de contacto registrada</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="section-title">Productos del proveedor</h2>
+
+    <div class="table-controls">
+        <div class="table-controls-left">
+            <span class="hide-sm">Vista de productos del proveedor</span>
+        </div>
+        <div class="table-controls-right">
+            <label for="toggleDenseProvProductos" class="hide-sm">Vista compacta</label>
+            <input id="toggleDenseProvProductos" type="checkbox" />
+        </div>
+    </div>
+
+    <div class="table-container table-scroll">
+        <table class="table-admin">
+            <thead>
+                <tr>
+                    <th>Imagen</th>
+                    <th>Nombre</th>
+                    <th>Tipo</th>
+                    <th>Estado</th>
+                    <th>Precio proveedor</th>
+                    <th>Stock</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="p : ${proveedor.productos}">
+                    <td>
+                        <img th:if="${p.imagenUrl != null}"
+                             th:src="${p.imagenUrl}"
+                             alt="img"
+                             style="width:40px;height:40px;object-fit:cover;border-radius:4px;">
+                    </td>
+                    <td>
+                        <div class="cell-text-ellipsis">
+                            <div class="cell-title" th:text="${p.nombre}">Producto</div>
+                            <small class="cell-subtitle" th:if="${p.sku != null}" th:text="'SKU: ' + ${p.sku}"></small>
+                        </div>
+                    </td>
+                    <td>
+                        <span th:switch="${p.tipo}" class="badge" 
+                              th:classappend="${p.tipo == T(merko.merko.Entity.TipoProducto).MATERIA_PRIMA} ? 'badge-info' : 'badge-success'">
+                            <span th:case="${T(merko.merko.Entity.TipoProducto).MATERIA_PRIMA}">Materia Prima</span>
+                            <span th:case="${T(merko.merko.Entity.TipoProducto).PRODUCTO_TERMINADO}">Producto Terminado</span>
+                            <span th:case="*">—</span>
+                        </span>
+                    </td>
+                    <td>
+                        <span th:switch="${p.estado}" class="badge"
+                              th:classappend="${p.estado == T(merko.merko.Entity.EstadoProducto).ACTIVO} ? 'badge-success' : 'badge-danger'">
+                            <span th:case="${T(merko.merko.Entity.EstadoProducto).ACTIVO}">Activo</span>
+                            <span th:case="${T(merko.merko.Entity.EstadoProducto).INACTIVO}">Inactivo</span>
+                            <span th:case="*">—</span>
+                        </span>
+                    </td>
+                    <td th:text="${'$' + #numbers.formatDecimal(p.precioCompra, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
+                    <td>
+                        <span th:classappend="${p.stock != null and p.stockMinimo != null and p.stock <= p.stockMinimo} ? 'badge badge-warning' : 
+                                              (${p.stock != null and p.stock <= 5} ? 'badge badge-warning' : 'badge badge-success')"
+                              th:text="${p.stock}">0</span>
+                    </td>
+                    
+                </tr>
+                <tr th:if="${proveedor.productos == null or #lists.isEmpty(proveedor.productos)}">
+                    <td colspan="6" class="empty-message">Este proveedor no tiene productos registrados.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script th:src="@{/js/pages/proveedores/ver.js}"></script>
+</th:block>
+</body>
+</html>

@@ -1,0 +1,24 @@
+package merko.merko.Repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import merko.merko.Entity.Compra;
+import java.time.LocalDate;
+import java.util.List;
+
+@Repository
+public interface CompraRepository extends JpaRepository<Compra, Long> {
+    @Query("SELECT c FROM Compra c LEFT JOIN FETCH c.detalles WHERE c.id = :id")
+    java.util.Optional<Compra> findByIdWithDetalles(@Param("id") Long id);
+
+    @Query("select coalesce(sum(c.total),0) from Compra c where c.fecha between :start and :end")
+    Double sumTotalBetween(@Param("start") LocalDate start, @Param("end") LocalDate end);
+
+    long countByFechaBetween(LocalDate start, LocalDate end);
+
+    @Query("select c.fecha as fecha, coalesce(sum(c.total),0) as total from Compra c where c.fecha between :start and :end group by c.fecha order by c.fecha")
+    List<Object[]> dailyTotalsBetween(@Param("start") LocalDate start, @Param("end") LocalDate end);
+}

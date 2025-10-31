@@ -1,0 +1,171 @@
+/* Estilos base para botones */
+.btn {
+    padding: 0.625rem 1.25rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    color: white;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn i {
+    font-size: 0.9em;
+}
+
+.btn-primary {
+    background-color: var(--color-primario, #3498db);
+}
+
+.btn-primary:hover {
+    background-color: var(--color-primario-hover, #2980b9);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(52, 152, 219, 0.25);
+}
+
+.btn-secondary {
+    background-color: var(--color-texto-claro, #64748b);
+}
+
+.btn-secondary:hover {
+    background-color: #475569;
+    transform: translateY(-1px);
+}
+
+.btn-danger {
+    background-color: var(--color-peligro, #e74c3c);
+}
+
+.btn-danger:hover {
+    background-color: var(--color-peligro-hover, #c0392b);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(231, 76, 60, 0.25);
+}
+
+.btn-success {
+    background-color: var(--color-secundario, #2ecc71);
+}
+
+.btn-success:hover {
+    background-color: var(--color-secundario-hover, #27ae60);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(46, 204, 113, 0.25);
+}
+
+.btn-warning {
+    background-color: var(--color-advertencia, #f39c12);
+    color: white;
+}
+
+.btn-warning:hover {
+    background-color: var(--color-advertencia-hover, #d97706);
+    transform: translateY(-1px);
+}
+
+.btn-add {
+    background-color: var(--color-secundario, #2ecc71);
+}
+
+.btn-add:hover {
+    background-color: var(--color-secundario-hover, #27ae60);
+    transform: translateY(-1px);
+}
+
+.btn-remove {
+    background-color: var(--color-peligro, #e74c3c);
+}
+
+.btn-remove:hover {
+    background-color: var(--color-peligro-hover, #c0392b);
+    transform: translateY(-1px);
+}
+
+.btn-container {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Botones específicos */
+.btn-ver {
+    display: inline-block;
+    background-color: #3498db;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+.btn-ver:hover {
+    background-color: #2980b9;
+}
+
+/* Botones de cantidad */
+.btn-cantidad {
+    background: var(--color-secundario);
+    color: white;
+    border: none;
+    width: 25px;
+    height: 25px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Botones compactos tipo icono para celdas de acciones */
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    border: 1px solid var(--color-border, #e2e8f0);
+    background: #ffffff;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-icon i { font-size: 0.9rem; }
+
+.btn-icon:hover {
+    background: #f8fafc;
+    transform: translateY(-1px);
+}
+
+.btn-icon-primary {
+    color: #2563eb;
+    border-color: #bfdbfe;
+    background: #eff6ff;
+}
+.btn-icon-primary:hover { background: #dbeafe; }
+
+.btn-icon-danger {
+    color: #dc2626;
+    border-color: #fecaca;
+    background: #fff1f2;
+}
+.btn-icon-danger:hover { background: #ffe4e6; }
+
+.btn-icon-secondary {
+    color: #334155;
+}
+
+@media (max-width: 768px) {
+    .btn-icon {
+        width: 30px;
+        height: 30px;
+    }
+    .btn-icon i { font-size: 0.85rem; }
+}

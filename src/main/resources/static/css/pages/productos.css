@@ -1,0 +1,287 @@
+/* Productos page styles */
+/* Note: Table and button styles are now inherited from global components (tables.css and buttons.css) */
+
+.header-with-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.header-with-actions h1 {
+    margin: 0;
+    color: var(--color-texto);
+}
+
+.empty-message {
+    text-align: center;
+    color: #94a3b8;
+    padding: 2rem !important;
+}
+
+.section-divider {
+    margin: 2rem 0;
+    height: 1px;
+    background: var(--color-border, #e2e8f0);
+}
+
+h2 {
+    color: #1f2937;
+    margin-bottom: 1rem;
+}
+
+/* Controles de tabla */
+.table-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.table-controls-left,
+.table-controls-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.table-controls label {
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.size-selector {
+    min-width: 100px;
+}
+
+/* Acciones compactas en la tabla de productos */
+.actions-cell {
+    display: inline-flex;
+    gap: 0.25rem;
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
+/* Oculta textos en botones en pantallas muy pequeñas para ahorrar espacio */
+@media (max-width: 480px) {
+    .hide-sm { display: none; }
+}
+
+/* Botones compactos tipo icono para acciones */
+.btn-icon {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    border: 1px solid var(--color-border, #e2e8f0);
+    background: #ffffff;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-icon i { font-size: 0.95rem; }
+
+.btn-icon:hover {
+    background: #f8fafc;
+    transform: translateY(-1px);
+}
+
+.btn-icon-primary {
+    color: #2563eb;
+    border-color: #bfdbfe;
+    background: #eff6ff;
+}
+.btn-icon-primary:hover { background: #dbeafe; }
+
+.btn-icon-danger {
+    color: #dc2626;
+    border-color: #fecaca;
+    background: #fff1f2;
+}
+.btn-icon-danger:hover { background: #ffe4e6; }
+
+.btn-icon-secondary {
+    color: #334155;
+}
+
+/* --- Tablas grandes: scroll + header sticky + densidad --- */
+.table-container.table-scroll {
+    max-height: 560px;
+    overflow-y: auto;
+    overflow-x: auto; /* hereda horizontal del base, pero lo aseguramos */
+    border: 1px solid var(--color-border, #e2e8f0);
+    border-radius: 8px;
+}
+
+.table-admin.dense th,
+.table-admin.dense td {
+    padding: 6px 8px !important;
+    font-size: 0.92rem;
+}
+
+.table-admin.table-sm th,
+.table-admin.table-sm td {
+    padding: 8px 10px;
+}
+
+/* Respetar ancho de acciones del componente base; solo evitamos salto */
+.actions-col { white-space: nowrap; }
+
+.cell-text-ellipsis { max-width: 360px; }
+.cell-text-ellipsis .cell-title {
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.cell-text-ellipsis .cell-subtitle {
+    color: #64748b; display: block; margin-top: 2px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* Scrollbar suave (soporta navegadores modernos) */
+.table-container.table-scroll::-webkit-scrollbar { height: 10px; width: 10px; }
+.table-container.table-scroll::-webkit-scrollbar-thumb {
+    background: #cbd5e1; border-radius: 8px;
+}
+.table-container.table-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* Filtros en cabecera (evitar estilos inline) */
+.filters {
+    display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem; justify-content: space-between; flex-wrap: wrap;
+}
+.filters form {
+    display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;
+}
+
+/* Scroll específico para historial en productos (más bajo que la grilla principal) */
+.history-scroll { max-height: 420px; }
+
+/* === Estilos para ver producto (mismo diseño que ver proveedor) === */
+.producto-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.info-section {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    border: 1px solid var(--color-border, #e2e8f0);
+    overflow: hidden;
+}
+
+.info-section-title {
+    background: transparent;
+    color: #111827;
+    padding: 0.75rem 1.5rem;
+    margin: 0;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.info-section-title i {
+    font-size: 1rem;
+    color: #6b7280;
+}
+
+.info-section-content {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.info-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.25rem;
+}
+
+.info-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.75rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border-left: 3px solid #667eea;
+}
+
+.info-field-full {
+    grid-column: 1 / -1;
+}
+
+.info-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-value {
+    font-size: 0.95rem;
+    color: #1e293b;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.info-value i {
+    color: #667eea;
+    font-size: 0.9rem;
+}
+
+.info-value.precio {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #059669;
+}
+
+/* Imagen del producto */
+.producto-imagen {
+    width: 100%;
+    max-width: 200px;
+    height: 200px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+}
+
+.producto-imagen img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Badges adicionales para productos */
+.badge-info {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.badge-warning {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badge-secondary {
+    background: #e2e8f0;
+    color: #475569;
+}

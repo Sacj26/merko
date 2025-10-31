@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title layout:title-pattern="$CONTENT_TITLE - Merko">Merko</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" th:href="@{/css/productos-publicos.css}" />
+</head>
+<body>
+    <!-- Header Fragment -->
+    <header class="header-publico" th:replace="~{shared/fragments/header-public :: header}">
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <div layout:fragment="content">
+            <!-- Page content will be inserted here -->
+        </div>
+    </main>
+
+    <!-- Footer Fragment -->
+    <footer class="footer-publico" th:replace="~{shared/fragments/footer :: footer}">
+    </footer>
+
+    <!-- Scripts -->
+    <th:block layout:fragment="scripts">
+        <!-- Page specific scripts will be inserted here -->
+    </th:block>
+</body>
+</html>

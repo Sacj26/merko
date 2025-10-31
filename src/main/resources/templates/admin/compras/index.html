@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{shared/layouts/admin}"
+      lang="es">
+<head>
+    <title>Historial de Compras</title>
+    <link rel="stylesheet" th:href="@{/css/pages/compras-list.css}">
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="header-with-actions">
+            <div class="title-group">
+                <h1 class="page-title">Compras</h1>
+                <p class="page-subtitle">Gestiona y consulta el historial de compras a proveedores</p>
+            </div>
+            <div class="actions">
+                <a th:href="@{/admin/compras/crear}" class="btn-nuevo">
+                    <i class="fas fa-plus"></i> Nueva Compra
+                </a>
+            </div>
+        </div>
+
+        <div class="filters">
+            <select id="filterProveedor" class="form-control">
+                <option value="">Todos los proveedores</option>
+                <option th:each="proveedor : ${proveedores}" 
+                        th:value="${proveedor.id}" 
+                        th:text="${proveedor.nombre}"></option>
+            </select>
+            <input type="date" id="filterFecha" class="form-control" placeholder="Filtrar por fecha">
+        </div>
+
+        <div class="table-controls">
+            <div class="table-controls-left">
+                <label class="hide-sm">Mostrar</label>
+                <select id="pageSizeSelector" class="form-control size-selector">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+                <span class="hide-sm">registros</span>
+            </div>
+            <div class="table-controls-right">
+                <label for="toggleDenseCompras" class="hide-sm">Vista compacta</label>
+                <input id="toggleDenseCompras" type="checkbox" />
+            </div>
+        </div>
+
+        <div class="table-container table-scroll">
+            <table class="table-admin">
+                <thead>
+                    <tr>
+                        <th># Compra</th>
+                        <th>Fecha</th>
+                        <th>Proveedor</th>
+                        <th>Producto</th>
+                        <th>Ítems</th>
+                        <th>Cantidad</th>
+                        <th>Total</th>
+                        <th class="actions-col">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="compra : ${compras}">
+                        <td th:text="${'#' + compra.id}">#0</td>
+                        <td th:text="${#temporals.format(compra.fecha, 'dd/MM/yyyy')}"></td>
+                        <td th:text="${compra.proveedor != null ? compra.proveedor.nombre : '—'}"></td>
+                        <td>
+                            <span th:text="${compra.producto != null ? compra.producto.nombre : 'Múltiples'}">Producto</span>
+                        </td>
+                        <td th:text="${compra.detalles != null ? #lists.size(compra.detalles) : (compra.producto != null ? 1 : 0)}"></td>
+                        <td th:text="${compra.cantidad > 0 ? compra.cantidad : '-'}">0</td>
+                        <td th:text="${'$' + #numbers.formatDecimal(compra.total, 1, 'COMMA', 2, 'POINT')}"></td>
+                        <td class="actions-col">
+                            <div class="actions-cell">
+                                <a th:href="@{/admin/compras/detalle/{id}(id=${compra.id})}"
+                                   class="btn-icon btn-icon-secondary" title="Ver detalles">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(compras)}">
+                        <td colspan="8" class="empty-message">
+                            No hay compras registradas.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <script th:src="@{/js/pages/compras/index.js}"></script>
+    </th:block>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{shared/layouts/admin}"
+      lang="es">
+<head>
+    <title>Editar Producto</title>
+    <link rel="stylesheet" th:href="@{/css/pages/proveedores.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="header-with-actions">
+        <div class="title-group">
+            <h1 class="page-title">Editar Producto</h1>
+            <p class="page-subtitle">Actualiza la información del producto</p>
+        </div>
+    </div>
+
+    <div class="form-container">
+    <form th:action="@{/admin/productos/actualizar/{id}(id=${producto.id})}" method="post" th:object="${producto}" enctype="multipart/form-data" class="form-admin">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <input type="hidden" th:field="*{id}" />
+
+        <div th:replace="~{shared/fragments/product-form-fields :: bound}"></div>
+    </form>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,186 @@
+/* Layout público principal */
+:root {
+    --color-primario: #1abc9c;
+    --color-secundario: #16a085;
+    --color-fondo: #f5f7fa;
+    --color-texto: #2c3e50;
+    --color-texto-claro: #ecf0f1;
+    --color-borde: #dcdde1;
+    --color-exito: #27ae60;
+    --color-error: #e74c3c;
+    --color-advertencia: #f1c40f;
+    --sombra-suave: 0 2px 4px rgba(0,0,0,0.1);
+    --sombra-media: 0 4px 6px rgba(0,0,0,0.1);
+    --transicion: all 0.3s ease;
+}
+
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+    background-color: var(--color-fondo);
+    color: var(--color-texto);
+    line-height: 1.6;
+}
+
+/* Header público */
+.header-public {
+    background-color: white;
+    box-shadow: var(--sombra-suave);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+.header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logo-container img {
+    height: 40px;
+    width: auto;
+}
+
+.logo-container h1 {
+    font-size: 1.5rem;
+    color: var(--color-primario);
+    font-weight: 600;
+}
+
+/* Navegación principal */
+.nav-public {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
+
+.nav-public a {
+    color: var(--color-texto);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: var(--transicion);
+}
+
+.nav-public a:hover {
+    color: var(--color-primario);
+    background-color: var(--color-fondo);
+}
+
+.nav-public a.active {
+    color: var(--color-primario);
+    font-weight: 600;
+}
+
+/* Contenedor principal */
+.main-container {
+    max-width: 1200px;
+    margin: 80px auto 2rem;
+    padding: 0 2rem;
+    min-height: calc(100vh - 80px - 100px); /* altura total - header - footer */
+}
+
+/* Footer público */
+.footer-public {
+    background-color: var(--color-texto);
+    color: var(--color-texto-claro);
+    padding: 2rem 0;
+    margin-top: auto;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.footer-section h3 {
+    color: var(--color-primario);
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.footer-section ul {
+    list-style: none;
+}
+
+.footer-section ul li {
+    margin-bottom: 0.5rem;
+}
+
+.footer-section a {
+    color: var(--color-texto-claro);
+    text-decoration: none;
+    transition: var(--transicion);
+}
+
+.footer-section a:hover {
+    color: var(--color-primario);
+}
+
+/* Utilidades de layout */
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.section {
+    padding: 4rem 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .header-container {
+        padding: 1rem;
+    }
+
+    .nav-public {
+        display: none; /* Se mostrará en menú hamburguesa */
+    }
+
+    .nav-public.active {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        padding: 1rem;
+        box-shadow: var(--sombra-media);
+    }
+
+    .main-container {
+        margin-top: 60px;
+        padding: 0 1rem;
+    }
+
+    .footer-container {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+    }
+}

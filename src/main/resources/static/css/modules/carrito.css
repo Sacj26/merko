@@ -1,0 +1,144 @@
+/* Estilos específicos para el carrito de compras */
+
+/* Container principal */
+.carrito-container {
+    max-width: 900px;
+    margin: 40px auto;
+    background-color: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+}
+
+/* Tabla del carrito */
+.cart-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.cart-table th, 
+.cart-table td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+.cart-table th {
+    background-color: var(--color-primario);
+    color: white;
+}
+
+.cart-table td {
+    background-color: #f9f9f9;
+}
+
+/* Control de cantidad */
+.quantity-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.quantity-control button {
+    background: var(--color-secundario);
+    color: white;
+    border: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.quantity-control input {
+    width: 50px;
+    text-align: center;
+    padding: 4px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Sección de total */
+.total-section {
+    text-align: right;
+    font-size: 1.2rem;
+    margin-top: 15px;
+    font-weight: bold;
+    color: var(--color-texto);
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.total-section .total-label {
+    color: #666;
+    margin-right: 10px;
+}
+
+.total-section .total-amount {
+    color: var(--color-primario);
+    font-size: 1.4rem;
+}
+
+/* Botones de acción */
+.cart-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.cart-actions .btn-seguir-comprando {
+    background-color: var(--color-secundario);
+}
+
+.cart-actions .btn-finalizar {
+    background-color: var(--color-primario);
+}
+
+/* Mensajes */
+.message {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.message.error {
+    background-color: #fee2e2;
+    color: #ef4444;
+    border: 1px solid #fecaca;
+}
+
+.message.success {
+    background-color: #dcfce7;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .carrito-container {
+        margin: 20px;
+        padding: 15px;
+    }
+
+    .cart-table th, 
+    .cart-table td {
+        padding: 8px;
+    }
+
+    .cart-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .cart-actions button {
+        width: 100%;
+    }
+}

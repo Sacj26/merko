@@ -1,0 +1,212 @@
+/* Estilos para las páginas de error */
+
+/* Contenedor principal */
+.error-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-fondo);
+    padding: 2rem;
+}
+
+/* Contenedor del contenido de error */
+.error-content {
+    text-align: center;
+    max-width: 600px;
+    padding: 3rem 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--sombra-suave);
+}
+
+/* Código de error */
+.error-codigo {
+    font-size: 8rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 1rem;
+    background: linear-gradient(45deg, var(--color-primario), var(--color-secundario));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Título del error */
+.error-titulo {
+    font-size: 2rem;
+    color: var(--color-texto);
+    margin-bottom: 1rem;
+}
+
+/* Mensaje de error */
+.error-mensaje {
+    color: #666;
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+/* Ilustración de error */
+.error-ilustracion {
+    max-width: 300px;
+    height: auto;
+    margin: 2rem auto;
+}
+
+/* Botones de acción */
+.error-acciones {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.btn-error {
+    padding: 0.8rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn-primario {
+    background-color: var(--color-primario);
+    color: white;
+}
+
+.btn-primario:hover {
+    background-color: var(--color-secundario);
+    transform: translateY(-2px);
+}
+
+.btn-secundario {
+    background-color: var(--color-fondo);
+    color: var(--color-texto);
+}
+
+.btn-secundario:hover {
+    background-color: #e9ecef;
+    transform: translateY(-2px);
+}
+
+/* Links adicionales */
+.error-links {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-borde);
+}
+
+.error-links a {
+    color: var(--color-primario);
+    text-decoration: none;
+    margin: 0 1rem;
+    font-size: 0.9rem;
+}
+
+.error-links a:hover {
+    text-decoration: underline;
+}
+
+/* Estilos específicos por tipo de error */
+
+/* 404 - No encontrado */
+.error-404 .error-ilustracion {
+    opacity: 0.8;
+    transform: scale(0.9);
+}
+
+/* 403 - Prohibido */
+.error-403 .error-codigo {
+    color: var(--color-error);
+}
+
+/* 500 - Error del servidor */
+.error-500 .error-codigo {
+    animation: glitch 1s linear infinite alternate;
+}
+
+/* Animaciones */
+@keyframes glitch {
+    0% {
+        transform: skew(0deg);
+    }
+    20% {
+        transform: skew(10deg);
+    }
+    40% {
+        transform: skew(-10deg);
+    }
+    60% {
+        transform: skew(5deg);
+    }
+    80% {
+        transform: skew(-5deg);
+    }
+    100% {
+        transform: skew(0deg);
+    }
+}
+
+/* Animación de entrada */
+.error-content {
+    animation: errorFadeIn 0.5s ease-out;
+}
+
+@keyframes errorFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .error-page {
+        padding: 1rem;
+    }
+
+    .error-content {
+        padding: 2rem 1rem;
+    }
+
+    .error-codigo {
+        font-size: 6rem;
+    }
+
+    .error-titulo {
+        font-size: 1.5rem;
+    }
+
+    .error-mensaje {
+        font-size: 1rem;
+    }
+
+    .error-ilustracion {
+        max-width: 200px;
+    }
+
+    .error-acciones {
+        flex-direction: column;
+    }
+
+    .btn-error {
+        width: 100%;
+        text-align: center;
+    }
+
+    .error-links {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .error-links a {
+        margin: 0;
+    }
+}

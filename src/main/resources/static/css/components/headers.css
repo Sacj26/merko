@@ -1,0 +1,104 @@
+/* Header with actions and page titles */
+.header-with-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.header-with-actions .title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--color-texto);
+}
+
+.page-subtitle {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-texto-claro);
+}
+
+.header-with-actions .actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Botón Nuevo (principal en headers) */
+.btn-nuevo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background: var(--color-secundario);
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(46, 204, 113, 0.2);
+}
+
+.btn-nuevo:hover {
+  background: var(--color-secundario-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(46, 204, 113, 0.3);
+}
+
+.btn-nuevo i {
+  font-size: 1rem;
+}
+
+/* Variante secundaria del botón nuevo (azul) */
+.btn-nuevo.btn-secondary {
+  background: var(--color-primario);
+  box-shadow: 0 1px 3px rgba(52, 152, 219, 0.2);
+}
+
+.btn-nuevo.btn-secondary:hover {
+  background: var(--color-primario-hover);
+  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+}
+
+/* Section title */
+.section-title {
+  margin: 1.5rem 0 1rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #334155;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+@media (max-width: 768px) {
+  .header-with-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .page-title {
+    font-size: 1.5rem;
+  }
+  
+  .header-with-actions .actions {
+    width: 100%;
+  }
+  
+  .btn-nuevo {
+    width: 100%;
+    justify-content: center;
+  }
+}

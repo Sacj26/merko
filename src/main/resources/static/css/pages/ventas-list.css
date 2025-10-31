@@ -1,0 +1,105 @@
+/* Ventas List - Estilos modernos */
+
+/* Filtros */
+.filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.filters .form-control {
+    min-width: 200px;
+}
+
+/* Controles de tabla */
+.table-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.table-controls-left,
+.table-controls-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.table-controls label {
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.size-selector {
+    min-width: 100px;
+}
+
+/* Tabla con scroll */
+.table-container.table-scroll {
+    max-height: 560px;
+    overflow-y: auto;
+    overflow-x: auto;
+    border: 1px solid var(--color-border, #e2e8f0);
+    border-radius: 8px;
+}
+
+/* Densidad compacta */
+.table-admin.dense th,
+.table-admin.dense td {
+    padding: 6px 8px !important;
+    font-size: 0.92rem;
+}
+
+/* Badges de estado */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-success {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.badge-danger {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.badge-secondary {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+/* Scrollbar */
+.table-container.table-scroll::-webkit-scrollbar {
+    height: 10px;
+    width: 10px;
+}
+
+.table-container.table-scroll::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 8px;
+}
+
+.table-container.table-scroll::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hide-sm {
+        display: none;
+    }
+}

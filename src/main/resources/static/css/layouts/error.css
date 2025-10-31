@@ -1,0 +1,142 @@
+/* Layout para páginas de error */
+:root {
+    --color-primario: #1abc9c;
+    --color-secundario: #16a085;
+    --color-fondo: #f5f7fa;
+    --color-texto: #2c3e50;
+    --color-error: #e74c3c;
+    --color-error-suave: #ffeaea;
+    --sombra-suave: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Reset y estilos base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+    background-color: var(--color-fondo);
+    color: var(--color-texto);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+}
+
+/* Contenedor de error */
+.error-container {
+    max-width: 600px;
+    text-align: center;
+    background: white;
+    padding: 3rem 2rem;
+    border-radius: 12px;
+    box-shadow: var(--sombra-suave);
+    margin: 2rem auto;
+}
+
+/* Logo */
+.error-logo {
+    width: 80px;
+    height: auto;
+    margin-bottom: 2rem;
+}
+
+/* Código de error */
+.error-code {
+    font-size: 5rem;
+    font-weight: 700;
+    color: var(--color-error);
+    line-height: 1;
+    margin-bottom: 1rem;
+}
+
+/* Mensaje de error */
+.error-message {
+    font-size: 1.5rem;
+    color: var(--color-texto);
+    margin-bottom: 2rem;
+}
+
+/* Descripción del error */
+.error-description {
+    color: #666;
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+}
+
+/* Botón de retorno */
+.error-button {
+    display: inline-block;
+    padding: 0.8rem 2rem;
+    background-color: var(--color-primario);
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.error-button:hover {
+    background-color: var(--color-secundario);
+    transform: translateY(-2px);
+}
+
+/* Links adicionales */
+.error-links {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.error-links a {
+    color: var(--color-primario);
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.error-links a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .error-container {
+        padding: 2rem 1rem;
+        margin: 1rem;
+    }
+
+    .error-code {
+        font-size: 4rem;
+    }
+
+    .error-message {
+        font-size: 1.25rem;
+    }
+
+    .error-description {
+        font-size: 1rem;
+    }
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.error-container {
+    animation: fadeIn 0.5s ease-out;
+}

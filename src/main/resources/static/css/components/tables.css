@@ -1,0 +1,86 @@
+/* Estilos base para tablas administrativas */
+.table-container {
+    background: var(--color-fondo-card, white);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    margin-top: 20px;
+    border: 1px solid var(--color-border, #e2e8f0);
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: auto; /* Evita que la tabla se salga de su contenedor */
+}
+
+.table-admin {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table-admin th {
+    background: var(--color-primario, #3498db);
+    color: white;
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    white-space: nowrap; /* Evita saltos por encabezados largos */
+}
+
+.table-admin td {
+    padding: 12px;
+    border-bottom: 1px solid var(--color-border, #e2e8f0);
+    color: var(--color-texto, #2c3e50);
+    font-size: 0.875rem;
+    vertical-align: middle;
+    word-break: break-word; /* Evita desbordes por textos largos */
+}
+
+.table-admin tbody tr {
+    transition: background-color 0.15s ease;
+}
+
+.table-admin tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+.table-admin tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.empty-message {
+    text-align: center;
+    padding: 2rem;
+    color: var(--color-texto-claro, #64748b);
+    font-style: italic;
+    font-size: 0.875rem;
+}
+
+/* Contenedor compacto para botones de acción en tablas */
+.actions-cell {
+    display: inline-flex;
+    gap: 0.25rem;
+    align-items: center;
+    flex-wrap: nowrap;
+}
+
+/* Columna de acciones con ancho fijo para evitar que desconfigure la tabla */
+.table-admin th.actions-col,
+.table-admin td.actions-col {
+    width: 136px; /* 4 iconos (30-34px) + separaciones */
+    min-width: 136px;
+    white-space: nowrap;
+    text-align: center;
+    padding: 8px;
+}
+
+@media (max-width: 768px) {
+    .table-admin th.actions-col,
+    .table-admin td.actions-col {
+        width: 120px;
+        min-width: 120px;
+        padding: 6px;
+    }
+}

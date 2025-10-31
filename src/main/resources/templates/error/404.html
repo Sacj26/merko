@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{shared/layouts/public}"
+      lang="es">
+<head>
+    <title>No Encontrado</title>
+    <link rel="stylesheet" th:href="@{/css/pages/error.css}">
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="error-container">
+            <h1>404 - Página no encontrada</h1>
+            <p>Lo sentimos, la página que buscas no existe o ha sido movida.</p>
+            <a th:href="@{/tienda/productos}" class="btn btn-primary">
+                <i class="fas fa-home"></i> Volver al inicio
+            </a>
+        </div>
+    </div>
+</body>
+</html>

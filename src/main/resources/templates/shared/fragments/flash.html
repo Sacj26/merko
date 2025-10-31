@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <div th:fragment="flash">
+        <!-- Mensajes flash desde RedirectAttributes o atributos del modelo -->
+        <div th:if="${success != null}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error != null}" class="alert alert-danger" th:text="${error}"></div>
+        <!-- Soporta también parámetros en la URL: ?info=... -->
+        <div th:if="${param.info != null}" class="alert alert-info" th:text="${param.info}"></div>
+    </div>
+</body>
+</html>

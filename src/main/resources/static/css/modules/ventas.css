@@ -1,0 +1,41 @@
+/* Estilos específicos para el módulo de ventas */
+/* Estilos para la lista de productos en nueva venta */
+.producto-list {
+    margin-top: 20px;
+}
+
+.producto-item {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+}
+
+.producto-item select, 
+.producto-item input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.subtotal {
+    font-weight: bold;
+    color: var(--color-primario);
+}
+
+/* Total section */
+.total-section {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    text-align: right;
+}
+
+.total-section strong {
+    font-size: 1.2em;
+    color: var(--color-primario);
+}

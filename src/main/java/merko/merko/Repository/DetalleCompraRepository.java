@@ -1,0 +1,23 @@
+package merko.merko.Repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import merko.merko.Entity.DetalleCompra;
+
+import java.time.LocalDate;
+import java.util.List;
+
+@Repository
+public interface DetalleCompraRepository extends JpaRepository<DetalleCompra, Long> {
+
+    @Query("select dc.producto.id as productoId, dc.producto.nombre as nombre, sum(dc.cantidad) as cantidad " +
+	    "from DetalleCompra dc join dc.compra c " +
+	    "where c.fecha between :start and :end " +
+	    "group by dc.producto.id, dc.producto.nombre " +
+	    "order by cantidad desc")
+    List<Object[]> topProductosCompradosPorCantidad(@Param("start") LocalDate start,
+						    @Param("end") LocalDate end);
+}

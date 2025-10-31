@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{shared/layouts/admin}"
+      lang="es">
+<head>
+    <title>Detalle de Compra</title>
+    <link rel="stylesheet" th:href="@{/css/modules/compras-detalle.css}">
+</head>
+<body>
+    <div layout:fragment="content">
+        <h1>Detalle de Compra</h1>
+
+        <div class="detail-container">
+            <div class="detail-section">
+                <h2>Información General</h2>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <strong>Fecha de Compra</strong>
+                        <span th:text="${compra.fecha != null ? #temporals.format(compra.fecha, 'dd/MM/yyyy') : '—'}"></span>
+                    </div>
+                    <div class="detail-item">
+                        <strong>Proveedor</strong>
+                        <span th:text="${compra.proveedor != null ? compra.proveedor.nombre : '—'}"></span>
+                    </div>
+                    <div class="detail-item">
+                        <strong>Número de Registro</strong>
+                        <span th:text="${compra.id}"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-section">
+                <h2>Detalle(s) de la Compra</h2>
+                
+                <!-- Mostrar tabla si hay múltiples detalles -->
+                <div th:if="${compra.detalles != null && !#lists.isEmpty(compra.detalles)}">
+                    <table class="table-admin">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Cantidad</th>
+                                <th>Precio unitario</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="det : ${compra.detalles}">
+                                <td th:text="${det.producto != null ? det.producto.nombre : '—'}"></td>
+                                <td th:text="${det.cantidad}"></td>
+                                <td th:text="${'$' + #numbers.formatDecimal(det.precioUnitario != null ? det.precioUnitario : 0, 1, 'COMMA', 2, 'POINT')}"></td>
+                                <td th:text="${'$' + #numbers.formatDecimal((det.cantidad != null && det.precioUnitario != null ? det.cantidad * det.precioUnitario : 0), 1, 'COMMA', 2, 'POINT')}"></td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" style="text-align:right"><strong>Total</strong></td>
+                                <td th:text="${'$' + #numbers.formatDecimal(compra.total, 1, 'COMMA', 2, 'POINT')}"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <!-- Si no hay lista de detalles, mostrar los campos directos de la compra (compra de un solo ítem) -->
+                <div class="detail-grid" th:if="${compra.detalles == null || #lists.isEmpty(compra.detalles)}">
+                    <div class="detail-item">
+                        <strong>Producto</strong>
+                        <span th:text="${compra.producto != null ? compra.producto.nombre : '—'}"></span>
+                    </div>
+                    <div class="detail-item">
+                        <strong>Cantidad</strong>
+                        <span th:text="${(compra.cantidad != null ? compra.cantidad : 0) + ' unidades'}"></span>
+                    </div>
+                    <div class="detail-item">
+                        <strong>Precio Unitario</strong>
+                        <span th:text="${'$' + #numbers.formatDecimal(compra.precioUnidad != null ? compra.precioUnidad : 0, 1, 'COMMA', 2, 'POINT')}"></span>
+                    </div>
+                    <div class="detail-item">
+                        <strong>Total</strong>
+                        <span th:text="${'$' + #numbers.formatDecimal(compra.total, 1, 'COMMA', 2, 'POINT')}"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="btn-container">
+                <a th:href="@{/admin/compras}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver al listado
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

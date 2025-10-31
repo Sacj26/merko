@@ -1,0 +1,128 @@
+/* Estilos específicos para el módulo de compras */
+.producto-info {
+    margin-top: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.producto-info p {
+    margin: 5px 0;
+    color: #666;
+}
+
+/* Detalle de compra */
+.detail-container {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-top: 20px;
+}
+
+.detail-section {
+    margin-bottom: 20px;
+}
+
+.detail-section h2 {
+    color: var(--color-primario);
+    font-size: 1.5em;
+    margin-bottom: 15px;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.detail-item {
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.detail-item strong {
+    display: block;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.detail-item span {
+    color: #333;
+    font-size: 1.1em;
+}
+
+/* Inline layout para la celda de producto: select + metadatos (precio/stock) alineados sin saltos de línea */
+.cell-inline {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+.cell-inline .form-control {
+    min-width: 220px;
+    flex: 1 1 auto;
+}
+.item-meta {
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+    white-space: nowrap;
+    color: #475569; /* slate-600 */
+}
+.item-meta .meta {
+    display: inline-flex;
+    align-items: center;
+    gap: .25rem;
+    background: #f1f5f9; /* slate-100 */
+    color: #334155; /* slate-700 */
+    border-radius: 9999px;
+    padding: 2px 8px;
+    font-size: .75rem;
+    line-height: 1;
+}
+.item-meta .meta i {
+    font-size: .75rem;
+}
+
+/* Inputs de solo lectura (p. ej., precio unitario) */
+.form-control[readonly] {
+    background-color: #f8fafc;
+    color: #334155;
+    cursor: not-allowed;
+}
+
+/* Fila de proveedor con celdas (campo + acciones) */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: .5rem;
+}
+.form-row .field-cell .form-control {
+    min-width: 260px;
+}
+.form-row .actions-cell {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+/* Estado de la compra */
+.status-badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.9em;
+    font-weight: bold;
+}
+
+.status-completed {
+    background-color: #2ecc71;
+    color: white;
+}
+
+.status-pending {
+    background-color: #f1c40f;
+    color: #333;
+}

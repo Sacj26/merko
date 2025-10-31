@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{shared/layouts/admin}"
+      lang="es">
+<head>
+    <title>Historial de Ventas</title>
+    <link rel="stylesheet" th:href="@{/css/pages/ventas-list.css}">
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="header-with-actions">
+            <div class="title-group">
+                <h1 class="page-title">Ventas</h1>
+                <p class="page-subtitle">Gestiona y consulta el historial de ventas</p>
+            </div>
+            <div class="actions">
+                <a th:href="@{/admin/ventas/crear}" class="btn-nuevo">
+                    <i class="fas fa-plus"></i> Nueva Venta
+                </a>
+            </div>
+        </div>
+
+        <div class="filters">
+            <select id="filterCliente" class="form-control">
+                <option value="">Todos los clientes</option>
+                <option th:each="cliente : ${clientes}" 
+                        th:value="${cliente.id}" 
+                        th:text="${cliente.nombre}"></option>
+            </select>
+            <input type="date" id="filterFecha" class="form-control" placeholder="Filtrar por fecha">
+        </div>
+
+        <div class="table-controls">
+            <div class="table-controls-left">
+                <label class="hide-sm">Mostrar</label>
+                <select id="pageSizeSelector" class="form-control size-selector">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+                <span class="hide-sm">registros</span>
+            </div>
+            <div class="table-controls-right">
+                <label for="toggleDenseVentas" class="hide-sm">Vista compacta</label>
+                <input id="toggleDenseVentas" type="checkbox" />
+            </div>
+        </div>
+
+        <div class="table-container table-scroll">
+            <table class="table-admin">
+                <thead>
+                    <tr>
+                        <th># Venta</th>
+                        <th>Fecha</th>
+                        <th>Cliente</th>
+                        <th>Ítems</th>
+                        <th>Cantidad</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                        <th class="actions-col">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="venta : ${ventas}">
+                        <td th:text="${'#' + venta.id}">#0</td>
+                        <td th:text="${#temporals.format(venta.fecha, 'dd/MM/yyyy HH:mm')}"></td>
+                        <td>
+                            <span th:text="${venta.cliente != null ? venta.cliente.nombre : 'No registrado'}"></span>
+                        </td>
+                        <td th:text="${venta.detalles != null ? #lists.size(venta.detalles) : (venta.producto != null ? 1 : 0)}"></td>
+                        <td th:text="${venta.cantidad > 0 ? venta.cantidad : '-'}">0</td>
+                        <td th:text="${'$' + #numbers.formatDecimal(venta.total, 1, 'COMMA', 2, 'POINT')}"></td>
+                        <td>
+                            <span th:if="${venta.estado} == T(merko.merko.Entity.EstadoVenta).ACTIVA" class="badge badge-success">ACTIVA</span>
+                            <span th:if="${venta.estado} == T(merko.merko.Entity.EstadoVenta).ANULADA" class="badge badge-danger">ANULADA</span>
+                            <span th:if="${venta.estado} == null" class="badge badge-secondary">—</span>
+                        </td>
+                        <td class="actions-col">
+                            <div class="actions-cell">
+                                <a th:href="@{/admin/ventas/detalle/{id}(id=${venta.id})}" 
+                                   class="btn-icon btn-icon-secondary" title="Ver detalles">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(ventas)}">
+                        <td colspan="8" class="empty-message">
+                            No hay ventas registradas.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <script th:src="@{/js/pages/ventas/index.js}"></script>
+    </th:block>
+</body>
+</html>

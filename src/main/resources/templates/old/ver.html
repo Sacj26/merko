@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Carrito de Compras - Merko</title>
+    <link rel="stylesheet" th:href="@{/css/carrito.css}">
+</head>
+<body>
+<div class="container">
+    <h2>Carrito de Compras</h2>
+    <div th:if="${param.error}">
+        <p class="message error">Uno o más productos no tienen suficiente stock. Por favor revisa tu carrito.</p>
+    </div>
+
+
+    <div th:if="${carrito.isEmpty()}">
+        <p class="message error">Tu carrito está vacío.</p>
+        <div class="buttons">
+            <a th:href="@{/publico/productos}" class="btn btn-secondary">Volver a productos</a>
+        </div>
+    </div>
+
+    <div th:if="${!carrito.isEmpty()}">
+        <table class="cart-table">
+            <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Precio</th>
+                <th>Cantidad</th>
+                <th>Subtotal</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item : ${carrito}">
+                <td th:text="${item.nombre}">Nombre</td>
+                <td th:text="${#numbers.formatDecimal(item.precio, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
+                <td th:text="${item.cantidad}">1</td>
+                <td th:text="${#numbers.formatDecimal(item.precio * item.cantidad, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
+                <td>
+                    <form th:action="@{/carrito/eliminar}" method="post" style="display:inline;">
+                        <input type="hidden" name="productoId" th:value="${item.productoId}" />
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <button type="submit" class="btn btn-secondary">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="total-section">
+            Total: <strong th:text="${#numbers.formatDecimal(total, 1, 'COMMA', 2, 'POINT')}">$0.00</strong>
+        </div>
+
+        <div class="buttons">
+            <a th:href="@{/publico/productos}" class="btn btn-secondary">Seguir comprando</a>
+                <form th:action="@{/carrito/checkout}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit" class="btn btn-primary">Confirmar compra</button>
+                </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

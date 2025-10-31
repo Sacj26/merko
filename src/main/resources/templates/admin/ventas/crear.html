@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{shared/layouts/admin}"
+      lang="es">
+<head>
+    <title>Nueva Venta</title>
+    <link rel="stylesheet" th:href="@{/css/components/forms.css}">
+    <link rel="stylesheet" th:href="@{/css/components/buttons.css}">
+    <link rel="stylesheet" th:href="@{/css/modules/ventas.css}">
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="header-with-actions">
+            <div class="title-group">
+                <h1 class="page-title">Registrar Nueva Venta</h1>
+                <p class="page-subtitle">Selecciona el cliente y los productos para la venta</p>
+            </div>
+        </div>
+
+        <div class="form-container">
+            <form th:action="@{/admin/ventas/guardar}" method="post" id="ventaForm">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                <div class="form-group">
+                    <label for="cliente">Cliente</label>
+                    <select id="cliente" name="clienteId" class="form-control" required>
+                        <option value="">Seleccione un cliente</option>
+                        <option th:each="cliente : ${clientes}"
+                                th:value="${cliente.id}"
+                                th:text="${cliente.nombre}"></option>
+                    </select>
+                </div>
+
+                <div class="producto-list" id="productos">
+                    <div class="producto-item">
+                        <div class="cell-inline">
+                            <select name="detalles[0].productoId" class="producto-select" required>
+                                <option value="">Seleccione un producto</option>
+                                <option th:each="producto : ${productos}"
+                                        th:value="${producto.id}"
+                                        th:text="${producto.nombre}"
+                                        th:data-precio="${producto.precioVenta}"
+                                        th:data-stock="${producto.stock}"></option>
+                            </select>
+                            <div class="item-meta">
+                                <span class="badge price">P. Unit: $<span class="price-value">0.00</span></span>
+                                <span class="badge stock">Stock: <span class="stock-value">0</span></span>
+                            </div>
+                        </div>
+                        <input type="number" name="detalles[0].cantidad"
+                               min="1" value="1" required
+                               class="cantidad-input"
+                               onchange="actualizarFila(this.closest('.producto-item'))">
+                        <span class="subtotal">$0.00</span>
+                        <button type="button" class="btn btn-remove" onclick="eliminarProducto(this)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-actions">
+                    <button type="button" class="btn btn-add" onclick="agregarProducto()" title="Agregar ítem">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+
+                <div class="total-section">
+                    Total: <strong id="totalVenta">$0.00</strong>
+                </div>
+
+                <div class="btn-container">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Guardar venta
+                    </button>
+                    <a th:href="@{/admin/ventas}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <script th:src="@{/js/pages/ventas/crear.js}"></script>
+    </th:block>
+</body>
+</html>

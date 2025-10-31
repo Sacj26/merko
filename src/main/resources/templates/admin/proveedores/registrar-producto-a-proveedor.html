@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{shared/layouts/admin}"
+      lang="es">
+<head>
+    <title>Agregar Productos a Proveedor | Merko</title>
+    <link rel="stylesheet" th:href="@{/css/pages/proveedores.css}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="header-with-actions">
+            <div class="title-group">
+                <h1 class="page-title">Agregar Productos a Proveedor</h1>
+                <p class="page-subtitle">Selecciona un proveedor y agrega uno o más productos</p>
+            </div>
+        </div>
+
+        <div class="form-container">
+            <form id="form-productos"
+                  th:action="@{/admin/proveedores/agregar-productos/0}"
+                  th:attr="data-action-base=@{/admin/proveedores/agregar-productos/}"
+                  method="post" enctype="multipart/form-data" class="form-admin">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                <fieldset class="form-section">
+                    <legend><i class="fas fa-truck-loading"></i> Seleccionar Proveedor</legend>
+                    <div class="form-group">
+                        <label for="proveedorId">Proveedor: <span class="required">*</span></label>
+                        <select id="proveedorId" required class="form-control">
+                            <option value="" disabled selected>-- Seleccione un proveedor --</option>
+                            <option th:each="prov : ${proveedores}"
+                                    th:value="${prov.id}"
+                                    th:text="${prov.nombre + ' (NIT: ' + prov.nit + ')'}"></option>
+                        </select>
+                    </div>
+                </fieldset>
+
+                <fieldset class="form-section">
+                    <legend>
+                        <i class="fas fa-box"></i> Productos
+                        <button type="button" class="btn-add-producto" onclick="agregarProducto()">
+                            <i class="fas fa-plus-circle"></i> Agregar Producto
+                        </button>
+                    </legend>
+
+                    <div id="productos-container">
+                        <!-- Primer producto (obligatorio) -->
+                        <div th:replace="~{shared/fragments/product-form-fields :: indexed('productos[0]')}"></div>
+                    </div>
+                </fieldset>
+
+                <div th:if="${param.error}" class="alert alert-error">
+                    <span class="alert-icon"><i class="fas fa-exclamation-circle"></i></span>
+                    <div class="alert-content">
+                        <p class="alert-message">Error al registrar los productos para el proveedor.</p>
+                    </div>
+                </div>
+                <div th:if="${error}" class="alert alert-error">
+                    <span class="alert-icon"><i class="fas fa-exclamation-circle"></i></span>
+                    <div class="alert-content">
+                        <p class="alert-message" th:text="${error}">Ha ocurrido un error al registrar los productos.</p>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Guardar Productos
+                    </button>
+                    <a th:href="@{/admin/proveedores}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts en el fragment correcto -->
+    <th:block layout:fragment="scripts">
+        <script th:src="@{/js/pages/proveedores/registrar-producto-a-proveedor.js}"></script>
+    </th:block>
+</body>
+</html>

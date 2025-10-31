@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<body>
+<!--
+  Fragment: product form fields
+  - bound: use inside a form with th:object="${producto}", uses th:field
+  - indexed(prefix): use for dynamic/multi-product forms, pass prefix like 'productos[0]'
+-->
+
+<!-- Bound fragment (model-backed single product) -->
+<div th:fragment="bound">
+    <!-- Sección: Información Básica -->
+    <fieldset class="form-section">
+        <legend><i class="fas fa-info-circle"></i> Información Básica</legend>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="nombre">Nombre del Producto: <span class="required">*</span></label>
+                <input type="text" id="nombre" th:field="*{nombre}" class="form-control" required />
+            </div>
+
+            <div class="form-group">
+                <label for="sku">SKU:</label>
+                <input type="text" id="sku" th:field="*{sku}" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label for="codigoBarras">Código de Barras:</label>
+                <input type="text" id="codigoBarras" th:field="*{codigoBarras}" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label for="marca">Marca:</label>
+                <input type="text" id="marca" th:field="*{marca}" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label for="tipo">Tipo de Producto: <span class="required">*</span></label>
+                <select id="tipo" th:field="*{tipo}" class="form-control" required>
+                    <option value="">Seleccione...</option>
+                    <option th:each="t : ${T(merko.merko.Entity.TipoProducto).values()}" 
+                            th:value="${t}" 
+                            th:text="${#strings.capitalize(#strings.replace(t.name(), '_', ' '))}"></option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="estado">Estado: <span class="required">*</span></label>
+                <select id="estado" th:field="*{estado}" class="form-control" required>
+                    <option value="">Seleccione...</option>
+                    <option th:each="e : ${T(merko.merko.Entity.EstadoProducto).values()}" 
+                            th:value="${e}" 
+                            th:text="${#strings.capitalize(#strings.replace(e.name(), '_', ' '))}"></option>
+                </select>
+            </div>
+
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label for="descripcion">Descripción:</label>
+                <textarea id="descripcion" th:field="*{descripcion}" class="form-control" rows="2"></textarea>
+            </div>
+        </div>
+    </fieldset>
+
+    <!-- Sección: Presentación y Unidades -->
+    <fieldset class="form-section">
+        <legend><i class="fas fa-box"></i> Presentación y Unidades</legend>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="unidadMedida">Unidad de Medida:</label>
+                <select id="unidadMedida" th:field="*{unidadMedida}" class="form-control">
+                    <option value="">Seleccione...</option>
+                    <option th:each="u : ${T(merko.merko.Entity.UnidadMedida).values()}" 
+                            th:value="${u}" 
+                            th:text="${#strings.capitalize(#strings.replace(u.name(), '_', ' '))}"></option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="contenidoNeto">Contenido Neto:</label>
+                <input type="number" id="contenidoNeto" th:field="*{contenidoNeto}" class="form-control" step="0.01" min="0" />
+            </div>
+
+            <div class="form-group">
+                <label for="contenidoUoM">Unidad del Contenido:</label>
+                <select id="contenidoUoM" th:field="*{contenidoUoM}" class="form-control">
+                    <option value="">Seleccione...</option>
+                    <option th:each="u : ${T(merko.merko.Entity.UnidadMedida).values()}" 
+                            th:value="${u}" 
+                            th:text="${#strings.capitalize(#strings.replace(u.name(), '_', ' '))}"></option>
+                </select>
+            </div>
+        </div>
+    </fieldset>
+
+    <!-- Sección: Precios e Inventario -->
+    <fieldset class="form-section">
+        <legend><i class="fas fa-dollar-sign"></i> Precios e Inventario</legend>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="precioCompra">Precio de Compra:</label>
+                <input type="number" id="precioCompra" th:field="*{precioCompra}" class="form-control" step="0.01" min="0" />
+            </div>
+
+            <div class="form-group">
+                <label for="precioVenta">Precio de Venta: <span class="required">*</span></label>
+                <input type="number" id="precioVenta" th:field="*{precioVenta}" class="form-control" step="0.01" min="0" required />
+            </div>
+
+            <div class="form-group">
+                <label for="stock">Stock Actual: <span class="required">*</span></label>
+                <input type="number" id="stock" th:field="*{stock}" class="form-control" min="0" required />
+            </div>
+
+            <div class="form-group">
+                <label for="stockMinimo">Stock Mínimo:</label>
+                <input type="number" id="stockMinimo" th:field="*{stockMinimo}" class="form-control" min="0" />
+            </div>
+
+            <div class="form-group">
+                <label for="puntoReorden">Punto de Reorden:</label>
+                <input type="number" id="puntoReorden" th:field="*{puntoReorden}" class="form-control" min="0" />
+            </div>
+
+            <div class="form-group">
+                <label for="leadTimeDias">Lead Time (días):</label>
+                <input type="number" id="leadTimeDias" th:field="*{leadTimeDias}" class="form-control" min="0" />
+            </div>
+        </div>
+    </fieldset>
+
+    <!-- Sección: Proveedor (SOLO LECTURA) -->
+    <fieldset class="form-section">
+        <legend><i class="fas fa-truck"></i> Proveedor</legend>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Proveedor Asignado:</label>
+                <input type="text" class="form-control" 
+                       th:value="${producto.proveedor != null ? producto.proveedor.nombre : 'Sin proveedor asignado'}" 
+                       readonly 
+                       style="background-color: #f8f9fa; cursor: not-allowed;">
+                <small class="error-message" style="color: #6c757d; font-size: 0.85rem;">
+                    <i class="fas fa-info-circle"></i> 
+                    <span th:if="${producto.proveedor != null}">
+                        Este producto está asociado al proveedor <strong th:text="${producto.proveedor.nombre}"></strong>
+                    </span>
+                    <span th:if="${producto.proveedor == null}">
+                        Este producto no tiene proveedor asignado
+                    </span>
+                </small>
+            </div>
+        </div>
+    </fieldset>
+
+    <!-- Sección: Lotes y Vencimientos -->
+    <fieldset class="form-section">
+        <legend><i class="fas fa-calendar-alt"></i> Lotes y Vencimientos</legend>
+        <div class="form-group" style="grid-column: 1 / -1;">
+            <div style="display: flex; gap: 2rem; align-items: center; flex-wrap: wrap;">
+                <label style="margin: 0;">
+                    <input type="checkbox" th:field="*{gestionaLotes}" />
+                    Gestiona Lotes
+                </label>
+                <label style="margin: 0;">
+                    <input type="checkbox" th:field="*{requiereVencimiento}" />
+                    Requiere Control de Vencimiento
+                </label>
+            </div>
+        </div>
+
+        <div class="form-grid" style="margin-top: 1rem;">
+            <div class="form-group">
+                <label for="vidaUtilDias">Vida Útil (días):</label>
+                <input type="number" id="vidaUtilDias" th:field="*{vidaUtilDias}" class="form-control" min="0" />
+            </div>
+
+            <div class="form-group">
+                <label for="almacenamiento">Almacenamiento:</label>
+                <select id="almacenamiento" th:field="*{almacenamiento}" class="form-control">
+                    <option value="">Seleccione...</option>
+                    <option th:each="a : ${T(merko.merko.Entity.Almacenamiento).values()}" 
+                            th:value="${a}" 
+                            th:text="${#strings.capitalize(#strings.replace(a.name(), '_', ' '))}"></option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="registroSanitario">Registro Sanitario:</label>
+                <input type="text" id="registroSanitario" th:field="*{registroSanitario}" class="form-control" />
+            </div>
+        </div>
+    </fieldset>
+
+    <!-- Sección: Imagen -->
+    <fieldset class="form-section">
+        <legend><i class="fas fa-image"></i> Imagen del Producto</legend>
+        <div class="form-group">
+            <label>Imagen Actual:</label>
+            <div th:if="${producto.imagenUrl != null}">
+                <img th:src="@{${producto.imagenUrl}}" alt="Imagen actual" style="max-width: 200px; border-radius: 6px; border: 2px solid #e2e8f0; margin-top: 0.5rem;">
+            </div>
+            <div th:unless="${producto.imagenUrl != null}">
+                <p style="color: #6c757d; font-size: 0.9rem;">No hay imagen</p>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="imagen">Nueva Imagen:</label>
+            <input type="file" id="imagen" name="imagen" class="form-control" accept="image/*" />
+        </div>
+    </fieldset>
+
+    <!-- Botones -->
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i> Guardar Cambios
+        </button>
+        <a th:href="@{/admin/productos}" class="btn btn-secondary">
+            <i class="fas fa-times-circle"></i> Cancelar
+        </a>
+    </div>
+</div>
+
+
+<!-- Indexed fragment (for list forms like productos[0], pass prefix e.g. 'productos[0]') -->
+<div th:fragment="indexed(prefix)">
+    <!-- Same structure but using name/id attributes with provided prefix -->
+    <fieldset class="form-section">
+        <legend><i class="fas fa-info-circle"></i> Información Básica</legend>
+        <div class="form-grid">
+            <div class="form-group">
+                <label th:for="${prefix + '.nombre'}">Nombre del Producto: <span class="required">*</span></label>
+                <input type="text" th:id="${prefix + '.nombre'}" th:attr="name=${prefix + '.nombre'}" class="form-control" required />
+            </div>
+
+            <div class="form-group">
+                <label th:for="${prefix + '.sku'}">SKU:</label>
+                <input type="text" th:id="${prefix + '.sku'}" th:attr="name=${prefix + '.sku'}" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label th:for="${prefix + '.codigoBarras'}">Código de Barras:</label>
+                <input type="text" th:id="${prefix + '.codigoBarras'}" th:attr="name=${prefix + '.codigoBarras'}" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label th:for="${prefix + '.marca'}">Marca:</label>
+                <input type="text" th:id="${prefix + '.marca'}" th:attr="name=${prefix + '.marca'}" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label th:for="${prefix + '.tipo'}">Tipo de Producto: <span class="required">*</span></label>
+                <select th:id="${prefix + '.tipo'}" th:attr="name=${prefix + '.tipo'}" class="form-control" required>
+                    <option value="">Seleccione...</option>
+                    <option th:each="t : ${T(merko.merko.Entity.TipoProducto).values()}" th:value="${t}" th:text="${#strings.capitalize(#strings.replace(t.name(), '_', ' '))}"></option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label th:for="${prefix + '.estado'}">Estado: <span class="required">*</span></label>
+                <select th:id="${prefix + '.estado'}" th:attr="name=${prefix + '.estado'}" class="form-control" required>
+                    <option value="">Seleccione...</option>
+                    <option th:each="e : ${T(merko.merko.Entity.EstadoProducto).values()}" th:value="${e}" th:text="${#strings.capitalize(#strings.replace(e.name(), '_', ' '))}"></option>
+                </select>
+            </div>
+
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label th:for="${prefix + '.descripcion'}">Descripción:</label>
+                <textarea th:id="${prefix + '.descripcion'}" th:attr="name=${prefix + '.descripcion'}" class="form-control" rows="2"></textarea>
+            </div>
+        </div>
+    </fieldset>
+
+    <!-- Presentación y Unidades -->
+    <fieldset class="form-section">
+        <legend><i class="fas fa-box"></i> Presentación y Unidades</legend>
+        <div class="form-grid">
+            <div class="form-group">
+                <label th:for="${prefix + '.unidadMedida'}">Unidad de Medida:</label>
+                <select th:id="${prefix + '.unidadMedida'}" th:attr="name=${prefix + '.unidadMedida'}" class="form-control">
+                    <option value="">Seleccione...</option>
+                    <option th:each="u : ${T(merko.merko.Entity.UnidadMedida).values()}" th:value="${u}" th:text="${#strings.capitalize(#strings.replace(u.name(), '_', ' '))}"></option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label th:for="${prefix + '.contenidoNeto'}">Contenido Neto:</label>
+                <input type="number" th:id="${prefix + '.contenidoNeto'}" th:attr="name=${prefix + '.contenidoNeto'}" class="form-control" step="0.01" min="0" />
+            </div>
+
+            <div class="form-group">
+                <label th:for="${prefix + '.contenidoUoM'}">Unidad del Contenido:</label>
+                <select th:id="${prefix + '.contenidoUoM'}" th:attr="name=${prefix + '.contenidoUoM'}" class="form-control">
+                    <option value="">Seleccione...</option>
+                    <option th:each="u : ${T(merko.merko.Entity.UnidadMedida).values()}" th:value="${u}" th:text="${#strings.capitalize(#strings.replace(u.name(), '_', ' '))}"></option>
+                </select>
+            </div>
+        </div>
+    </fieldset>
+
+    <!-- Precios e Inventario -->
+    <fieldset class="form-section">
+        <legend><i class="fas fa-dollar-sign"></i> Precios e Inventario</legend>
+        <div class="form-grid">
+            <div class="form-group">
+                <label th:for="${prefix + '.precioCompra'}">Precio de Compra:</label>
+                <input type="number" th:id="${prefix + '.precioCompra'}" th:attr="name=${prefix + '.precioCompra'}" class="form-control" step="0.01" min="0" />
+            </div>
+
+            <div class="form-group">
+                <label th:for="${prefix + '.precioVenta'}">Precio de Venta: <span class="required">*</span></label>
+                <input type="number" th:id="${prefix + '.precioVenta'}" th:attr="name=${prefix + '.precioVenta'}" class="form-control" step="0.01" min="0" required />
+            </div>
+
+            <div class="form-group">
+                <label th:for="${prefix + '.stock'}">Stock Inicial: <span class="required">*</span></label>
+                <input type="number" th:id="${prefix + '.stock'}" th:attr="name=${prefix + '.stock'}" class="form-control" min="0" required />
+            </div>
+
+            <div class="form-group">
+                <label th:for="${prefix + '.stockMinimo'}">Stock Mínimo:</label>
+                <input type="number" th:id="${prefix + '.stockMinimo'}" th:attr="name=${prefix + '.stockMinimo'}" class="form-control" min="0" />
+            </div>
+
+            <div class="form-group">
+                <label th:for="${prefix + '.puntoReorden'}">Punto de Reorden:</label>
+                <input type="number" th:id="${prefix + '.puntoReorden'}" th:attr="name=${prefix + '.puntoReorden'}" class="form-control" min="0" />
+            </div>
+
+            <div class="form-group">
+                <label th:for="${prefix + '.leadTimeDias'}">Lead Time (días):</label>
+                <input type="number" th:id="${prefix + '.leadTimeDias'}" th:attr="name=${prefix + '.leadTimeDias'}" class="form-control" min="0" />
+            </div>
+        </div>
+    </fieldset>
+
+    <!-- Lotes y Vencimientos -->
+    <fieldset class="form-section">
+        <legend><i class="fas fa-calendar-alt"></i> Lotes y Vencimientos</legend>
+        <div class="form-group" style="grid-column: 1 / -1;">
+            <div style="display: flex; gap: 2rem; align-items: center; flex-wrap: wrap;">
+                <label style="margin: 0;">
+                    <input type="checkbox" th:attr="name=${prefix + '.gestionaLotes'}" value="true" />
+                    Gestiona Lotes
+                </label>
+                <label style="margin: 0;">
+                    <input type="checkbox" th:attr="name=${prefix + '.requiereVencimiento'}" value="true" />
+                    Requiere Control de Vencimiento
+                </label>
+            </div>
+        </div>
+
+        <div class="form-grid" style="margin-top: 1rem;">
+            <div class="form-group">
+                <label th:for="${prefix + '.vidaUtilDias'}">Vida Útil (días):</label>
+                <input type="number" th:id="${prefix + '.vidaUtilDias'}" th:attr="name=${prefix + '.vidaUtilDias'}" class="form-control" min="0" />
+            </div>
+
+            <div class="form-group">
+                <label th:for="${prefix + '.almacenamiento'}">Almacenamiento:</label>
+                <select th:id="${prefix + '.almacenamiento'}" th:attr="name=${prefix + '.almacenamiento'}" class="form-control">
+                    <option value="">Seleccione...</option>
+                    <option th:each="a : ${T(merko.merko.Entity.Almacenamiento).values()}" th:value="${a}" th:text="${#strings.capitalize(#strings.replace(a.name(), '_', ' '))}"></option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label th:for="${prefix + '.registroSanitario'}">Registro Sanitario:</label>
+                <input type="text" th:id="${prefix + '.registroSanitario'}" th:attr="name=${prefix + '.registroSanitario'}" class="form-control" />
+            </div>
+        </div>
+    </fieldset>
+
+    <!-- Imagen -->
+    <fieldset class="form-section">
+        <legend><i class="fas fa-image"></i> Imagen del Producto</legend>
+        <div class="form-group">
+            <label th:for="${prefix + '.imagenUrl'}">Imagen del Producto:</label>
+            <input type="file" th:id="${prefix + '.imagenUrl'}" th:attr="name=${prefix + '.imagenUrl'}" class="form-control" accept="image/*" />
+        </div>
+    </fieldset>
+</div>
+
+</body>
+</html>

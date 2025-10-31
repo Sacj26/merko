@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <!-- Header Fragment -->
+    <header class="header-publico" th:fragment="header">
+        <h1>Bienvenido al catálogo de productos Merko</h1>
+        <p>Descubre todos los productos que tenemos disponibles para ti. Calidad garantizada y atención personalizada.</p>
+
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+        <div th:if="${clienteLogueado == null}">
+            <a th:href="@{/login}" class="btn-login">Iniciar sesión</a>
+        </div>
+
+        <div th:if="${clienteLogueado != null}" class="usuario-logged">
+            <span>Hola, <span th:text="${clienteLogueado.nombre}">Cliente</span></span>
+            <a th:href="@{/carrito}" class="btn-carrito">Mi Carrito</a>
+            <form th:action="@{/logout}" method="post" style="display:inline">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <button type="submit" class="btn-logout">Cerrar sesión</button>
+            </form>
+        </div>
+    </header>
+</body>
+</html>

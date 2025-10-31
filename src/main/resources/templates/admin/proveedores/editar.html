@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{shared/layouts/admin}"
+      lang="es">
+<head>
+    <title>Editar Proveedor</title>
+    <link rel="stylesheet" th:href="@{/css/pages/proveedores.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="header-with-actions">
+        <div class="title-group">
+            <h1 class="page-title">Editar Proveedor</h1>
+            <p class="page-subtitle">Actualiza la información del proveedor</p>
+        </div>
+        <div class="actions">
+            <!-- Icon-only back button for compact header -->
+            <a th:href="@{/admin/proveedores}" class="btn btn-secondary btn-icon-only" title="Volver" aria-label="Volver" style="width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;padding:0;">
+        <!-- Sección: Productos (agregar nuevos productos al proveedor) -->
+        <fieldset class="form-section">
+            <legend>
+                <i class="fas fa-box"></i> Productos
+                <button type="button" class="btn-add-producto btn-icon-only" onclick="agregarProducto()" title="Agregar producto" aria-label="Agregar producto" style="width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;padding:0;margin-left:8px;">
+                    <i class="fas fa-plus-circle" style="font-size:1.1rem"></i>
+                </button>
+            </legend>
+
+            <div id="productos-container">
+                <div class="producto-item" data-producto-index="0">
+                    <div class="producto-header">
+                        <h4>Producto #1</h4>
+                        <button type="button" class="btn-remove-producto" onclick="eliminarProducto(0)" title="Eliminar producto" aria-label="Eliminar producto">
+                            <i class="fas fa-trash-alt" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <div th:replace="~{shared/fragments/product-form-fields :: indexed('productos[0]')}"></div>
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- Botones -->
+            </a>
+        </div>
+    </div>
+
+    <div class="form-container">
+    <form th:action="@{/admin/proveedores/actualizar/{id}(id=${proveedor.id})}" method="post" th:object="${proveedor}" class="form-admin">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <input type="hidden" th:field="*{id}" />
+
+        <!-- Sección: Información Básica -->
+        <fieldset class="form-section">
+<div layout:fragment="scripts">
+    <script th:src="@{/js/pages/proveedores/proveedor-form.js}"></script>
+</div>
+            <legend><i class="fas fa-building"></i> Información Básica</legend>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="nombre">Nombre del Proveedor: <span class="required">*</span></label>
+                    <input type="text" id="nombre" th:field="*{nombre}" class="form-control" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="nit">NIT / RUC: <span class="required">*</span></label>
+                    <input type="text" id="nit" th:field="*{nit}" class="form-control" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="telefono">Teléfono: <span class="required">*</span></label>
+                    <input type="text" id="telefono" th:field="*{telefono}" class="form-control" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" th:field="*{email}" class="form-control" />
+                </div>
+
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="direccion">Dirección: <span class="required">*</span></label>
+                    <input type="text" id="direccion" th:field="*{direccion}" class="form-control" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="ciudad">Ciudad:</label>
+                    <input type="text" id="ciudad" th:field="*{ciudad}" class="form-control" />
+                </div>
+
+                <div class="form-group">
+                    <label for="pais">País:</label>
+                    <input type="text" id="pais" th:field="*{pais}" class="form-control" />
+                </div>
+
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="descripcion">Descripción:</label>
+                    <textarea id="descripcion" th:field="*{descripcion}" class="form-control" rows="2"></textarea>
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- Sección: Contacto -->
+        <fieldset class="form-section">
+            <legend><i class="fas fa-address-book"></i> Contacto</legend>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="nombreContacto">Persona de Contacto:</label>
+                    <input type="text" id="nombreContacto" th:field="*{nombreContacto}" class="form-control" />
+                </div>
+
+                <div class="form-group">
+                    <label for="cargoContacto">Cargo:</label>
+                    <input type="text" id="cargoContacto" th:field="*{cargoContacto}" class="form-control" />
+                </div>
+
+                <div class="form-group">
+                    <label for="telefonoContacto">Teléfono Contacto:</label>
+                    <input type="text" id="telefonoContacto" th:field="*{telefonoContacto}" class="form-control" />
+                </div>
+
+                <div class="form-group">
+                    <label for="emailContacto">Email Contacto:</label>
+                    <input type="email" id="emailContacto" th:field="*{emailContacto}" class="form-control" />
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- Sección: Metadatos -->
+        <fieldset class="form-section">
+            <legend><i class="fas fa-calendar-alt"></i> Metadatos</legend>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="fechaRegistro">Fecha Registro:</label>
+                    <input type="text" id="fechaRegistro" class="form-control" th:value="${#temporals.format(proveedor.fechaRegistro, 'yyyy-MM-dd')}" readonly />
+                </div>
+
+                <div class="form-group">
+                    <label style="display:flex; align-items:center; gap:.5rem;">
+                        <input type="checkbox" th:field="*{activo}" /> Activo
+                    </label>
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- Botones: icon-only y alineados a la derecha -->
+        <div class="form-actions" style="display:flex;gap:0.5rem;justify-content:flex-end;align-items:center;margin-top:1rem;">
+            <a th:href="@{/admin/proveedores}" class="btn btn-secondary btn-icon-only" title="Cancelar" aria-label="Cancelar" style="width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;padding:0;">
+                <i class="fas fa-times-circle" style="font-size:1.1rem"></i>
+            </a>
+            <button type="submit" class="btn btn-primary btn-icon-only" title="Guardar cambios" aria-label="Guardar cambios" style="width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;padding:0;">
+                <i class="fas fa-save" style="font-size:1.1rem"></i>
+            </button>
+        </div>
+    </form>
+    </div>
+</div>
+</body>
+</html>

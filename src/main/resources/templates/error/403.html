@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{shared/layouts/public}"
+      lang="es">
+<head>
+    <title>Acceso Denegado</title>
+    <link rel="stylesheet" th:href="@{/css/pages/error.css}">
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="error-container">
+            <h1>403 - Acceso Denegado</h1>
+            <p>Lo sentimos, no tienes permisos para acceder a esta página.</p>
+            <a th:href="@{/tienda/productos}" class="btn btn-primary">
+                <i class="fas fa-home"></i> Volver al inicio
+            </a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <!-- Navigation Fragment -->
+    <aside class="sidebar" th:fragment="nav">
+        <!-- Logo/Brand -->
+        <div class="sidebar-header">
+            <h2>MERKO</h2>
+            <p>Sistema de Gestión</p>
+        </div>
+
+        <ul>
+            <!-- GENERAL -->
+            <li class="nav-section">GENERAL</li>
+            <li><a th:href="@{/admin/dashboard}"
+                   th:classappend="${#httpServletRequest != null and #httpServletRequest.getRequestURI() == '/admin/dashboard' ? 'active' : ''}">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </a></li>
+
+            <!-- INVENTARIO -->
+            <li class="nav-section">INVENTARIO</li>
+            <li><a th:href="@{/admin/productos}"
+                   th:classappend="${#httpServletRequest != null and #strings.startsWith(#httpServletRequest.getRequestURI(), '/admin/productos') ? 'active' : ''}">
+                <i class="fas fa-box"></i> Productos
+            </a></li>
+
+            <!-- OPERACIONES -->
+            <li class="nav-section">OPERACIONES</li>
+            <li><a th:href="@{/admin/ventas}"
+                   th:classappend="${#httpServletRequest != null and #strings.startsWith(#httpServletRequest.getRequestURI(), '/admin/ventas') ? 'active' : ''}">
+                <i class="fas fa-cash-register"></i> Ventas
+            </a></li>
+            <li><a th:href="@{/admin/compras}"
+                   th:classappend="${#httpServletRequest != null and #strings.startsWith(#httpServletRequest.getRequestURI(), '/admin/compras') ? 'active' : ''}">
+                <i class="fas fa-boxes"></i> Compras
+            </a></li>
+
+            <!-- GESTIÓN -->
+            <li class="nav-section">GESTIÓN</li>
+            <li><a th:href="@{/admin/proveedores}"
+                   th:classappend="${#httpServletRequest != null and #strings.startsWith(#httpServletRequest.getRequestURI(), '/admin/proveedores') ? 'active' : ''}">
+                <i class="fas fa-truck-loading"></i> Proveedores
+            </a></li>
+            <li><a th:href="@{/admin/clientes}"
+                   th:classappend="${#httpServletRequest != null and #strings.startsWith(#httpServletRequest.getRequestURI(), '/admin/clientes') ? 'active' : ''}">
+                <i class="fas fa-user-friends"></i> Clientes
+            </a></li>
+        </ul>
+
+        <!-- User info footer -->
+        <div class="sidebar-footer">
+            <i class="fas fa-user-circle"></i>
+            <span>Administrador</span>
+        </div>
+    </aside>
+</body>
+</html>
