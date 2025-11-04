@@ -18,10 +18,10 @@
         </div>
 
         <div class="form-container">
-            <form id="form-productos"
-                  th:action="@{/admin/proveedores/agregar-productos/0}"
-                  th:attr="data-action-base=@{/admin/proveedores/agregar-productos/}"
-                  method="post" enctype="multipart/form-data" class="form-admin">
+        <form id="form-productos"
+            th:action="@{/admin/proveedores/agregar-productos/0}"
+            th:attr="data-action-base=@{/admin/proveedores/agregar-productos/}"
+            method="post" enctype="multipart/form-data" class="form-admin proveedor-form">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
                 <fieldset class="form-section">

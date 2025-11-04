@@ -30,6 +30,15 @@ public class Usuario {
 
     private String nombre;
     private String telefono;
+    @Column(nullable = false)
+    private String apellido = "";
+    
+    // Estado del usuario. No nulo en BD; por defecto true para usuarios activos.
+    @Column(nullable = false)
+    private Boolean activo = true;
+
+    @Column(nullable = false)
+    private Boolean notificaciones = false;
 
     public Usuario(String username, String correo, String password, Rol rol) {
 
@@ -37,5 +46,8 @@ public class Usuario {
         this.correo = correo;
         this.password = password;
         this.rol = rol;
+        this.activo = true;
+        this.apellido = "";
+        this.notificaciones = false;
     }
 }

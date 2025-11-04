@@ -10,6 +10,16 @@
         <link rel="stylesheet" th:href="@{/css/pages/productos.css}" />
         <link rel="stylesheet" th:href="@{/css/modules/productos-form.css}" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+        <!-- Inline override to force compact row layout for producto form when needed -->
+        <style>
+            @media (min-width: 768px) {
+                .producto-form .form-grid { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem 2rem; }
+                .producto-form .form-group { display:flex !important; flex-direction:row !important; align-items:center !important; gap:0.75rem !important; margin-bottom:1rem !important; width:100%; }
+                .producto-form .form-group label { flex:0 0 160px; margin:0; font-weight:600; }
+                .producto-form .form-group .form-control { flex:1 1 auto !important; width:auto !important; max-width:none !important; }
+                .producto-form .form-group.full-width{ display:block !important; width:100% !important; grid-column: 1 / -1 !important; }
+            }
+        </style>
     
         
     </head>
@@ -23,9 +33,11 @@
             </div>
 
             <div class="form-container">
-                <form th:action="@{${accion}}" th:object="${producto}" method="post" enctype="multipart/form-data" class="form-admin">
+                <form th:action="@{${accion}}" th:object="${producto}" method="post" enctype="multipart/form-data" class="form-admin producto-form">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                     <input type="hidden" th:field="*{id}" />
+                    <!-- Si se pasó una sucursal seleccionada, conservarla en un campo oculto -->
+                    <input type="hidden" name="branchId" th:value="${selectedBranchId}" />
 
                     <!-- Sección: Información básica -->
                     <div class="form-section">

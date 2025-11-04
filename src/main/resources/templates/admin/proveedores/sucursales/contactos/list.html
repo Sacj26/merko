@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{shared/layouts/admin}" lang="es">
+<head>
+    <title>Contactos</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="header-with-actions">
+        <div class="title-group">
+            <h1 class="page-title" th:text="${proveedor.nombre} + ' — ' + ${branch.nombre} + ' — Contactos'">Contactos</h1>
+            <p class="page-subtitle">Gestiona los contactos de la sucursal</p>
+        </div>
+    <div class="actions">
+            <!-- Volver al listado de proveedores (icono) -->
+            <a th:href="@{/admin/proveedores}" class="btn btn-secondary btn-icon-only" title="Volver a proveedores">
+                <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                <span class="sr-only">Volver a proveedores</span>
+            </a>
+
+            <!-- (El botón "Volver a sucursal" se eliminó intencionalmente) -->
+
+            <!-- Volver al listado de sucursales del proveedor (icono) -->
+            <a th:href="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales'}" class="btn btn-secondary btn-icon-only" title="Volver a sucursales">
+                <i class="fas fa-store" aria-hidden="true"></i>
+                <span class="sr-only">Volver a sucursales</span>
+            </a>
+
+            <!-- Nuevo contacto (icono) -->
+            <a th:href="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales/' + ${branch.id} + '/contactos/nuevo'}" class="btn btn-primary btn-icon-only" title="Nuevo contacto">
+                <i class="fas fa-user-plus" aria-hidden="true"></i>
+                <span class="sr-only">Nuevo contacto</span>
+            </a>
+        </div>
+    </div>
+    <div class="form-container">
+            <div th:if="${#lists.isEmpty(contacts)}" class="alert alert-info">No hay contactos registrados para esta sucursal.</div>
+            <div th:if="${!#lists.isEmpty(contacts)}">
+                <div class="table-container table-scroll">
+                    <table class="table-admin">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Rol</th>
+                                <th>Teléfono</th>
+                                <th>Email</th>
+                                <th>Principal</th>
+                                <th class="actions-col">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="c : ${contacts}">
+                                <td th:text="${c.id}">1</td>
+                                <td>
+                                    <div class="cell-text-ellipsis">
+                                        <div class="cell-title" th:text="${c.nombre}">Nombre</div>
+                                        <small class="cell-subtitle" th:text="${c.rol}">Rol</small>
+                                    </div>
+                                </td>
+                                <td th:text="${c.rol}">Rol</td>
+                                <td th:text="${c.telefono}">Tel</td>
+                                <td th:text="${c.email}">Email</td>
+                                <td>
+                                    <span th:if="${c.isPrimary}" class="badge badge-success">Principal</span>
+                                    <span th:unless="${c.isPrimary}" class="text-muted">—</span>
+                                </td>
+                                <td class="actions-col">
+                                    <div class="actions-cell">
+                                        <a th:href="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales/' + ${branch.id} + '/contactos/editar/' + ${c.id}}" class="btn-icon btn-icon-primary" title="Editar contacto">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form th:action="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales/' + ${branch.id} + '/contactos/' + ${c.id} + '/eliminar'}" method="post" style="display:inline">
+                                            <button type="submit" class="btn-icon btn-icon-danger" title="Eliminar contacto" onclick="return confirm('¿Eliminar contacto?')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{shared/layouts/admin}" lang="es">
+<head>
+    <title>Formulario sucursal</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="header-with-actions">
+        <div class="title-group">
+            <h1 class="page-title" th:text="${proveedor.nombre} + ' — Sucursal'">Sucursal</h1>
+            <p class="page-subtitle">Crear / editar sucursal</p>
+        </div>
+        <div class="actions">
+            <a th:href="@{/admin/proveedores/{id}(id=${proveedor.id})}" class="btn btn-secondary">Volver al proveedor</a>
+        </div>
+    </div>
+
+    <div class="form-container">
+        <form th:action="${accion}" th:object="${branch}" method="post">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="nombre">Nombre</label>
+                    <input type="text" id="nombre" th:field="*{nombre}" class="form-control" required />
+                </div>
+                <div class="form-group">
+                    <label for="direccion">Dirección</label>
+                    <input type="text" id="direccion" th:field="*{direccion}" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="telefono">Teléfono</label>
+                    <input type="text" id="telefono" th:field="*{telefono}" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="ciudad">Ciudad</label>
+                    <input type="text" id="ciudad" th:field="*{ciudad}" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="pais">País</label>
+                    <input type="text" id="pais" th:field="*{pais}" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="activo">Activo</label>
+                    <input type="checkbox" id="activo" th:field="*{activo}" />
+                </div>
+            </div>
+
+            <hr />
+            <h3>Contacto principal de la sucursal</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="contactNombre">Nombre</label>
+                    <input type="text" id="contactNombre" th:field="*{contacts[0].nombre}" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="contactRol">Rol</label>
+                    <input type="text" id="contactRol" th:field="*{contacts[0].rol}" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="contactTelefono">Teléfono</label>
+                    <input type="text" id="contactTelefono" th:field="*{contacts[0].telefono}" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="contactEmail">Email</label>
+                    <input type="email" id="contactEmail" th:field="*{contacts[0].email}" class="form-control" />
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="contactNotas">Notas</label>
+                    <textarea id="contactNotas" th:field="*{contacts[0].notas}" class="form-control"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="contactIsPrimary">Contacto principal</label>
+                    <input type="checkbox" id="contactIsPrimary" th:field="*{contacts[0].isPrimary}" />
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a th:href="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales'}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

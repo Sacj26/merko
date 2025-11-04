@@ -135,6 +135,24 @@
             </div>
         </div>
 
+        <!-- Sección: Stock por Sucursal (si aplica) -->
+        <div class="info-section" th:if="${productBranches != null and !#lists.isEmpty(productBranches)}">
+            <h3 class="info-section-title">
+                <i class="fas fa-store"></i> Stock por Sucursal
+            </h3>
+            <div class="info-section-content">
+                <div class="info-row">
+                    <div class="info-field" th:each="pb : ${productBranches}">
+                        <span class="info-label" th:text="${pb.branch.nombre}">Sucursal</span>
+                        <span class="info-value">
+                            <small th:text="${'Stock: ' + (pb.stock != null ? pb.stock : 0)}">Stock: 0</small>
+                            <small style="margin-left:0.5rem;" th:text="${pb.precio != null ? ('Precio local: $' + #numbers.formatDecimal(pb.precio, 1, 'COMMA', 2, 'POINT')) : ''}"></small>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Sección: Características del Producto -->
         <div class="info-section">
             <h3 class="info-section-title">

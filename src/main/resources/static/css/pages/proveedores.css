@@ -36,54 +36,217 @@
 }
 
 /* Page header */
-.page-header {
-    margin-bottom: 2rem;
-}
-
-.page-header h1 {
-    font-size: 1.875rem;
-    font-weight: 600;
-    color: #1e293b;
-    margin: 0;
-}
-
-/* Form container */
-.form-container {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    padding: 1.25rem;
-    max-width: 900px;
-}
-
-.form-admin {
-    display: flex;
-    flex-direction: column;
+/* Scoped styles for sucursales view to avoid colliding with global components */
+.proveedor-sucursales .branch-grid {
+    display: grid;
+    grid-template-columns: 1fr;
     gap: 1rem;
 }
 
-/* Form sections */
-.form-section {
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
+.proveedor-sucursales .branch-card {
+    background: #fff;
+    border: 1px solid #e6eef8;
+    border-radius: 8px;
     padding: 1rem;
-    margin: 0;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
 }
 
-.form-section legend {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #334155;
-    padding: 0 0.5rem;
-    margin-bottom: 0.75rem;
+.proveedor-sucursales .branch-header {
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:0.75rem;
 }
 
-/* Form rows - two columns layout */
-.form-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 0.875rem;
-    margin-bottom: 0.875rem;
+.proveedor-sucursales .branch-title {
+    font-weight:700;
+    color: #0f172a;
+    font-size:1.05rem;
+}
+
+.proveedor-sucursales .branch-meta {
+    color:#64748b;
+    font-size:0.875rem;
+    margin-top:0.25rem;
+}
+
+.proveedor-sucursales .branch-body {
+    display:flex;
+    flex-direction:column;
+    gap:0.5rem;
+}
+
+.proveedor-sucursales .branch-row {
+    display:flex;
+    gap:0.75rem;
+    align-items:flex-start;
+}
+
+.proveedor-sucursales .branch-label {
+    min-width:90px;
+    color:#475569;
+    font-weight:600;
+    font-size:0.85rem;
+}
+
+.proveedor-sucursales .branch-value {
+    color:#1e293b;
+    font-size:0.95rem;
+    word-break:break-word;
+}
+
+.proveedor-sucursales .branch-contact .contact-name {
+    font-weight:600;
+    color:#0f172a;
+}
+
+.proveedor-sucursales .branch-contact .contact-phone {
+    color:#475569;
+    font-size:0.9rem;
+}
+
+/* Style only actions inside proveedor-sucursales to avoid global btn changes */
+.proveedor-sucursales .branch-actions {
+    display:flex;
+    gap:0.5rem;
+    align-items:center;
+}
+
+.proveedor-sucursales .branch-actions .btn {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:36px;
+    height:36px;
+    border-radius:6px;
+    padding:0.35rem;
+    background: rgba(15,23,42,0.03);
+    color:#0f172a;
+}
+
+@media (min-width: 768px) {
+    .proveedor-sucursales .branch-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1100px) {
+    .proveedor-sucursales .branch-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+.seccion-sucursales .branch-header {
+    position: relative;
+    padding-right: 3rem; /* leave room for absolute actions */
+}
+.branch-actions {
+    position: absolute;
+    right: 0.5rem;
+    top: 0.5rem;
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+}
+.btn-remove-branch.btn-icon-only {
+    background: var(--color-danger, #ef4444);
+    color: #fff;
+    border-radius: 6px;
+    padding: 0.35rem 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn-remove-branch.btn-icon-only i {
+    font-size: 0.9rem;
+}
+.seccion-sucursales .branch-item:not(.prototype):first-child .btn-remove-branch {
+    display: none !important;
+    pointer-events: none;
+    opacity: 0; /* hide visually */
+}
+
+/* Ensure first contact in each branch cannot be removed */
+.seccion-sucursales .branch-item .contacts-container .contact-item:not(.prototype):first-child .btn-remove-contact {
+    display: none !important;
+    pointer-events: none;
+    opacity: 0;
+}
+.btn-add-contact.btn-icon-only {
+    background: var(--color-primario, #2563eb);
+    color: #fff;
+    border-radius: 6px;
+    padding: 0.35rem 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.seccion-sucursales .branch-header .title {
+    font-weight:600;
+    color:var(--color-primario);
+}
+.seccion-sucursales .contacts-list {
+    margin-top:0.5rem;
+}
+.contact-item {
+    padding:0.5rem;
+    border-radius:4px;
+    border:1px dashed rgba(0,0,0,0.04);
+    margin-bottom:0.5rem;
+    background: #fbfbfb;
+}
+/* Indicador y control para contacto principal */
+.contact-is-primary {
+    width: 1.05rem;
+    height: 1.05rem;
+    vertical-align: middle;
+    margin-left: 0.5rem;
+}
+.contact-primary-badge {
+    display: inline-block;
+    background: var(--color-primario, #2563eb);
+    color: #fff;
+    font-size: 0.75rem;
+    padding: 0.15rem 0.4rem;
+    border-radius: 8px;
+    margin-left: 0.5rem;
+}
+/* Estilo para el botón eliminar de contacto (icon-only) */
+.btn-remove-contact {
+    background: var(--color-danger, #ef4444);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.35rem 0.45rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+.btn-remove-contact i {
+    font-size: 0.9rem;
+}
+/* hover feedback handled by .btn-remove-contact (no extra rules needed) */
+.branch-actions .btn, .contact-actions .btn {
+    margin-left:0.5rem;
+}
+
+/* small remove button style */
+.btn-remove-small {
+    background: var(--color-danger, #e74c3c);
+    color: #fff;
+    border-radius: 4px;
+    padding: 0.35rem 0.5rem;
+    font-size: 0.9rem;
+}
+
+/* Keep stacked layout on small screens */
+@media (max-width: 768px) {
+    .sections-two-column {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* Form grid - three columns layout (like productos form) */
@@ -287,6 +450,113 @@ input[type="file"].form-control {
     margin-bottom: 1rem;
     color: #1f2937;
     font-size: 1.25rem;
+
+/* Utilidades y estados por defecto para prototipos y layout dinámico */
+.prototype {
+    display: none !important; /* ocultar prototipos clonables por defecto */
+}
+
+/* Ocultar por defecto la sección de sucursales y productos; JS las mostrará cuando proceda */
+#seccion-sucursales, #seccion-productos {
+    display: none;
+}
+
+/* Clase para forzar que un grupo ocupe toda la fila (reemplaza inline style grid-column:1 / -1) */
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+/* Horizontal layout for proveedores forms: labels a la izquierda, inputs a la derecha
+   Applied only on medium+ screens to preserve mobile stacked layout. Scoped under
+   .form-container and .seccion-sucursales so it doesn't affect global forms. */
+@media (min-width: 768px) {
+    /* Two-column layout for proveedor forms: show two form-groups per row */
+    .form-container .proveedor-form .form-grid,
+    .proveedor-form .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.25rem 2rem;
+        align-items: start;
+    }
+
+    .form-container .proveedor-form .form-grid .form-group,
+    .proveedor-form .form-grid .form-group {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 0.75rem !important;
+        margin-bottom: 1rem !important;
+        width: 100%;
+    }
+
+    .form-container .proveedor-form .form-grid .form-group label,
+    .proveedor-form .form-grid .form-group label {
+        flex: 0 0 160px;
+        margin: 0;
+        text-align: left;
+        font-size: 0.95rem;
+        font-weight: 600;
+    }
+
+    .form-container .proveedor-form .form-grid .form-group .form-control,
+    .proveedor-form .form-grid .form-group .form-control {
+        flex: 1 1 auto !important;
+        width: auto !important;
+        max-width: none !important;
+        box-sizing: border-box;
+    }
+
+    /* Explicit full-width groups should span both columns */
+    .form-container .proveedor-form .form-grid .form-group.full-width,
+    .form-container .seccion-sucursales .form-grid .form-group.full-width,
+    .proveedor-form .form-grid .form-group.full-width,
+    .seccion-sucursales .form-grid .form-group.full-width {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        grid-column: 1 / -1;
+    }
+
+    /* Increase spacing between blocks */
+    .form-container {
+        padding: 1.5rem;
+    }
+
+    .form-section {
+        margin-bottom: 1.75rem;
+        padding: 1rem;
+    }
+}
+
+/* Accessibility helper: visually hidden but available to screen readers */
+.sr-only {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Utilidad pequeña de margen horizontal (para botones dentro de legends/headers) */
+.ml-1 {
+    margin-left: 0.5rem;
+}
+
+/* Utilidades para layout en líneas y etiquetas sin margen (reemplazan inline styles) */
+.inline-row {
+    display:flex;
+    gap:2rem;
+    align-items:center;
+    flex-wrap:wrap;
+}
+
+.no-margin {
+    margin:0;
+}
     font-weight: 600;
 }
 
@@ -484,7 +754,7 @@ input[type="file"].form-control {
 }
 
 .btn-add-producto:hover {
-    background: var(--color-secundario-dark);
+    background: var(--color-secundario-hover);
     transform: translateY(-1px);
 }
 
@@ -535,10 +805,178 @@ input[type="file"].form-control {
     transform: translateY(-1px);
 }
 
+/* Ocultar el botón eliminar del primer producto real para evitar parpadeo antes de que JS lo oculte */
+#productos-container .producto-item:not(.prototype):first-child .btn-remove-producto {
+    display: none;
+}
+
+/* Utilidad para botones que solo muestran un icono */
+.btn-icon-only {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 8px;
+}
+
+/* Ensure add/show buttons have stable size and appearance to avoid visual flicker */
+
+/* Icon-only sizing: keep consistent size for small icon buttons */
+.btn-add-producto.btn-icon-only,
+#btn-mostrar-productos.btn-icon-only,
+#btn-cancelar-productos.btn-icon-only {
+    min-width: 36px;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    transition: background-color 0.12s ease, transform 0.12s ease;
+}
+
+/* Make the add-product icon use the secondary (green) color so it appears as the "add" action.
+   Keep mostrar/cancelar icon-only buttons using the primary color (typically blue). */
+.btn-add-producto.btn-icon-only {
+    /* Make the inline add-product button filled with secondary color for consistency */
+    background: var(--color-secundario);
+    color: white;
+    border: none;
+}
+
+#btn-mostrar-productos.btn-icon-only,
+#btn-cancelar-productos.btn-icon-only {
+    /* Show/Cancel use primary filled color */
+    background: var(--color-primario);
+    color: white;
+    border: none;
+}
+
+/* Provide a subtle background so icon-only buttons don't shift layout when hovered */
+.btn-add-producto.btn-icon-only:hover {
+    background: var(--color-secundario-hover);
+    transform: translateY(-1px);
+}
+
+#btn-mostrar-productos.btn-icon-only:hover,
+#btn-cancelar-productos.btn-icon-only:hover {
+    background: var(--color-primario-dark);
+    transform: translateY(-1px);
+}
+
+/* Form actions alignment and consistent button sizing */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.form-actions .btn {
+    min-width: 44px;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+}
+
+.btn-primary.btn-icon-only {
+    background: var(--color-primario);
+    color: white;
+}
+
+.btn-primary.btn-icon-only:hover {
+    background: var(--color-primario-dark);
+}
+
+.btn-secondary.btn-icon-only {
+    background: var(--color-secundario);
+    color: white;
+}
+
+.btn-secondary.btn-icon-only:hover {
+    background: var(--color-secundario-hover);
+}
+
+/* Accessibility helper: visually hide text but keep it available for screen readers */
+.sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
 #productos-container .producto-item:first-child .producto-header {
     border-bottom-color: var(--color-primario);
 }
 
 #productos-container .producto-item:first-child .producto-header h4 {
     color: var(--color-primario);
+}
+
+/* --- Horizontal form layout: labels to the left, controls to the right --- */
+/* This applies to .form-grid and .form-group used across provider/branch/contact forms */
+.form-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.form-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+.form-group > label {
+    flex: 0 0 28%;
+    max-width: 28%;
+    text-align: left;
+    font-weight: 600;
+}
+
+.form-group > input,
+.form-group > select,
+.form-group > textarea,
+.form-group > .form-control {
+    flex: 1 1 72%;
+    min-width: 0; /* avoid overflow */
+}
+
+/* Keep full-width groups unchanged */
+.form-group.full-width {
+    display: block;
+}
+
+/* Responsive: on small screens stack vertical */
+@media (max-width: 767px) {
+    .form-grid,
+    .form-group {
+        display: block;
+    }
+    .form-group > label {
+        display: block;
+        width: 100%;
+        margin-bottom: 0.25rem;
+    }
+    .form-group > input,
+    .form-group > select,
+    .form-group > textarea,
+    .form-group > .form-control {
+        width: 100%;
+    }
 }

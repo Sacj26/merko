@@ -1,0 +1,64 @@
+<!-- Fragmento: campos de Sucursal (indexed(index, branch)) - usa th:field para binding robusto -->
+<div th:fragment="indexed(index, branch)" th:inline="text">
+    <div class="form-grid">
+        <div class="form-group">
+            <label th:for="${'branches[' + index + '].nombre'}">Nombre Sucursal:</label>
+            <input type="text" th:attr="id=${'branches[' + index + '].nombre'}, name=${'branches[' + index + '].nombre'}" th:value="${branch != null ? branch.nombre : ''}" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label th:for="${'branches[' + index + '].direccion'}">Dirección:</label>
+            <input type="text" th:attr="id=${'branches[' + index + '].direccion'}, name=${'branches[' + index + '].direccion'}" th:value="${branch != null ? branch.direccion : ''}" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label th:for="${'branches[' + index + '].telefono'}">Teléfono:</label>
+            <input type="text" th:attr="id=${'branches[' + index + '].telefono'}, name=${'branches[' + index + '].telefono'}" th:value="${branch != null ? branch.telefono : ''}" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label th:for="${'branches[' + index + '].ciudad'}">Ciudad:</label>
+            <input type="text" th:attr="id=${'branches[' + index + '].ciudad'}, name=${'branches[' + index + '].ciudad'}" th:value="${branch != null ? branch.ciudad : ''}" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label th:for="${'branches[' + index + '].pais'}">País:</label>
+            <input type="text" th:attr="id=${'branches[' + index + '].pais'}, name=${'branches[' + index + '].pais'}" th:value="${branch != null ? branch.pais : ''}" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label th:for="${'branches[' + index + '].activo'}">Activo:</label>
+            <!-- hidden para asegurar envío cuando no chequeado -->
+            <input type="hidden" th:attr="name=${'branches[' + index + '].activo'}" value="false" />
+            <input type="checkbox" th:attr="id=${'branches[' + index + '].activo'}, name=${'branches[' + index + '].activo'}" th:checked="${branch != null ? branch.activo : false}" />
+        </div>
+    </div>
+    
+    <!-- Contacto principal: incluido inline para facilitar creación junto a la sucursal -->
+    <div class="form-section contact-principal">
+        <h5>Contacto principal</h5>
+        <div class="form-grid">
+            <div class="form-group">
+                <label th:for="${'branches[' + index + '].contacts[0].nombre'}">Nombre:</label>
+                <input type="text" th:attr="id=${'branches[' + index + '].contacts[0].nombre'}, name=${'branches[' + index + '].contacts[0].nombre'}" th:value="${branch != null && branch.contacts != null && #lists.size(branch.contacts) > 0 ? branch.contacts[0].nombre : ''}" class="form-control" required />
+            </div>
+            <div class="form-group">
+                <label th:for="${'branches[' + index + '].contacts[0].rol'}">Rol / Cargo:</label>
+                <input type="text" th:attr="id=${'branches[' + index + '].contacts[0].rol'}, name=${'branches[' + index + '].contacts[0].rol'}" th:value="${branch != null && branch.contacts != null && #lists.size(branch.contacts) > 0 ? branch.contacts[0].rol : ''}" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label th:for="${'branches[' + index + '].contacts[0].telefono'}">Teléfono:</label>
+                <input type="text" th:attr="id=${'branches[' + index + '].contacts[0].telefono'}, name=${'branches[' + index + '].contacts[0].telefono'}" th:value="${branch != null && branch.contacts != null && #lists.size(branch.contacts) > 0 ? branch.contacts[0].telefono : ''}" class="form-control" required />
+            </div>
+            <div class="form-group">
+                <label th:for="${'branches[' + index + '].contacts[0].email'}">Email:</label>
+                <input type="email" th:attr="id=${'branches[' + index + '].contacts[0].email'}, name=${'branches[' + index + '].contacts[0].email'}" th:value="${branch != null && branch.contacts != null && #lists.size(branch.contacts) > 0 ? branch.contacts[0].email : ''}" class="form-control" />
+            </div>
+            <div class="form-group full-width">
+                <label th:for="${'branches[' + index + '].contacts[0].notas'}">Notas:</label>
+                <textarea th:attr="id=${'branches[' + index + '].contacts[0].notas'}, name=${'branches[' + index + '].contacts[0].notas'}" class="form-control" rows="2" th:text="${branch != null && branch.contacts != null && #lists.size(branch.contacts) > 0 ? branch.contacts[0].notas : ''}"></textarea>
+            </div>
+            <div class="form-group">
+                <label th:for="${'branches[' + index + '].contacts[0].isPrimary'}">Principal</label>
+                <input type="hidden" th:attr="name=${'branches[' + index + '].contacts[0].isPrimary'}" value="false" />
+                <!-- Si no existe contacto previo, marcar como true por defecto -->
+                <input type="checkbox" th:attr="id=${'branches[' + index + '].contacts[0].isPrimary'}, name=${'branches[' + index + '].contacts[0].isPrimary'}" th:checked="${branch != null && branch.contacts != null && #lists.size(branch.contacts) > 0 ? branch.contacts[0].isPrimary : true}" class="contact-is-primary" value="true" />
+            </div>
+        </div>
+    </div>
+</div>

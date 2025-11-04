@@ -18,7 +18,22 @@
             <a th:href="@{/admin/proveedores/nuevo}" class="btn-nuevo" title="Nuevo proveedor" aria-label="Nuevo proveedor">
                 <i class="fas fa-plus"></i>
             </a>
+            <!-- Registrar sucursal: primero elegir proveedor -->
+            <button id="btnShowCreateBranch" type="button" class="btn-nuevo" title="Registrar sucursal" aria-label="Registrar sucursal">
+                <i class="fas fa-store"></i>
+            </button>
         </div>
+    </div>
+
+    <!-- Box oculto para elegir proveedor antes de crear sucursal -->
+    <div id="createBranchBox" class="create-branch-box" style="display:none; margin: 12px 0;">
+        <label for="selectProveedorForBranch" style="margin-right:8px;">Seleccionar proveedor:</label>
+        <select id="selectProveedorForBranch" class="form-control" style="display:inline-block; width:auto; margin-right:8px;">
+            <option value="">-- Seleccionar --</option>
+            <option th:each="p : ${proveedores}" th:value="${p.id}" th:text="${p.nombre}"></option>
+        </select>
+        <button id="btnCreateBranch" type="button" class="btn btn-primary">Registrar sucursal</button>
+        <button id="btnCancelCreateBranch" type="button" class="btn btn-secondary">Cancelar</button>
     </div>
 
     <div class="table-controls">
@@ -67,11 +82,23 @@
                 <td th:text="${prov.email ?: 'N/A'}">Email</td>
                 <td th:text="${prov.ciudad ?: 'N/A'}">Ciudad</td>
                 <td>
+                    <!-- Legacy: proveedor may have flattened contact fields; prefer branch->contacts now -->
                     <div th:if="${prov.nombreContacto}" class="cell-text-ellipsis">
                         <div class="cell-title" th:text="${prov.nombreContacto}">Contacto</div>
                         <small class="cell-subtitle" th:text="${prov.cargoContacto}">Cargo</small>
                     </div>
-                    <span th:unless="${prov.nombreContacto}" class="text-muted">Sin contacto</span>
+
+                    <!-- New: buscar el primer contacto disponible en las sucursales del proveedor -->
+                    <div th:if="${prov.nombreContacto == null}">
+                        <div th:if="${prov.branches != null and !#lists.isEmpty(prov.branches)}" th:with="firstBranch=${prov.branches[0]}">
+                            <div th:if="${firstBranch.contacts != null and !#lists.isEmpty(firstBranch.contacts)}" class="cell-text-ellipsis">
+                                <div class="cell-title" th:text="${firstBranch.contacts[0].nombre}">Contacto</div>
+                                <small class="cell-subtitle" th:text="${firstBranch.contacts[0].rol}">Rol</small>
+                            </div>
+                            <span th:unless="${firstBranch.contacts != null and !#lists.isEmpty(firstBranch.contacts)}" class="text-muted">Sin contacto</span>
+                        </div>
+                        <span th:if="${prov.branches == null or #lists.isEmpty(prov.branches)}" class="text-muted">Sin contacto</span>
+                    </div>
                 </td>
                 <td>
                     <span th:if="${prov.activo}" class="badge badge-success">
@@ -86,9 +113,13 @@
                         <a th:href="@{'/admin/proveedores/ver/' + ${prov.id}}" class="btn-icon btn-icon-secondary" title="Ver proveedor">
                             <i class="fas fa-eye"></i>
                         </a>
-                        <a th:href="@{'/admin/proveedores/agregar-productos/' + ${prov.id}}" class="btn-icon btn-icon-primary" title="Agregar productos">
-                            <i class="fas fa-plus"></i>
+                        <!-- Agregar productos (migrado a nivel de sucursal) -->
+                        <!-- Botón: gestionar sucursales (navega a la lista de sucursales del proveedor) -->
+                        <a th:href="@{'/admin/proveedores/' + ${prov.id} + '/sucursales'}" class="btn-icon btn-icon-secondary" title="Sucursales">
+                            <i class="fas fa-store"></i>
                         </a>
+
+                        <!-- Botón: editar proveedor (mantener comportamiento existente) -->
                         <a th:href="@{'/admin/proveedores/editar/' + ${prov.id}}" class="btn-icon btn-icon-primary" title="Editar proveedor">
                             <i class="fas fa-edit"></i>
                         </a>

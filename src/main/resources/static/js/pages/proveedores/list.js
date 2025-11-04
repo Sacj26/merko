@@ -33,3 +33,32 @@
     }
   }
 })();
+
+// Crear sucursal: mostrar selector y redirigir
+(function(){
+  const btnShow = document.getElementById('btnShowCreateBranch');
+  const box = document.getElementById('createBranchBox');
+  const btnCreate = document.getElementById('btnCreateBranch');
+  const btnCancel = document.getElementById('btnCancelCreateBranch');
+  const select = document.getElementById('selectProveedorForBranch');
+
+  if (btnShow && box) {
+    btnShow.addEventListener('click', () => {
+      box.style.display = (box.style.display === 'none' || box.style.display === '') ? 'block' : 'none';
+    });
+  }
+  if (btnCancel && box) {
+    btnCancel.addEventListener('click', () => { box.style.display = 'none'; select.value = ''; });
+  }
+  if (btnCreate && select) {
+    btnCreate.addEventListener('click', () => {
+      const id = select.value;
+      if (!id) {
+        alert('Seleccione un proveedor antes de crear la sucursal.');
+        return;
+      }
+      // Navegar a la ruta de crear sucursal para el proveedor
+      window.location.href = `/admin/proveedores/${id}/sucursales/nuevo`;
+    });
+  }
+})();

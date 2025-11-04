@@ -37,7 +37,7 @@
 <main class="content">
     <h1>Registrar Producto a Proveedor Existente</h1>
 
-    <form th:action="@{/admin/proveedores/agregar-producto}" method="post" class="form-admin" novalidate>
+    <form th:action="@{/admin/proveedores/agregar-producto}" method="post" class="form-admin proveedor-form" novalidate>
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
         <!-- Selección de Proveedor -->

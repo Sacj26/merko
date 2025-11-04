@@ -111,37 +111,48 @@ function actualizarNumerosProductos() {
 // Inicialización del formulario principal
 (function initFormularioProveedorProducto(){
     document.addEventListener('DOMContentLoaded', function() {
-        const selectProveedor = document.getElementById('proveedorId');
-        const form = document.getElementById('form-productos');
-        const btnSubmit = form?.querySelector('button[type="submit"]');
+            const selectProveedor = document.getElementById('proveedorId');
+            const form = document.getElementById('form-productos');
+            const btnSubmit = form?.querySelector('button[type="submit"]');
 
-        if (btnSubmit) btnSubmit.disabled = true;
+            // Inicialmente, habilitar submit si el formulario contiene proveedorId o branchId ocultos (caso sucursal)
+            const hiddenProveedor = document.querySelector('input[name="proveedorId"]')?.value;
+            const hiddenBranch = document.querySelector('input[name="branchId"]')?.value;
 
-        const base = form?.getAttribute('data-action-base') || '/admin/proveedores/agregar-productos/';
-
-        function actualizarAction() {
-            const proveedorId = selectProveedor?.value;
-            if (proveedorId) {
-                if (form) form.action = base + proveedorId;
+            if (hiddenProveedor || hiddenBranch) {
                 if (btnSubmit) btnSubmit.disabled = false;
             } else {
-                if (form) form.action = base + '0';
                 if (btnSubmit) btnSubmit.disabled = true;
             }
-        }
 
-        if (selectProveedor) {
-            selectProveedor.addEventListener('change', actualizarAction);
-        }
+            const base = form?.getAttribute('data-action-base') || '/admin/proveedores/agregar-productos/';
 
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                if (!selectProveedor?.value) {
-                    e.preventDefault();
-                    alert('Por favor, seleccione un proveedor antes de guardar.');
-                    selectProveedor?.focus();
+            function actualizarAction() {
+                const proveedorId = selectProveedor?.value;
+                if (proveedorId) {
+                    if (form) form.action = base + proveedorId;
+                    if (btnSubmit) btnSubmit.disabled = false;
+                } else {
+                    if (form) form.action = base + '0';
+                    if (btnSubmit) btnSubmit.disabled = true;
                 }
-            });
-        }
+            }
+
+            if (selectProveedor) {
+                selectProveedor.addEventListener('change', actualizarAction);
+            }
+
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    const proveedorSelected = selectProveedor?.value;
+                    const proveedorHiddenNow = document.querySelector('input[name="proveedorId"]')?.value;
+                    const branchHiddenNow = document.querySelector('input[name="branchId"]')?.value;
+                    if (!proveedorSelected && !proveedorHiddenNow && !branchHiddenNow) {
+                        e.preventDefault();
+                        alert('Por favor, seleccione un proveedor antes de guardar.');
+                        selectProveedor?.focus();
+                    }
+                });
+            }
     });
 })();

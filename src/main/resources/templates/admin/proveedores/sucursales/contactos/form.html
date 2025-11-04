@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{shared/layouts/admin}" lang="es">
+<head>
+    <title>Contacto</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="header-with-actions">
+        <div class="title-group">
+            <h1 class="page-title" th:text="${branch.nombre} + ' — Contacto'">Contacto</h1>
+        </div>
+        <div class="actions">
+            <a th:href="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales/' + ${branch.id} + '/contactos'}" class="btn btn-secondary">Volver a contactos</a>
+        </div>
+    </div>
+
+    <div class="form-container">
+        <form th:action="${accion}" th:object="${contact}" method="post">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" id="nombre" th:field="*{nombre}" class="form-control" required />
+                </div>
+                <div class="form-group">
+                    <label for="rol">Rol / Cargo:</label>
+                    <input type="text" id="rol" th:field="*{rol}" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="telefono">Teléfono:</label>
+                    <input type="text" id="telefono" th:field="*{telefono}" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" th:field="*{email}" class="form-control" />
+                </div>
+                <div class="form-group full-width">
+                    <label for="notas">Notas:</label>
+                    <textarea id="notas" th:field="*{notas}" class="form-control" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="isPrimary">Principal:</label>
+                    <input type="hidden" name="isPrimary" value="false" />
+                    <input type="checkbox" id="isPrimary" th:field="*{isPrimary}" value="true" />
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a th:href="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales/' + ${branch.id} + '/contactos'}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

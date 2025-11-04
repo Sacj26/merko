@@ -7,6 +7,8 @@ import merko.merko.Entity.EstadoProducto;
 import merko.merko.Entity.UnidadMedida;
 import merko.merko.Entity.Almacenamiento;
 import merko.merko.Entity.Proveedor;
+import merko.merko.Entity.Branch;
+import merko.merko.Entity.ContactPerson;
 import merko.merko.Service.ProductoService;
 import merko.merko.Service.ProveedorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -214,6 +216,10 @@ public class ProveedorController {
             System.out.println("NIT: " + proveedor.getNit());
             System.out.println("Productos a guardar: " + productos.size());
 
+            // Procesar sucursales y contactos enviados desde el form (si existen)
+            List<Branch> branches = proveedorService.buildBranchesFromParams(allParams, proveedor);
+            proveedor.setBranches(branches);
+
             if (productos.isEmpty()) {
                 proveedorService.saveProveedor(proveedor);
                 redirectAttributes.addFlashAttribute("mensaje", "Proveedor creado exitosamente");
@@ -246,10 +252,89 @@ public class ProveedorController {
         return "redirect:/admin/proveedores";
     }
 
+    @PostMapping("/guardar")
+    public String guardarProveedor(
+            @ModelAttribute Proveedor proveedor,
+            RedirectAttributes redirectAttributes,
+            Model model
+    ) {
+        // Validaciones mínimas (mirar guardar-con-producto para más comprobaciones si se desea)
+        if (proveedor.getNombre() == null || proveedor.getNombre().trim().isEmpty()) {
+            model.addAttribute("error", "El nombre del proveedor es obligatorio");
+            model.addAttribute("proveedor", proveedor);
+            model.addAttribute("producto", new Producto());
+            return "admin/proveedores/form";
+        }
+        if (proveedor.getNit() == null || proveedor.getNit().trim().isEmpty()) {
+            model.addAttribute("error", "El NIT/RUC es obligatorio");
+            model.addAttribute("proveedor", proveedor);
+            model.addAttribute("producto", new Producto());
+            return "admin/proveedores/form";
+        }
+        if (proveedor.getTelefono() == null || proveedor.getTelefono().trim().isEmpty()) {
+            model.addAttribute("error", "El teléfono es obligatorio");
+            model.addAttribute("proveedor", proveedor);
+            model.addAttribute("producto", new Producto());
+            return "admin/proveedores/form";
+        }
+        if (proveedor.getDireccion() == null || proveedor.getDireccion().trim().isEmpty()) {
+            model.addAttribute("error", "La dirección es obligatoria");
+            model.addAttribute("proveedor", proveedor);
+            model.addAttribute("producto", new Producto());
+            return "admin/proveedores/form";
+        }
+
+        proveedor.setFechaRegistro(LocalDate.now());
+        proveedor.setActivo(true);
+
+        proveedorService.saveProveedor(proveedor);
+        redirectAttributes.addFlashAttribute("mensaje", "Proveedor creado exitosamente");
+        return "redirect:/admin/proveedores";
+    }
+
     @GetMapping("/editar/{id}")
     public String mostrarFormularioEditarProveedor(@PathVariable Long id, Model model) {
         Proveedor proveedor = proveedorService.getProveedorById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Proveedor no encontrado"));
+        // DEBUG: imprimir detalles de sucursales para diagnosticar campos vacíos en la vista
+        try {
+            System.out.println("[DEBUG] Mostrar editar proveedor id=" + id + ", nombre=" + proveedor.getNombre());
+            if (proveedor.getBranches() == null) {
+                System.out.println("[DEBUG] branches == null");
+            } else {
+                System.out.println("[DEBUG] branches.size=" + proveedor.getBranches().size());
+                int bi = 0;
+                for (merko.merko.Entity.Branch b : proveedor.getBranches()) {
+                    System.out.println("[DEBUG] branch[" + bi + "] id=" + b.getId() + ", nombre='" + b.getNombre() + "', direccion='" + b.getDireccion() + "', telefono='" + b.getTelefono() + "', ciudad='" + b.getCiudad() + "', pais='" + b.getPais() + "', activo='" + b.getActivo() + "'");
+                    bi++;
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("[DEBUG] Error al inspeccionar branches: " + e.getMessage());
+        }
+        // UI-only fallback: si existen sucursales pero la primera no tiene dirección/teléfono/ciudad/país,
+        // rellenar esos campos desde el proveedor para que el formulario de edición muestre valores útiles.
+        // Nota: esto es solo para la presentación en la vista (no se persiste automáticamente).
+        try {
+            if (proveedor.getBranches() != null && !proveedor.getBranches().isEmpty()) {
+                Branch first = proveedor.getBranches().get(0);
+                if ((first.getDireccion() == null || first.getDireccion().isBlank()) && proveedor.getDireccion() != null) {
+                    first.setDireccion(proveedor.getDireccion());
+                }
+                if ((first.getTelefono() == null || first.getTelefono().isBlank()) && proveedor.getTelefono() != null) {
+                    first.setTelefono(proveedor.getTelefono());
+                }
+                if ((first.getCiudad() == null || first.getCiudad().isBlank()) && proveedor.getCiudad() != null) {
+                    first.setCiudad(proveedor.getCiudad());
+                }
+                if ((first.getPais() == null || first.getPais().isBlank()) && proveedor.getPais() != null) {
+                    first.setPais(proveedor.getPais());
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("[DEBUG] Fallback UI para branch falló: " + e.getMessage());
+        }
+
         model.addAttribute("proveedor", proveedor);
         model.addAttribute("producto", new Producto());
         return "admin/proveedores/form";
@@ -314,6 +399,58 @@ public class ProveedorController {
                 .orElseThrow(() -> new IllegalArgumentException("Proveedor no encontrado"));
         model.addAttribute("proveedor", proveedor);
         return "admin/proveedores/agregar-productos";
+    }
+
+    // Endpoint temporal de depuración: retorna JSON con proveedor, sucursales y contactos
+    @GetMapping(value = "/debug/{id}")
+    @ResponseBody
+    public Object debugProveedorJson(@PathVariable Long id) {
+        Proveedor proveedor = proveedorService.getProveedorById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Proveedor no encontrado"));
+
+        java.util.Map<String, Object> out = new java.util.HashMap<>();
+        out.put("id", proveedor.getId());
+        out.put("nombre", proveedor.getNombre());
+        out.put("nit", proveedor.getNit());
+        out.put("telefono", proveedor.getTelefono());
+        out.put("direccion", proveedor.getDireccion());
+        out.put("ciudad", proveedor.getCiudad());
+        out.put("pais", proveedor.getPais());
+
+        java.util.List<java.util.Map<String, Object>> branchesOut = new java.util.ArrayList<>();
+        java.util.List<merko.merko.Entity.Branch> branches = proveedor.getBranches();
+        if (branches != null) {
+            for (merko.merko.Entity.Branch b : branches) {
+                java.util.Map<String, Object> bm = new java.util.HashMap<>();
+                bm.put("id", b.getId());
+                bm.put("nombre", b.getNombre());
+                bm.put("direccion", b.getDireccion());
+                bm.put("telefono", b.getTelefono());
+                bm.put("ciudad", b.getCiudad());
+                bm.put("pais", b.getPais());
+                bm.put("activo", b.getActivo());
+
+                java.util.List<java.util.Map<String, Object>> contactsOut = new java.util.ArrayList<>();
+                java.util.List<merko.merko.Entity.ContactPerson> contacts = b.getContacts();
+                if (contacts != null) {
+                    for (merko.merko.Entity.ContactPerson c : contacts) {
+                        java.util.Map<String, Object> cm = new java.util.HashMap<>();
+                        cm.put("id", c.getId());
+                        cm.put("nombre", c.getNombre());
+                        cm.put("rol", c.getRol());
+                        cm.put("telefono", c.getTelefono());
+                        cm.put("email", c.getEmail());
+                        cm.put("notas", c.getNotas());
+                        cm.put("isPrimary", c.getIsPrimary());
+                        contactsOut.add(cm);
+                    }
+                }
+                bm.put("contacts", contactsOut);
+                branchesOut.add(bm);
+            }
+        }
+        out.put("branches", branchesOut);
+        return out;
     }
 
     @PostMapping("/agregar-productos/{id}")
@@ -469,4 +606,6 @@ public class ProveedorController {
             return "redirect:/admin/proveedores/registrar-producto?error";
         }
     }
+
+    
 }

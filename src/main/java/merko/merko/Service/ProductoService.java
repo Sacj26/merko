@@ -2,6 +2,7 @@ package merko.merko.Service;
 
 import merko.merko.Entity.Producto;
 import merko.merko.Repository.ProductoRepository;
+import merko.merko.Repository.ProductBranchRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -14,9 +15,11 @@ import java.util.Optional;
 public class ProductoService {
 
     private final ProductoRepository productoRepository;
+    private final ProductBranchRepository productBranchRepository;
 
-    public ProductoService(ProductoRepository productoRepository) {
+    public ProductoService(ProductoRepository productoRepository, ProductBranchRepository productBranchRepository) {
         this.productoRepository = productoRepository;
+        this.productBranchRepository = productBranchRepository;
     }
 
     public List<Producto> getAllProductos() {
@@ -95,6 +98,8 @@ public class ProductoService {
         if (!productoRepository.existsById(id)) {
             throw new IllegalArgumentException("Producto con id " + id + " no existe");
         }
+        // eliminar asignaciones por sucursal antes de borrar el producto para evitar FK constraints
+        productBranchRepository.deleteByProductoId(id);
         productoRepository.deleteById(id);
     }
 

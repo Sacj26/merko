@@ -1,0 +1,32 @@
+<!-- Fragmento: campos de Contacto (indexed(branchIndex, contactIndex, contact)) - usa th:field -->
+<div th:fragment="indexed(branchIndex, contactIndex, contact)" th:inline="text">
+    <div class="form-grid">
+        <div class="form-group">
+            <label th:for="${'branches[' + branchIndex + '].contacts[' + contactIndex + '].nombre'}">Nombre:</label>
+            <input type="text" th:attr="id=${'branches[' + branchIndex + '].contacts[' + contactIndex + '].nombre'}, name=${'branches[' + branchIndex + '].contacts[' + contactIndex + '].nombre'}" th:value="${contact != null ? contact.nombre : ''}" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label th:for="${'branches[' + branchIndex + '].contacts[' + contactIndex + '].rol'}">Rol / Cargo:</label>
+            <input type="text" th:attr="id=${'branches[' + branchIndex + '].contacts[' + contactIndex + '].rol'}, name=${'branches[' + branchIndex + '].contacts[' + contactIndex + '].rol'}" th:value="${contact != null ? contact.rol : ''}" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label th:for="${'branches[' + branchIndex + '].contacts[' + contactIndex + '].telefono'}">Teléfono:</label>
+            <input type="text" th:attr="id=${'branches[' + branchIndex + '].contacts[' + contactIndex + '].telefono'}, name=${'branches[' + branchIndex + '].contacts[' + contactIndex + '].telefono'}" th:value="${contact != null ? contact.telefono : ''}" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label th:for="${'branches[' + branchIndex + '].contacts[' + contactIndex + '].email'}">Email:</label>
+            <input type="email" th:attr="id=${'branches[' + branchIndex + '].contacts[' + contactIndex + '].email'}, name=${'branches[' + branchIndex + '].contacts[' + contactIndex + '].email'}" th:value="${contact != null ? contact.email : ''}" class="form-control" />
+        </div>
+        <div class="form-group full-width">
+            <label th:for="${'branches[' + branchIndex + '].contacts[' + contactIndex + '].notas'}">Notas:</label>
+            <textarea th:attr="id=${'branches[' + branchIndex + '].contacts[' + contactIndex + '].notas'}, name=${'branches[' + branchIndex + '].contacts[' + contactIndex + '].notas'}" class="form-control" rows="2" th:text="${contact != null ? contact.notas : ''}"></textarea>
+        </div>
+        <!-- Marcar contacto como principal para la sucursal. JS garantiza exclusividad por sucursal -->
+        <div class="form-group">
+            <label th:for="${'branches[' + branchIndex + '].contacts[' + contactIndex + '].isPrimary'}">Principal</label>
+            <!-- hidden para asegurar que siempre se envíe un valor (false) cuando la casilla no está marcada -->
+            <input type="hidden" th:attr="name=${'branches[' + branchIndex + '].contacts[' + contactIndex + '].isPrimary'}" value="false" />
+            <input type="checkbox" th:attr="id=${'branches[' + branchIndex + '].contacts[' + contactIndex + '].isPrimary'}, name=${'branches[' + branchIndex + '].contacts[' + contactIndex + '].isPrimary'}" th:checked="${contact != null ? contact.isPrimary : false}" class="contact-is-primary" value="true" />
+        </div>
+    </div>
+</div>

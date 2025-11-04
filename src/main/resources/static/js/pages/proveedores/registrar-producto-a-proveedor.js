@@ -89,7 +89,7 @@ window.agregarProducto = function agregarProducto() {
               </select>
           </div>
 
-          <div class="form-group" style="grid-column: 1 / -1;">
+          <div class="form-group full-width">
               <label for="productos[${productoIndex}].descripcion">Descripción:</label>
               <textarea id="productos[${productoIndex}].descripcion" name="productos[${productoIndex}].descripcion" class="form-control" rows="2"></textarea>
           </div>
@@ -162,13 +162,13 @@ window.agregarProducto = function agregarProducto() {
           </div>
 
           <!-- Lotes y Vencimientos -->
-          <div class="form-group" style="grid-column: 1 / -1;">
-              <div style="display: flex; gap: 2rem; align-items: center; flex-wrap: wrap;">
-                  <label style="margin: 0;">
+          <div class="form-group full-width">
+              <div class="inline-row">
+                  <label class="no-margin">
                       <input type="checkbox" id="productos[${productoIndex}].gestionaLotes" name="productos[${productoIndex}].gestionaLotes" value="true" />
                       Gestiona Lotes
                   </label>
-                  <label style="margin: 0;">
+                  <label class="no-margin">
                       <input type="checkbox" id="productos[${productoIndex}].requiereVencimiento" name="productos[${productoIndex}].requiereVencimiento" value="true" />
                       Requiere Control de Vencimiento
                   </label>
@@ -197,7 +197,7 @@ window.agregarProducto = function agregarProducto() {
           </div>
 
           <!-- Imagen -->
-          <div class="form-group" style="grid-column: 1 / -1;">
+          <div class="form-group full-width">
               <label for="productos[${productoIndex}].imagenUrl">Imagen del Producto:</label>
               <input type="file" id="productos[${productoIndex}].imagenUrl" name="productos[${productoIndex}].imagenUrl" class="form-control" accept="image/*" />
           </div>

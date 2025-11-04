@@ -83,58 +83,52 @@
             </div>
         </div>
 
-        <!-- Sección: Contacto -->
-        <div class="info-section">
+        <!-- NOTE: Provider-level contact removed — contacts are now managed per-branch (sucursales) -->
+        
+    <!-- Sección: Sucursales del proveedor (tarjetas organizadas) -->
+    <div class="info-section proveedor-sucursales" th:if="${proveedor.branches != null and !#lists.isEmpty(proveedor.branches)}">
             <h3 class="info-section-title">
-                <i class="fas fa-address-book"></i> Información de Contacto
+                <i class="fas fa-store"></i> Sucursales
             </h3>
             <div class="info-section-content">
-                <div class="info-row">
-                    <div class="info-field">
-                        <span class="info-label">Teléfono Principal</span>
-                        <span class="info-value">
-                            <i class="fas fa-phone"></i> <span th:text="${proveedor.telefono}">--</span>
-                        </span>
-                    </div>
-                    <div class="info-field">
-                        <span class="info-label">Email</span>
-                        <span class="info-value">
-                            <i class="fas fa-envelope"></i> <span th:text="${proveedor.email ?: '--'}">--</span>
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="contact-person" th:if="${proveedor.nombreContacto}">
-                    <h4 class="contact-person-title">Persona de Contacto</h4>
-                    <div class="info-row">
-                        <div class="info-field">
-                            <span class="info-label">Nombre</span>
-                            <span class="info-value" th:text="${proveedor.nombreContacto}">--</span>
+                <div class="branch-grid">
+                    <div class="branch-card" th:each="b : ${proveedor.branches}">
+                        <div class="branch-header">
+                            <div>
+                                <div class="branch-title" th:text="${b.nombre}">Sucursal</div>
+                                <div class="branch-meta">
+                                    <span class="branch-city" th:if="${b.ciudad != null}" th:text="${b.ciudad}">Ciudad</span>
+                                    <span class="branch-country" th:if="${b.pais != null}" th:text="' • ' + ${b.pais}"> • País</span>
+                                </div>
+                            </div>
+                            <div class="branch-actions">
+                                <a th:href="@{/admin/sucursales/ver/{id}(id=${b.id})}" class="btn btn-icon" title="Ver sucursal">
+                                    <i class="fas fa-eye"></i>
+                                    <span class="sr-only">Ver sucursal</span>
+                                </a>
+                                <a th:href="@{/admin/sucursales/editar/{id}(id=${b.id})}" class="btn btn-icon" title="Editar sucursal">
+                                    <i class="fas fa-edit"></i>
+                                    <span class="sr-only">Editar sucursal</span>
+                                </a>
+                            </div>
                         </div>
-                        <div class="info-field">
-                            <span class="info-label">Cargo</span>
-                            <span class="info-value" th:text="${proveedor.cargoContacto ?: '--'}">--</span>
-                        </div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-field">
-                            <span class="info-label">Teléfono</span>
-                            <span class="info-value">
-                                <i class="fas fa-phone"></i> <span th:text="${proveedor.telefonoContacto ?: '--'}">--</span>
-                            </span>
-                        </div>
-                        <div class="info-field">
-                            <span class="info-label">Email</span>
-                            <span class="info-value">
-                                <i class="fas fa-envelope"></i> <span th:text="${proveedor.emailContacto ?: '--'}">--</span>
-                            </span>
+                        <div class="branch-body">
+                            <div class="branch-row">
+                                <div class="branch-label">Dirección</div>
+                                <div class="branch-value" th:text="${b.direccion}">Dirección</div>
+                            </div>
+                            <div class="branch-row">
+                                <div class="branch-label">Teléfono</div>
+                                <div class="branch-value" th:text="${b.telefono}">Teléfono</div>
+                            </div>
+                            <div class="branch-contact" th:if="${b.contacts != null}">
+                                <div th:each="c : ${b.contacts}" th:if="${c.isPrimary}">
+                                    <div class="contact-name"><i class="fas fa-user"></i> <span th:text="${c.nombre}">Contacto</span></div>
+                                    <div class="contact-phone" th:if="${c.telefono != null}"><i class="fas fa-phone"></i> <span th:text="${c.telefono}">--</span></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                
-                <div class="empty-contact" th:unless="${proveedor.nombreContacto}">
-                    <i class="fas fa-user-slash"></i>
-                    <p>No hay persona de contacto registrada</p>
                 </div>
             </div>
         </div>

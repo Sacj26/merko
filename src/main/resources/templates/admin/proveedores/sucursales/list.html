@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{shared/layouts/admin}" lang="es">
+<head>
+    <title>Sucursales</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="header-with-actions">
+        <div class="title-group">
+            <h1 class="page-title" th:text="${proveedor.nombre} + ' — Sucursales'">Sucursales</h1>
+            <p class="page-subtitle">Gestiona las sucursales del proveedor</p>
+        </div>
+        <div class="actions">
+            <!-- Volver a la lista principal de proveedores (icono) -->
+            <a th:href="@{/admin/proveedores}" class="btn btn-secondary btn-icon-only" title="Volver a proveedores">
+                <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                <span class="sr-only">Volver a proveedores</span>
+            </a>
+
+            <!-- Nueva sucursal (icono) -->
+            <a th:href="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales/nuevo'}" class="btn btn-primary btn-icon-only" title="Nueva sucursal">
+                <i class="fas fa-plus" aria-hidden="true"></i>
+                <span class="sr-only">Nueva sucursal</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="form-container">
+        <div th:if="${#lists.isEmpty(branches)}" class="alert alert-info">No hay sucursales registradas para este proveedor.</div>
+        <div th:if="${!#lists.isEmpty(branches)}">
+            <div class="table-container table-scroll">
+                <table class="table-admin">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Dirección</th>
+                            <th>Teléfono</th>
+                            <th>Ciudad</th>
+                            <th>País</th>
+                            <th>Activo</th>
+                            <th class="actions-col">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="b : ${branches}">
+                            <td th:text="${b.id}">1</td>
+                            <td>
+                                <div class="cell-text-ellipsis">
+                                    <div class="cell-title" th:text="${b.nombre}">Sucursal</div>
+                                    <small class="cell-subtitle" th:text="${b.direccion}">Dirección</small>
+                                </div>
+                            </td>
+                            <td th:text="${b.direccion}">Dirección</td>
+                            <td th:text="${b.telefono}">Tel</td>
+                            <td th:text="${b.ciudad}">Ciudad</td>
+                            <td th:text="${b.pais}">País</td>
+                            <td>
+                                <span th:if="${b.activo}" class="badge badge-success">
+                                    <i class="fas fa-check-circle"></i>
+                                </span>
+                                <span th:unless="${b.activo}" class="badge badge-danger">
+                                    <i class="fas fa-times-circle"></i>
+                                </span>
+                            </td>
+                            <td class="actions-col">
+                                <div class="actions-cell">
+                                    <!-- Agregar producto ligado a esta sucursal (abre formulario de producto con proveedor+branch preseleccionados) -->
+                                    <a th:href="@{/admin/productos/nuevo(proveedorId=${proveedor.id},branchId=${b.id})}"
+                                       class="btn-icon btn-icon-primary" title="Agregar producto a sucursal">
+                                        <i class="fas fa-plus"></i>
+                                    </a>
+
+                                    <a th:href="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales/editar/' + ${b.id}}" class="btn-icon btn-icon-primary" title="Editar sucursal">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a th:href="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales/' + ${b.id} + '/contactos'}" class="btn-icon btn-icon-secondary" title="Contactos">
+                                        <i class="fas fa-address-book"></i>
+                                    </a>
+                                    <form th:action="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales/' + ${b.id} + '/eliminar'}" method="post" style="display:inline">
+                                        <button type="submit" class="btn-icon btn-icon-danger" title="Eliminar" onclick="return confirm('¿Eliminar sucursal?')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

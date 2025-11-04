@@ -23,6 +23,7 @@ public class DataLoader {
                         Rol.ADMINISTRADOR
                 );
                 admin.setNombre("Administrador");
+                admin.setNotificaciones(false);
                 usuarioRepository.save(admin);
 
                 Usuario cliente = new Usuario(
@@ -32,6 +33,7 @@ public class DataLoader {
                         Rol.CLIENTE
                 );
                 cliente.setNombre("Cliente de prueba");
+                cliente.setNotificaciones(false);
                 usuarioRepository.save(cliente);
 
                 System.out.println("Usuarios por defecto creados: admin y cliente");

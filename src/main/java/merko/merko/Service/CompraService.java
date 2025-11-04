@@ -44,8 +44,8 @@ public class CompraService {
         this.detalleCompraRepository = detalleCompraRepository;
         this.loteRepository = loteRepository;
         this.movimientoInventarioRepository = movimientoInventarioRepository;
+        
     }
-
     public List<Compra> getAllCompras() {
         return compraRepository.findAll();
     }

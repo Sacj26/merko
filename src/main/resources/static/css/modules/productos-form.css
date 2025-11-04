@@ -4,16 +4,16 @@
 .form-container {
     background: white;
     border-radius: 10px;
-    padding: 2rem;
+    padding: 2.25rem;
     box-shadow: var(--sombra-suave);
-    max-width: 800px;
-    margin: 20px auto;
+    max-width: 900px;
+    margin: 28px auto;
     animation: slideIn 0.3s ease-out;
 }
 
 /* Grupos de formulario */
 .form-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.25rem;
 }
 
 .form-group label {
@@ -169,11 +169,66 @@ input[type="number"].form-control::-webkit-inner-spin-button {
     gap: 1rem;
 }
 
-/* Secciones del formulario */
+/* Make product form fields compact and uniform when screen wide */
+@media (min-width: 768px) {
+    /* Two-column layout: two .form-group elements per row */
+    .producto-form .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.25rem 2rem;
+        align-items: start;
+    }
+
+    /* Each form-group remains a horizontal label + control row */
+    .producto-form .form-grid .form-group {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        width: 100%;
+    }
+
+    .producto-form .form-grid .form-group label {
+        flex: 0 0 160px;
+        margin: 0;
+        text-align: left;
+        font-weight: 600;
+    }
+
+    .producto-form .form-grid .form-group .form-control {
+        flex: 1 1 auto;
+        max-width: none;
+        width: auto;
+        box-sizing: border-box;
+    }
+
+    /* Full-width groups (description, image upload) should span both columns */
+    .producto-form .form-grid .form-group.full-width {
+        display: block;
+        width: 100%;
+        grid-column: 1 / -1;
+    }
+
+    /* Slightly larger spacing between logical form sections */
+    .producto-form .form-section {
+        margin-bottom: 2.25rem;
+        padding: 0.75rem 0;
+    }
+
+    .producto-form .form-container {
+        padding: 1.5rem 1.25rem;
+    }
+}
+
+/* Secciones del formulario: make each section feel like a separate panel */
 .form-section {
-    margin-bottom: 2rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 3rem; /* more space between sections */
+    padding: 1rem 1rem; /* inner padding so content breathes */
+    border: 1px solid #eef0f2; /* light border to separate panels */
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.03);
 }
 
 .form-section:last-of-type {
@@ -241,6 +296,23 @@ input[type="number"].form-control::-webkit-inner-spin-button {
     border-radius: 6px;
     border: 2px solid var(--color-borde);
     margin-top: 0.5rem;
+}
+
+/* Producto item spacing and panel look */
+.producto-item {
+    padding: 0.75rem 0.75rem;
+    border-radius: 8px;
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,0.04);
+    margin-bottom: 1.5rem;
+}
+
+.producto-header {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:0.5rem;
+    margin-bottom:0.5rem;
 }
 
 /* Animaciones */

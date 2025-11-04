@@ -12,7 +12,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import merko.merko.Entity.Branch;
+import merko.merko.Entity.ContactPerson;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -149,5 +153,54 @@ public class ProveedorService {
             e.printStackTrace();
             return null;
         }
+    }
+
+    /**
+     * Construye una lista de Branch (y sus ContactPerson) a partir de los parámetros
+     * del formulario. Esta lógica fue extraída del controlador para facilitar pruebas
+     * y futuras refactorizaciones.
+     */
+    public List<Branch> buildBranchesFromParams(Map<String, String> allParams, Proveedor proveedor) {
+        List<Branch> branches = new ArrayList<>();
+        int bIndex = 0;
+        while (allParams.containsKey("branches[" + bIndex + "].nombre")) {
+            Branch branch = new Branch();
+            branch.setNombre(allParams.get("branches[" + bIndex + "].nombre"));
+            branch.setDireccion(allParams.get("branches[" + bIndex + "].direccion"));
+            branch.setTelefono(allParams.get("branches[" + bIndex + "].telefono"));
+            branch.setCiudad(allParams.get("branches[" + bIndex + "].ciudad"));
+            branch.setPais(allParams.get("branches[" + bIndex + "].pais"));
+            branch.setActivo(allParams.get("branches[" + bIndex + "].activo") != null);
+
+            List<ContactPerson> contacts = new ArrayList<>();
+            int cIndex = 0;
+            while (allParams.containsKey("branches[" + bIndex + "].contacts[" + cIndex + "].nombre")) {
+                ContactPerson contact = new ContactPerson();
+                contact.setNombre(allParams.get("branches[" + bIndex + "].contacts[" + cIndex + "].nombre"));
+                contact.setRol(allParams.get("branches[" + bIndex + "].contacts[" + cIndex + "].rol"));
+                contact.setTelefono(allParams.get("branches[" + bIndex + "].contacts[" + cIndex + "].telefono"));
+                contact.setEmail(allParams.get("branches[" + bIndex + "].contacts[" + cIndex + "].email"));
+                contact.setNotas(allParams.get("branches[" + bIndex + "].contacts[" + cIndex + "].notas"));
+                String isPrimaryStr = allParams.get("branches[" + bIndex + "].contacts[" + cIndex + "].isPrimary");
+                contact.setIsPrimary(isPrimaryStr != null && (isPrimaryStr.equalsIgnoreCase("true") || isPrimaryStr.equalsIgnoreCase("on")));
+                contact.setBranch(branch);
+                contacts.add(contact);
+                cIndex++;
+            }
+
+            boolean foundPrimary = false;
+            for (ContactPerson cp : contacts) {
+                if (cp.getIsPrimary() != null && cp.getIsPrimary()) {
+                    if (!foundPrimary) foundPrimary = true;
+                    else cp.setIsPrimary(false);
+                }
+            }
+
+            branch.setContacts(contacts);
+            branch.setProveedor(proveedor);
+            branches.add(branch);
+            bIndex++;
+        }
+        return branches;
     }
 }

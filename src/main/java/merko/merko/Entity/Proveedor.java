@@ -92,6 +92,9 @@ public class Proveedor {
     @OneToMany(mappedBy = "proveedor", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Producto> productos = new ArrayList<>();
 
+    @OneToMany(mappedBy = "proveedor", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Branch> branches = new ArrayList<>();
+
     // Constructor para mantener compatibilidad con código existente
     public Proveedor(String nombre, String nit, String telefono, String direccion) {
         this.nombre = nombre;
