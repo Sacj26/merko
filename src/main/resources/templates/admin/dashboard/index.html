@@ -14,8 +14,9 @@
             <p>Bienvenido, aquí tienes un resumen rápido del sistema.</p>
         </div>
 
-        <!-- KPIs principales -->
-        <section class="dashboard-cards">
+    <!-- KPIs: Ventas (agrupadas) -->
+    <h3 class="dashboard-section">Ventas</h3>
+    <section class="dashboard-cards section-sales">
             <div class="card">
                 <div class="card-icon"><i class="fas fa-cash-register"></i></div>
                 <div class="card-body">
@@ -31,28 +32,29 @@
                 </div>
             </div>
             <div class="card">
+                <div class="card-icon"><i class="fas fa-boxes"></i></div>
+                <div class="card-body">
+                    <h2 th:text="${totalVentas != null ? totalVentas : 0}">0</h2>
+                    <p>Total Ventas</p>
+                </div>
+            </div>
+            <div class="card">
                 <div class="card-icon"><i class="fas fa-receipt"></i></div>
                 <div class="card-body">
                     <h2 th:text="${ticketPromedio != null ? #numbers.formatDecimal(ticketPromedio, 1, 'POINT', 2, 'COMMA') : '0.00'}">0.00</h2>
                     <p>Ticket promedio</p>
                 </div>
             </div>
+        </section>
+
+    <!-- KPIs: Productos y Clientes -->
+    <h3 class="dashboard-section">Productos y compras</h3>
+    <section class="dashboard-cards section-products">
             <div class="card">
                 <div class="card-icon"><i class="fas fa-boxes"></i></div>
                 <div class="card-body">
                     <h2 th:text="${productosActivos != null ? productosActivos : 0}">0</h2>
                     <p>Productos activos</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Totales generales -->
-        <section class="dashboard-cards">
-            <div class="card">
-                <div class="card-icon"><i class="fas fa-shopping-cart"></i></div>
-                <div class="card-body">
-                    <h2 th:text="${totalVentas != null ? totalVentas : 0}">0</h2>
-                    <p>Total Ventas</p>
                 </div>
             </div>
             <div class="card">
@@ -165,14 +167,21 @@
                         <th>Lote</th>
                         <th>Vence</th>
                         <th>Disponible</th>
+                        <th>Sucursales</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="l : ${proximosVencimientos}">
-                        <td th:text="${l.producto != null ? l.producto.nombre : '—'}">Prod</td>
-                        <td th:text="${l.codigoLote}">Lote</td>
-                        <td th:text="${l.fechaVencimiento}">2025-01-01</td>
-                        <td th:text="${l.cantidadDisponible}">0</td>
+                    <tr th:each="item : ${proximosVencimientos}">
+                        <td class="product-name" th:text="${item.lote.producto != null ? item.lote.producto.nombre : '—'}">Prod</td>
+                        <td th:text="${item.lote.codigoLote}">Lote</td>
+                        <td th:text="${item.lote.fechaVencimiento}">2025-01-01</td>
+                        <td th:text="${item.lote.cantidadDisponible}">0</td>
+                        <td>
+                            <span th:if="${item.branches != null and !#lists.isEmpty(item.branches)}">
+                                <span th:each="b : ${item.branches}" class="branch-badge">[[${b.nombre}]]<span th:text="${(b.ciudad != null) ? ' — ' + b.ciudad : ''}"></span></span>
+                            </span>
+                            <span th:if="${item.branches == null or #lists.isEmpty(item.branches)}">—</span>
+                        </td>
                     </tr>
                     </tbody>
                 </table>

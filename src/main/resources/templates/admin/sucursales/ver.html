@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{shared/layouts/admin}"
+      lang="es">
+<head>
+    <title>Sucursal - Detalle</title>
+    <link rel="stylesheet" th:href="@{/css/pages/proveedores.css}">
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="header-with-actions">
+        <div class="title-group">
+            <h1 class="page-title" th:text="${branch.nombre}">Sucursal</h1>
+            <p class="page-subtitle">Detalle y productos asignados</p>
+        </div>
+        <div class="actions">
+            <a th:if="${branch.proveedor != null}" th:href="@{/admin/proveedores/ver/{id}(id=${branch.proveedor.id})}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver al proveedor
+            </a>
+            <a th:href="@{/admin/proveedores/{provId}/sucursales(provId=${branch.proveedor != null ? branch.proveedor.id : 0})}" class="btn btn-secondary" th:if="${branch.proveedor != null}">
+                <i class="fas fa-list"></i> Ver sucursales
+            </a>
+            <a th:href="@{/admin/proveedores/{provId}/sucursales/editar/{id}(provId=${branch.proveedor != null ? branch.proveedor.id : 0},id=${branch.id})}" class="btn btn-primary" th:if="${branch.id != null}">
+                <i class="fas fa-edit"></i> Editar sucursal
+            </a>
+        </div>
+    </div>
+
+    <div class="proveedor-info">
+        <div class="info-section">
+            <h3 class="info-section-title"><i class="fas fa-store"></i> Información de la sucursal</h3>
+            <div class="info-section-content">
+                <div class="info-row">
+                    <div class="info-field">
+                        <span class="info-label">Ciudad</span>
+                        <span class="info-value" th:text="${branch.ciudad ?: '--'}">--</span>
+                    </div>
+                    <div class="info-field">
+                        <span class="info-label">País</span>
+                        <span class="info-value" th:text="${branch.pais ?: '--'}">--</span>
+                    </div>
+                    <div class="info-field">
+                        <span class="info-label">Dirección</span>
+                        <span class="info-value" th:text="${branch.direccion ?: '--'}">--</span>
+                    </div>
+                    <div class="info-field">
+                        <span class="info-label">Teléfono</span>
+                        <span class="info-value" th:text="${branch.telefono ?: '--'}">--</span>
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-field info-field-full contact-person" th:if="${branch.contacts != null}">
+                        <span class="info-label">Contacto principal</span>
+                        <div class="info-value">
+                            <div th:each="c : ${branch.contacts}" th:if="${c.isPrimary}">
+                                <strong th:text="${c.nombre}">Contacto</strong>
+                                <div th:if="${c.telefono != null}"><i class="fas fa-phone"></i> <span th:text="${c.telefono}">--</span></div>
+                                <div th:if="${c.email != null}"><i class="fas fa-envelope"></i> <span th:text="${c.email}">--</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h3 class="info-section-title"><i class="fas fa-boxes"></i> Productos asignados a esta sucursal</h3>
+            <div class="info-section-content">
+                <div class="table-controls">
+                    <div class="table-controls-left">
+                        <span class="hide-sm">Productos asignados</span>
+                    </div>
+                    <div class="table-controls-right">
+                        <label for="toggleDenseSucursalProductos" class="hide-sm">Vista compacta</label>
+                        <input id="toggleDenseSucursalProductos" type="checkbox" />
+                    </div>
+                </div>
+
+                <div class="table-container table-scroll">
+                    <table class="table-admin" th:if="${productBranches != null and !#lists.isEmpty(productBranches)}">
+                        <thead>
+                            <tr>
+                                <th>Imagen</th>
+                                <th>Nombre</th>
+                                <th>SKU</th>
+                                <th>Estado</th>
+                                <th>Precio local</th>
+                                <th>Stock local</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="pb : ${productBranches}">
+                                <td>
+                                    <img th:if="${pb.producto.imagenUrl != null}"
+                                         th:src="${pb.producto.imagenUrl}"
+                                         alt="img"
+                                         style="width:40px;height:40px;object-fit:cover;border-radius:4px;">
+                                </td>
+                                <td>
+                                    <div class="cell-text-ellipsis">
+                                        <div class="cell-title" th:text="${pb.producto.nombre}">Producto</div>
+                                        <small class="cell-subtitle" th:if="${pb.producto.sku != null}" th:text="'SKU: ' + ${pb.producto.sku}"></small>
+                                    </div>
+                                </td>
+                                <td th:text="${pb.producto.sku ?: '—'}">SKU</td>
+                                <td>
+                                                                        <span th:switch="${pb.producto.estado}" class="badge"
+                                                                                    th:classappend="${pb.producto.estado == T(merko.merko.Entity.EstadoProducto).ACTIVO} ? 'badge-success' : 'badge-danger'">
+                                                                                <span th:case="${T(merko.merko.Entity.EstadoProducto).ACTIVO}">Activo</span>
+                                                                                <span th:case="${T(merko.merko.Entity.EstadoProducto).INACTIVO}">Inactivo</span>
+                                                                                <span th:case="*">—</span>
+                                                                        </span>
+                                </td>
+                                <td th:text="${pb.precio != null ? ('$' + #numbers.formatDecimal(pb.precio, 1, 'COMMA', 2, 'POINT')) : (pb.producto.precioCompra != null ? ('$' + #numbers.formatDecimal(pb.producto.precioCompra, 1, 'COMMA', 2, 'POINT')) : '--')}">$0.00</td>
+                                <td>
+                                    <span th:classappend="${pb.stock != null and pb.stock <= 5} ? 'badge badge-warning' : 'badge badge-success'"
+                                          th:text="${pb.stock != null ? pb.stock : 0}">0</span>
+                                </td>
+                                <td>
+                                    <a th:href="@{/admin/productos/ver/{id}(id=${pb.producto.id})}" class="btn btn-sm btn-outline"><i class="fas fa-eye"></i> Ver</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <p class="muted" th:if="${productBranches == null or #lists.isEmpty(productBranches)}">No hay productos asignados a esta sucursal.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script th:src="@{/js/pages/admin/sucursales/ver.js}"></script>
+</th:block>
+</body>
+</html>

@@ -6,6 +6,7 @@ import merko.merko.Entity.Proveedor;
 import merko.merko.Repository.CompraRepository;
 import merko.merko.Repository.ProductoRepository;
 import merko.merko.Repository.ProveedorRepository;
+import merko.merko.Repository.BranchRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -29,6 +30,9 @@ public class CompraController {
     @Autowired
     private ProveedorRepository proveedorRepository;
 
+    @Autowired
+    private BranchRepository branchRepository;
+
 
 
     @Autowired
@@ -44,6 +48,8 @@ public class CompraController {
         // Mostrar todos los proveedores para permitir seleccionar y luego agregar productos si es necesario
         List<Proveedor> proveedores = proveedorRepository.findAll();
         model.addAttribute("proveedores", proveedores);
+        // Añadir sucursales disponibles para poder asociar la compra a una sucursal (opcional)
+        model.addAttribute("sucursales", branchRepository.findAll());
         return "admin/compras/crear";
     }
 

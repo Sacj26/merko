@@ -134,73 +134,35 @@
         </div>
     </div>
 
-    <h2 class="section-title">Productos del proveedor</h2>
+    <!-- Los productos ya no se muestran a nivel de proveedor general.
+         Ahora se muestran y gestionan por sucursal. Mantén el control y la vista
+         desde la propia sucursal para ver los productos asignados a cada una. -->
 
-    <div class="table-controls">
-        <div class="table-controls-left">
-            <span class="hide-sm">Vista de productos del proveedor</span>
-        </div>
-        <div class="table-controls-right">
-            <label for="toggleDenseProvProductos" class="hide-sm">Vista compacta</label>
-            <input id="toggleDenseProvProductos" type="checkbox" />
-        </div>
-    </div>
-
-    <div class="table-container table-scroll">
-        <table class="table-admin">
-            <thead>
-                <tr>
-                    <th>Imagen</th>
-                    <th>Nombre</th>
-                    <th>Tipo</th>
-                    <th>Estado</th>
-                    <th>Precio proveedor</th>
-                    <th>Stock</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="p : ${proveedor.productos}">
-                    <td>
-                        <img th:if="${p.imagenUrl != null}"
-                             th:src="${p.imagenUrl}"
-                             alt="img"
-                             style="width:40px;height:40px;object-fit:cover;border-radius:4px;">
-                    </td>
-                    <td>
-                        <div class="cell-text-ellipsis">
-                            <div class="cell-title" th:text="${p.nombre}">Producto</div>
-                            <small class="cell-subtitle" th:if="${p.sku != null}" th:text="'SKU: ' + ${p.sku}"></small>
-                        </div>
-                    </td>
-                    <td>
-                        <span th:switch="${p.tipo}" class="badge" 
-                              th:classappend="${p.tipo == T(merko.merko.Entity.TipoProducto).MATERIA_PRIMA} ? 'badge-info' : 'badge-success'">
-                            <span th:case="${T(merko.merko.Entity.TipoProducto).MATERIA_PRIMA}">Materia Prima</span>
-                            <span th:case="${T(merko.merko.Entity.TipoProducto).PRODUCTO_TERMINADO}">Producto Terminado</span>
-                            <span th:case="*">—</span>
+    <div class="info-section redirect-card">
+        <div class="info-section-title"><i class="fas fa-box-open"></i> Productos por sucursal</div>
+        <div class="info-section-content">
+            <div class="redirect-grid">
+                <div class="rc-icon" aria-hidden="true"><i class="fas fa-store fa-2x"></i></div>
+                <div class="rc-body">
+                    <p class="muted">Los productos ahora se gestionan por <strong>sucursal</strong>. En lugar de listarlos a nivel general del proveedor, abre la sucursal para ver y administrar los productos asignados a ella.</p>
+                    <p class="muted">Accesos rápidos:</p>
+                    <div class="rc-actions">
+                        <span th:if="${proveedor.branches != null and !#lists.isEmpty(proveedor.branches)}" class="rc-buttons">
+                            <a th:each="b : ${proveedor.branches}"
+                               th:href="@{/admin/sucursales/ver/{id}(id=${b.id})}"
+                               class="btn btn-outline btn-sm"
+                               th:title="${'Ver productos de ' + b.nombre}">
+                                <i class="fas fa-eye"></i>
+                                <span class="hide-sm" th:text="${b.nombre}">Sucursal</span>
+                            </a>
                         </span>
-                    </td>
-                    <td>
-                        <span th:switch="${p.estado}" class="badge"
-                              th:classappend="${p.estado == T(merko.merko.Entity.EstadoProducto).ACTIVO} ? 'badge-success' : 'badge-danger'">
-                            <span th:case="${T(merko.merko.Entity.EstadoProducto).ACTIVO}">Activo</span>
-                            <span th:case="${T(merko.merko.Entity.EstadoProducto).INACTIVO}">Inactivo</span>
-                            <span th:case="*">—</span>
+                        <span th:if="${proveedor.branches == null or #lists.isEmpty(proveedor.branches)}">
+                            <em class="muted">No hay sucursales registradas para este proveedor.</em>
                         </span>
-                    </td>
-                    <td th:text="${'$' + #numbers.formatDecimal(p.precioCompra, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
-                    <td>
-                        <span th:classappend="${p.stock != null and p.stockMinimo != null and p.stock <= p.stockMinimo} ? 'badge badge-warning' : 
-                                              (${p.stock != null and p.stock <= 5} ? 'badge badge-warning' : 'badge badge-success')"
-                              th:text="${p.stock}">0</span>
-                    </td>
-                    
-                </tr>
-                <tr th:if="${proveedor.productos == null or #lists.isEmpty(proveedor.productos)}">
-                    <td colspan="6" class="empty-message">Este proveedor no tiene productos registrados.</td>
-                </tr>
-            </tbody>
-        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 

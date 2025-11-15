@@ -57,6 +57,20 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="sucursal">Sucursal (opcional)</label>
+                    <div class="form-row">
+                        <div class="field-cell">
+                            <select id="sucursal" name="sucursalId" class="form-control">
+                                <option value="">(Sin sucursal)</option>
+                                <option th:each="s : ${sucursales}"
+                                        th:value="${s.id}"
+                                        th:text="${s.nombre + (s.ciudad != null ? ' — ' + s.ciudad : '') + (s.pais != null ? ', ' + s.pais : '')}"></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
                     <label>Ítems de la compra <span class="text-muted" style="font-weight: normal;">(productos activos del proveedor)</span></label>
                     <div class="table-container" style="margin-top:.5rem;">
                         <table class="table-admin" id="tablaItems">

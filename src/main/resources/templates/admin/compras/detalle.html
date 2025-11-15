@@ -24,6 +24,10 @@
                         <span th:text="${compra.proveedor != null ? compra.proveedor.nombre : '—'}"></span>
                     </div>
                     <div class="detail-item">
+                        <strong>Sucursal</strong>
+                        <span th:text="${compra.sucursal != null ? (compra.sucursal.nombre + (compra.sucursal.ciudad != null ? ' — ' + compra.sucursal.ciudad : '') + (compra.sucursal.pais != null ? ', ' + compra.sucursal.pais : '')) : '—'}"></span>
+                    </div>
+                    <div class="detail-item">
                         <strong>Número de Registro</strong>
                         <span th:text="${compra.id}"></span>
                     </div>

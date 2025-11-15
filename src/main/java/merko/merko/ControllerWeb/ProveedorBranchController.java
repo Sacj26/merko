@@ -33,6 +33,26 @@ public class ProveedorBranchController {
         return "admin/proveedores/sucursales/list";
     }
 
+    // API JSON: obtener sucursales de un proveedor (para AJAX)
+    @GetMapping(value = "/json", produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public java.util.List<java.util.Map<String, Object>> listarJson(@PathVariable Long proveedorId) {
+        Proveedor proveedor = proveedorService.getProveedorById(proveedorId)
+                .orElse(null);
+        if (proveedor == null) return java.util.Collections.emptyList();
+        java.util.List<Branch> branches = proveedor.getBranches();
+        java.util.List<java.util.Map<String, Object>> out = new java.util.ArrayList<>();
+        for (Branch b : branches) {
+            java.util.Map<String, Object> m = new java.util.HashMap<>();
+            m.put("id", b.getId());
+            m.put("nombre", b.getNombre());
+            m.put("ciudad", b.getCiudad());
+            m.put("pais", b.getPais());
+            out.add(m);
+        }
+        return out;
+    }
+
     @GetMapping("/nuevo")
     public String nuevo(@PathVariable Long proveedorId, Model model) {
         Proveedor proveedor = proveedorService.getProveedorById(proveedorId)

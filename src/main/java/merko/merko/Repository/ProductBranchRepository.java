@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public interface ProductBranchRepository extends JpaRepository<ProductBranch, Long> {
     Optional<ProductBranch> findByProductoIdAndBranchId(Long productoId, Long branchId);
+    java.util.List<ProductBranch> findByBranchId(Long branchId);
+    java.util.List<ProductBranch> findByProductoId(Long productoId);
 
     @Modifying
     @Transactional

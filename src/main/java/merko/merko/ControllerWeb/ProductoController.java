@@ -384,4 +384,29 @@ public class ProductoController {
                 })
                 .collect(Collectors.toList());
     }
+
+    // Nuevo: API para cargar productos por sucursal (basado en ProductBranch)
+    @GetMapping(value = "/por-sucursal/{branchId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public List<Map<String, Object>> productosPorSucursal(@PathVariable("branchId") Long branchId) {
+        try {
+            java.util.List<merko.merko.Entity.ProductBranch> pbs = productBranchRepository.findByBranchId(branchId);
+            return pbs.stream()
+                    .filter(pb -> pb.getProducto() != null && pb.getProducto().getEstado() == merko.merko.Entity.EstadoProducto.ACTIVO)
+                    .map(pb -> {
+                        Map<String, Object> m = new HashMap<>();
+                        m.put("id", pb.getProducto().getId());
+                        m.put("nombre", pb.getProducto().getNombre());
+                        // prefer branch-specific precio, fallback to producto.precioCompra
+                        Double precio = pb.getPrecio() != null ? pb.getPrecio() : pb.getProducto().getPrecioCompra();
+                        m.put("precioCompra", precio);
+                        m.put("tipo", pb.getProducto().getTipo() != null ? pb.getProducto().getTipo().name() : null);
+                        m.put("stock", pb.getStock() != null ? pb.getStock() : 0);
+                        return m;
+                    }).collect(Collectors.toList());
+        } catch (Exception ex) {
+            log.debug("Error al recuperar products por sucursal {}: {}", branchId, ex.getMessage());
+            return java.util.Collections.emptyList();
+        }
+    }
 }

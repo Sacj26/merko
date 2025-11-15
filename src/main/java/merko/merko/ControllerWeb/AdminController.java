@@ -82,10 +82,45 @@ public class AdminController {
 
         // Alertas
         var stockCrit = dashboardService.stockCritico(5);
-        var proxVenc = dashboardService.proximosVencimientos(30, 5);
-        logger.info("Stock crítico: {} items, Próximos vencimientos: {} items", stockCrit.size(), proxVenc.size());
-        model.addAttribute("stockCritico", stockCrit);
-        model.addAttribute("proximosVencimientos", proxVenc);
+            var proxVenc = dashboardService.proximosVencimientos(30, 5);
+            logger.info("Stock crítico: {} items, Próximos vencimientos: {} items", stockCrit.size(), proxVenc.size());
+            model.addAttribute("stockCritico", stockCrit);
+
+            // Expandir información de próximos vencimientos para incluir sucursales donde el producto está asignado
+            java.util.List<java.util.Map<String, Object>> proxWithBranches = new java.util.ArrayList<>();
+            // We will use Spring injection by looking up the bean from application context via repository class autowiring pattern
+            try {
+                org.springframework.context.ApplicationContext ctx = org.springframework.web.context.support.WebApplicationContextUtils.getRequiredWebApplicationContext(((org.springframework.web.context.request.ServletRequestAttributes)org.springframework.web.context.request.RequestContextHolder.currentRequestAttributes()).getRequest().getServletContext());
+                merko.merko.Repository.ProductBranchRepository productBranchRepository = ctx.getBean(merko.merko.Repository.ProductBranchRepository.class);
+                for (merko.merko.Entity.Lote l : proxVenc) {
+                    java.util.Map<String, Object> m = new java.util.HashMap<>();
+                    m.put("lote", l);
+                    java.util.List<merko.merko.Entity.ProductBranch> pbs = productBranchRepository.findByProductoId(l.getProducto().getId());
+                    java.util.List<java.util.Map<String, Object>> branches = new java.util.ArrayList<>();
+                    for (merko.merko.Entity.ProductBranch pb : pbs) {
+                        java.util.Map<String, Object> b = new java.util.HashMap<>();
+                        if (pb.getBranch() != null) {
+                            b.put("id", pb.getBranch().getId());
+                            b.put("nombre", pb.getBranch().getNombre());
+                            b.put("ciudad", pb.getBranch().getCiudad());
+                            b.put("pais", pb.getBranch().getPais());
+                        }
+                        branches.add(b);
+                    }
+                    m.put("branches", branches);
+                    proxWithBranches.add(m);
+                }
+            } catch (Exception ex) {
+                // fallback: attach empty branches
+                for (merko.merko.Entity.Lote l : proxVenc) {
+                    java.util.Map<String, Object> m = new java.util.HashMap<>();
+                    m.put("lote", l);
+                    m.put("branches", java.util.Collections.emptyList());
+                    proxWithBranches.add(m);
+                }
+            }
+
+            model.addAttribute("proximosVencimientos", proxWithBranches);
 
         return "admin/dashboard/index";
     }

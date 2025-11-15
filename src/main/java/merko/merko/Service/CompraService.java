@@ -19,6 +19,10 @@ import merko.merko.Repository.ProveedorRepository;
 import merko.merko.Repository.DetalleCompraRepository;
 import merko.merko.Repository.LoteRepository;
 import merko.merko.Repository.MovimientoInventarioRepository;
+import merko.merko.Repository.ProductBranchRepository;
+import merko.merko.Repository.BranchRepository;
+import merko.merko.Entity.ProductBranch;
+import merko.merko.Entity.Branch;
 import merko.merko.dto.CompraForm;
 import merko.merko.dto.DetalleCompraForm;
 
@@ -31,20 +35,25 @@ public class CompraService {
     private final DetalleCompraRepository detalleCompraRepository;
     private final LoteRepository loteRepository;
     private final MovimientoInventarioRepository movimientoInventarioRepository;
+    private final ProductBranchRepository productBranchRepository;
+    private final BranchRepository branchRepository;
 
     public CompraService(CompraRepository compraRepository,
                          ProductoRepository productoRepository,
                          ProveedorRepository proveedorRepository,
                          DetalleCompraRepository detalleCompraRepository,
                          LoteRepository loteRepository,
-                         MovimientoInventarioRepository movimientoInventarioRepository) {
+                         MovimientoInventarioRepository movimientoInventarioRepository,
+                         ProductBranchRepository productBranchRepository,
+                         BranchRepository branchRepository) {
         this.compraRepository = compraRepository;
         this.productoRepository = productoRepository;
         this.proveedorRepository = proveedorRepository;
         this.detalleCompraRepository = detalleCompraRepository;
         this.loteRepository = loteRepository;
         this.movimientoInventarioRepository = movimientoInventarioRepository;
-        
+        this.productBranchRepository = productBranchRepository;
+        this.branchRepository = branchRepository;
     }
     public List<Compra> getAllCompras() {
         return compraRepository.findAll();
@@ -125,6 +134,11 @@ public class CompraService {
             Optional<Proveedor> proveedorOpt = proveedorRepository.findById(compraForm.getProveedorId());
             proveedorOpt.ifPresent(compra::setProveedor);
         }
+        // Si se envía sucursal en el formulario, asociarla a la compra (opcional)
+        if (compraForm.getSucursalId() != null) {
+            Optional<Branch> branchOpt = branchRepository.findById(compraForm.getSucursalId());
+            branchOpt.ifPresent(compra::setSucursal);
+        }
         if (compra.getProveedor() == null) {
             throw new IllegalArgumentException("Debe seleccionar un proveedor para la compra.");
         }
@@ -132,6 +146,8 @@ public class CompraService {
         List<DetalleCompra> detalles = new ArrayList<>();
         if (compraForm.getDetalles() != null) {
             for (DetalleCompraForm df : compraForm.getDetalles()) {
+                // defensiva: si el detalle no tiene productId, saltarlo para evitar findById(null)
+                if (df.getProductoId() == null) continue;
                 Producto p = productoRepository.findById(df.getProductoId()).orElse(null);
                 if (p == null) continue;
                 if (p.getProveedor() == null || !Objects.equals(p.getProveedor().getId(), compra.getProveedor().getId())) {
@@ -155,6 +171,28 @@ public class CompraService {
 
                 p.setStock(p.getStock() + df.getCantidad());
                 productoRepository.save(p);
+
+                // Si se indicó sucursal, actualizar stock por sucursal (ProductBranch)
+                Long sucursalId = compraForm.getSucursalId();
+                if (sucursalId != null) {
+                    Optional<ProductBranch> pbOpt = productBranchRepository.findByProductoIdAndBranchId(p.getId(), sucursalId);
+                    if (pbOpt.isPresent()) {
+                        ProductBranch pb = pbOpt.get();
+                        int current = pb.getStock() == null ? 0 : pb.getStock().intValue();
+                        pb.setStock(current + df.getCantidad());
+                        productBranchRepository.save(pb);
+                    } else {
+                        // crear asignación por sucursal si no existe
+                        Optional<Branch> brOpt = branchRepository.findById(sucursalId);
+                        if (brOpt.isPresent()) {
+                            ProductBranch newPb = new ProductBranch();
+                            newPb.setProducto(p);
+                            newPb.setBranch(brOpt.get());
+                            newPb.setStock(df.getCantidad());
+                            productBranchRepository.save(newPb);
+                        }
+                    }
+                }
             }
         } else if (productoId != null && cantidad != null && precioUnitario != null) {
             Producto p = productoRepository.findById(productoId).orElse(null);
@@ -180,10 +218,31 @@ public class CompraService {
 
                 p.setStock(p.getStock() + cantidad);
                 productoRepository.save(p);
+
+                // Si se indicó sucursal, actualizar stock por sucursal (ProductBranch)
+                Long sucursalId2 = compraForm.getSucursalId();
+                if (sucursalId2 != null) {
+                    Optional<ProductBranch> pbOpt = productBranchRepository.findByProductoIdAndBranchId(p.getId(), sucursalId2);
+                    if (pbOpt.isPresent()) {
+                        ProductBranch pb = pbOpt.get();
+                        int current = pb.getStock() == null ? 0 : pb.getStock().intValue();
+                        pb.setStock(current + (cantidad != null ? cantidad : 0));
+                        productBranchRepository.save(pb);
+                    } else {
+                        Optional<Branch> brOpt = branchRepository.findById(sucursalId2);
+                        if (brOpt.isPresent()) {
+                            ProductBranch newPb = new ProductBranch();
+                            newPb.setProducto(p);
+                            newPb.setBranch(brOpt.get());
+                            newPb.setStock(cantidad);
+                            productBranchRepository.save(newPb);
+                        }
+                    }
+                }
             }
         }
 
-        double total = detalles.stream().mapToDouble(d -> d.getCantidad() * (d.getPrecioUnitario() != null ? d.getPrecioUnitario() : 0.0)).sum();
+    double total = detalles.stream().mapToDouble(d -> d.getCantidad() * (d.getPrecioUnitario() != null ? d.getPrecioUnitario() : 0.0)).sum();
         compra.setDetalles(detalles);
         compra.setTotal(total);
 

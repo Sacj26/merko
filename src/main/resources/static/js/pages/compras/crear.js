@@ -2,6 +2,7 @@ let popupProductos = null;
 // Rutas base (mantener literales funcionales)
 const baseAgregarProductos = '/admin/proveedores/agregar-productos/';
 const apiProductosPorProveedor = '/admin/productos/por-proveedor/';
+const apiProductosPorSucursal = '/admin/productos/por-sucursal/';
 let productosProveedor = [];
 let itemIndex = 0;
 
@@ -35,6 +36,24 @@ window.irAAgregarProductos = function irAAgregarProductos() {
 
 async function cargarProductosProveedor(provId) {
     productosProveedor = [];
+    // Si hay sucursal seleccionada, cargar por sucursal (toma prioridad)
+    const sucursalSel = document.getElementById('sucursal');
+    const sucursalId = sucursalSel ? sucursalSel.value : '';
+    if (sucursalId) {
+        try {
+            const resp = await fetch(apiProductosPorSucursal + sucursalId, { headers: { 'Accept': 'application/json' } });
+            if (!resp.ok) throw new Error('Error al cargar productos por sucursal');
+            productosProveedor = await resp.json();
+        } catch (e) { console.error(e); }
+        actualizarSelectsProductos();
+        actualizarTotalGeneral();
+        // habilitar botón de agregar ítem cuando hay sucursal
+        const addBtn = document.getElementById('btnAgregarItem');
+        if (addBtn) addBtn.disabled = false;
+        return;
+    }
+
+    // Si no hay sucursal, pero sí proveedor, cargar por proveedor
     if (!provId) {
         actualizarSelectsProductos();
         actualizarTotalGeneral();
@@ -185,12 +204,63 @@ function filtrarProductosPorProveedor() {
     const btn = document.getElementById('btnAgregarProductoProveedor');
 
     btn.disabled = !provId;
-    cargarProductosProveedor(provId);
+    // Recargar la lista de sucursales para el proveedor.
+    // NO cargar productos por proveedor aquí: queremos que los productos solo se muestren
+    // cuando el usuario seleccione explícitamente una sucursal.
+    cargarSucursales(provId).then(() => {
+        // limpiar la lista de productos visible y actualizar selects para reflejar que
+        // todavía no hay sucursal seleccionada
+        productosProveedor = [];
+        actualizarSelectsProductos();
+        actualizarTotalGeneral();
+        // deshabilitar añadir ítem hasta que se seleccione sucursal
+        const addBtn = document.getElementById('btnAgregarItem');
+        if (addBtn) addBtn.disabled = true;
+    });
+}
+
+async function cargarSucursales(provId) {
+    const sucSel = document.getElementById('sucursal');
+    if (!sucSel) return;
+    // limpiar opciones
+    sucSel.innerHTML = '';
+    const opt0 = document.createElement('option');
+    opt0.value = '';
+    opt0.textContent = '(Sin sucursal)';
+    sucSel.appendChild(opt0);
+    if (!provId) {
+        // si no hay proveedor seleccionado, dejar sólo la opción vacía
+        return;
+    }
+    try {
+        const resp = await fetch('/admin/proveedores/' + provId + '/sucursales/json', { headers: { 'Accept': 'application/json' } });
+        if (!resp.ok) throw new Error('Error al cargar sucursales');
+        const list = await resp.json();
+        list.forEach(s => {
+            const o = document.createElement('option');
+            o.value = s.id;
+            let txt = s.nombre || '';
+            if (s.ciudad) txt += ' — ' + s.ciudad;
+            if (s.pais) txt += ', ' + s.pais;
+            o.textContent = txt;
+            sucSel.appendChild(o);
+        });
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 // Event listeners
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('proveedor').addEventListener('change', filtrarProductosPorProveedor);
+    const suc = document.getElementById('sucursal');
+    if (suc) {
+        suc.addEventListener('change', () => {
+            // Re-run product loading; provider may stay selected but branch takes priority
+            const provId = document.getElementById('proveedor').value;
+            cargarProductosProveedor(provId);
+        });
+    }
     document.getElementById('btnAgregarItem').addEventListener('click', agregarFila);
     agregarFila();
     filtrarProductosPorProveedor();
