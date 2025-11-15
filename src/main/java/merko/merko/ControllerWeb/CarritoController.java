@@ -17,7 +17,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Controller
@@ -135,8 +135,8 @@ public class CarritoController {
             return "redirect:/carrito?error=true";
         }
 
-        Venta venta = new Venta();
-        venta.setFecha(LocalDate.now());
+    Venta venta = new Venta();
+    venta.setFecha(LocalDateTime.now());
         venta.setCliente(cliente);
 
         List<DetalleVenta> detalles = new ArrayList<>();

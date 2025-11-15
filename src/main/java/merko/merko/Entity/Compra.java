@@ -1,6 +1,6 @@
 package merko.merko.Entity;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -30,7 +30,7 @@ public class Compra {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDate fecha;
+    private LocalDateTime fecha;
     private int cantidad;
     private double total;
     private double precioUnidad;

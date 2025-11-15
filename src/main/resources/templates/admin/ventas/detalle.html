@@ -5,6 +5,8 @@
       lang="es">
 <head>
     <title>Detalle de Venta</title>
+    <!-- Reuse compras detalle CSS for a similar layout; adjust style file if you prefer a ventas-specific CSS -->
+    <link rel="stylesheet" th:href="@{/css/modules/compras-detalle.css}">
     <link rel="stylesheet" th:href="@{/css/pages/ventas-detalle.css}">
 </head>
 <body>
@@ -12,8 +14,8 @@
     <div class="header-with-actions">
         <h1 class="page-title">Detalle de Venta
             <small style="margin-left: .5rem;">
-                <span th:if="${venta.estado} == T(merko.merko.Entity.EstadoVenta).ACTIVA" class="badge bg-success">ACTIVA</span>
-                <span th:if="${venta.estado} == T(merko.merko.Entity.EstadoVenta).ANULADA" class="badge bg-secondary">ANULADA</span>
+                <span th:if="${venta.estado == T(merko.merko.Entity.EstadoVenta).ACTIVA}" class="badge bg-success">ACTIVA</span>
+                <span th:if="${venta.estado == T(merko.merko.Entity.EstadoVenta).ANULADA}" class="badge bg-secondary">ANULADA</span>
             </small>
         </h1>
         <a th:href="@{/admin/ventas}" class="btn btn-secondary">
@@ -21,79 +23,130 @@
         </a>
     </div>
 
-    <div class="card">
-        <div class="card-body">
-            <div class="venta-meta">
-                <p><strong>ID:</strong> <span th:text="${venta.id}">1</span></p>
-                <p><strong>Fecha:</strong> <span th:text="${#temporals.format(venta.fecha, 'dd/MM/yyyy')}">01/01/2025</span></p>
-                <p><strong>Cliente:</strong> <span th:text="${venta.cliente != null ? venta.cliente.nombre : 'No registrado'}">Cliente</span></p>
-                <p><strong>Total:</strong> $<span th:text="${#numbers.formatDecimal(venta.total, 1, 'COMMA', 2, 'POINT')}">0.00</span></p>
+    <div class="detail-container">
+        <div class="detail-section">
+            <h2>Información General</h2>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <strong>ID</strong>
+                    <span th:text="${venta.id}">1</span>
+                </div>
+                <div class="detail-item">
+                    <strong>Fecha y Hora</strong>
+                    <span th:text="${venta.fecha != null ? #temporals.format(venta.fecha, 'dd/MM/yyyy HH:mm') : '—'}">01/01/2025 10:00</span>
+                </div>
+                <div class="detail-item">
+                    <strong>Cliente</strong>
+                    <!-- Usuario entity doesn't have 'email' field; show only the name to avoid SpEL evaluation errors -->
+                    <span th:text="${venta.cliente != null ? venta.cliente.nombre : 'No registrado'}">Cliente</span>
+                </div>
+                <div class="detail-item">
+                    <strong>Sucursal</strong>
+                    <!-- Venta entity doesn't have a 'sucursal' field. If movimientos exist, derive the branch from the first movimiento.productBranch.branch -->
+                    <span th:text="${(movimientos != null and !#lists.isEmpty(movimientos) and movimientos[0].productBranch != null and movimientos[0].productBranch.branch != null) ? (movimientos[0].productBranch.branch.nombre + (movimientos[0].productBranch.branch.ciudad != null ? ' — ' + movimientos[0].productBranch.branch.ciudad : '') + (movimientos[0].productBranch.branch.pais != null ? ', ' + movimientos[0].productBranch.branch.pais : '')) : '—'}">Sucursal</span>
+                </div>
+                <div class="detail-item">
+                    <strong>Total</strong>
+                    <span th:text="${'$' + #numbers.formatDecimal(venta.total, 1, 'COMMA', 2, 'POINT')}">$0.00</span>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="actions" style="margin: 1rem 0;" th:if="${venta.estado} == T(merko.merko.Entity.EstadoVenta).ACTIVA">
-        <form th:action="@{'/admin/ventas/' + ${venta.id} + '/reversar'}" method="post" onsubmit="return confirm('¿Seguro que deseas anular esta venta y revertir el inventario?');">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-            <button type="submit" class="btn btn-danger">
-                <i class="fas fa-undo"></i> Anular venta
-            </button>
-        </form>
-    </div>
+        <div class="detail-section">
+            <h2>Detalle(s) de la Venta</h2>
 
-    <h2 class="section-title" style="margin-top: 1.5rem;">Productos</h2>
+            <div th:if="${venta.detalles != null && !#lists.isEmpty(venta.detalles)}">
+                <table class="table-admin">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Precio unitario</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="det : ${venta.detalles}">
+                            <td th:text="${det.producto != null ? det.producto.nombre : '—'}">Producto</td>
+                            <td th:text="${det.cantidad}">1</td>
+                            <td th:text="${'$' + #numbers.formatDecimal(det.precioUnitario != null ? det.precioUnitario : 0, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
+                            <td th:text="${'$' + #numbers.formatDecimal((det.cantidad != null && det.precioUnitario != null ? det.cantidad * det.precioUnitario : 0), 1, 'COMMA', 2, 'POINT')}">$0.00</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" style="text-align:right"><strong>Total</strong></td>
+                            <td th:text="${'$' + #numbers.formatDecimal(venta.total, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
 
-    <div class="table-container">
-        <table class="table">
-        <thead>
-            <tr>
-                <th>Producto</th>
-                <th>Cantidad</th>
-                <th>Precio Unitario</th>
-                <th>Subtotal</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="det : ${venta.detalles}">
-                <td th:text="${det.producto != null ? det.producto.nombre : '—'}">Producto</td>
-                <td th:text="${det.cantidad}">1</td>
-                <td th:text="${#numbers.formatDecimal(det.precioUnitario, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
-                <td th:text="${#numbers.formatDecimal(det.cantidad * (det.precioUnitario != null ? det.precioUnitario : 0), 1, 'COMMA', 2, 'POINT')}">$0.00</td>
-            </tr>
-            <tr th:if="${venta.detalles == null or #lists.isEmpty(venta.detalles)}">
-                <td colspan="4" class="empty-message">No hay detalles para esta venta.</td>
-            </tr>
-        </tbody>
-        </table>
-    </div>
+            <div class="detail-grid" th:if="${venta.detalles == null || #lists.isEmpty(venta.detalles)}">
+                <div class="detail-item">
+                    <strong>Producto</strong>
+                    <span th:text="${venta.producto != null ? venta.producto.nombre : '—'}"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>Cantidad</strong>
+                    <span th:text="${(venta.cantidad != null ? venta.cantidad : 0) + ' unidades'}"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>Precio Unitario</strong>
+                    <span th:text="${'$' + #numbers.formatDecimal(venta.precioUnidad != null ? venta.precioUnidad : 0, 1, 'COMMA', 2, 'POINT')}"></span>
+                </div>
+                <div class="detail-item">
+                    <strong>Total</strong>
+                    <span th:text="${'$' + #numbers.formatDecimal(venta.total, 1, 'COMMA', 2, 'POINT')}"></span>
+                </div>
+            </div>
+        </div>
 
-    <h2 class="section-title" style="margin-top: 1.5rem;">Movimientos de inventario</h2>
-    <div class="table-container">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Fecha</th>
-                    <th>Tipo</th>
-                    <th>Producto</th>
-                    <th>Lote</th>
-                    <th>Cantidad</th>
-                    <th>Costo unitario</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="m : ${movimientos}">
-                    <td th:text="${#temporals.format(m.fecha, 'dd/MM/yyyy HH:mm')}">01/01/2025 10:00</td>
-                    <td th:text="${m.tipo}">VENTA_SALIDA</td>
-                    <td th:text="${m.producto != null ? m.producto.nombre : '—'}">Producto</td>
-                    <td th:text="${m.lote != null ? m.lote.codigoLote : '—'}">LOTE</td>
-                    <td th:text="${m.cantidad}">0</td>
-                    <td th:text="${m.costoUnitario != null ? #numbers.formatDecimal(m.costoUnitario, 1, 'COMMA', 2, 'POINT') : '—'}">0.00</td>
-                </tr>
-                <tr th:if="${movimientos == null or #lists.isEmpty(movimientos)}">
-                    <td colspan="6" class="empty-message">No hay movimientos registrados para esta venta.</td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="detail-section">
+            <h2>Movimientos de inventario</h2>
+            <div th:if="${movimientos != null && !#lists.isEmpty(movimientos)}">
+                <table class="table-admin">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Producto</th>
+                            <th>Lote</th>
+                            <th>Cantidad</th>
+                            <th>Costo unitario</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="m : ${movimientos}">
+                            <td th:text="${#temporals.format(m.fecha, 'dd/MM/yyyy HH:mm')}">01/01/2025 10:00</td>
+                            <td th:text="${m.tipo}">VENTA_SALIDA</td>
+                            <td th:text="${m.producto != null ? m.producto.nombre : '—'}">Producto</td>
+                            <td th:text="${m.lote != null ? m.lote.codigoLote : '—'}">LOTE</td>
+                            <td th:text="${m.cantidad}">0</td>
+                            <td th:text="${m.costoUnitario != null ? #numbers.formatDecimal(m.costoUnitario, 1, 'COMMA', 2, 'POINT') : '—'}">0.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div th:if="${movimientos == null or #lists.isEmpty(movimientos)}">
+                <p>No hay movimientos registrados para esta venta.</p>
+            </div>
+        </div>
+
+        <div class="btn-container">
+            <a th:href="@{/admin/ventas}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver al listado
+            </a>
+
+            <div style="display:inline-block; margin-left:.5rem;" th:if="${venta.estado == T(merko.merko.Entity.EstadoVenta).ACTIVA}">
+                <form th:action="@{'/admin/ventas/' + ${venta.id} + '/reversar'}" method="post" onsubmit="return confirm('¿Seguro que deseas anular esta venta y revertir el inventario?');" style="display:inline-block;">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-undo"></i> Anular venta
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 </body>

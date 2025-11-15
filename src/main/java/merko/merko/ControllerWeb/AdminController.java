@@ -148,11 +148,13 @@ public class AdminController {
         java.time.LocalDate fin = java.time.LocalDate.now();
         java.time.LocalDate inicio = fin.minusDays(dias - 1L);
         
-        // Obtener todas las compras del periodo
+        // Obtener todas las compras del periodo (Compra.fecha ahora es LocalDateTime)
         List<merko.merko.Entity.Compra> compras = compraRepository.findAll().stream()
-            .filter(c -> c.getFecha() != null && 
-                        !c.getFecha().isBefore(inicio) && 
-                        !c.getFecha().isAfter(fin))
+            .filter(c -> c.getFecha() != null)
+            .filter(c -> {
+                java.time.LocalDate fecha = c.getFecha().toLocalDate();
+                return !fecha.isBefore(inicio) && !fecha.isAfter(fin);
+            })
             .toList();
         
         logger.info("=== Compras encontradas en el periodo: {}", compras.size());
@@ -160,7 +162,7 @@ public class AdminController {
         // Agrupar por fecha
         Map<java.time.LocalDate, Double> totalesPorFecha = new java.util.HashMap<>();
         for (merko.merko.Entity.Compra c : compras) {
-            java.time.LocalDate fecha = c.getFecha();
+            java.time.LocalDate fecha = c.getFecha().toLocalDate();
             double total = c.getTotal();
             totalesPorFecha.merge(fecha, total, Double::sum);
             logger.debug("Compra ID {} - Fecha: {} - Total: {}", c.getId(), fecha, total);
@@ -190,12 +192,13 @@ public class AdminController {
         java.time.LocalDate fin = java.time.LocalDate.now();
         java.time.LocalDate inicio = fin.minusDays(dias - 1L);
         
-        // Obtener todos los detalles de compra del periodo
+        // Obtener todos los detalles de compra del periodo (comparar por LocalDate)
         List<merko.merko.Entity.DetalleCompra> detalles = detalleCompraRepository.findAll().stream()
-            .filter(dc -> dc.getCompra() != null && 
-                         dc.getCompra().getFecha() != null &&
-                         !dc.getCompra().getFecha().isBefore(inicio) && 
-                         !dc.getCompra().getFecha().isAfter(fin))
+            .filter(dc -> dc.getCompra() != null && dc.getCompra().getFecha() != null)
+            .filter(dc -> {
+                java.time.LocalDate fecha = dc.getCompra().getFecha().toLocalDate();
+                return !fecha.isBefore(inicio) && !fecha.isAfter(fin);
+            })
             .toList();
         
         logger.info("=== Detalles de compra encontrados en el periodo: {}", detalles.size());

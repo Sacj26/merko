@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import merko.merko.Entity.Compra;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -15,10 +16,10 @@ public interface CompraRepository extends JpaRepository<Compra, Long> {
     java.util.Optional<Compra> findByIdWithDetalles(@Param("id") Long id);
 
     @Query("select coalesce(sum(c.total),0) from Compra c where c.fecha between :start and :end")
-    Double sumTotalBetween(@Param("start") LocalDate start, @Param("end") LocalDate end);
+    Double sumTotalBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
-    long countByFechaBetween(LocalDate start, LocalDate end);
+    long countByFechaBetween(LocalDateTime start, LocalDateTime end);
 
-    @Query("select c.fecha as fecha, coalesce(sum(c.total),0) as total from Compra c where c.fecha between :start and :end group by c.fecha order by c.fecha")
-    List<Object[]> dailyTotalsBetween(@Param("start") LocalDate start, @Param("end") LocalDate end);
+    @Query("select function('date', c.fecha) as fecha, coalesce(sum(c.total),0) as total from Compra c where c.fecha between :start and :end group by function('date', c.fecha) order by fecha")
+    List<Object[]> dailyTotalsBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 }

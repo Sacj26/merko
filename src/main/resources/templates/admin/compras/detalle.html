@@ -9,35 +9,43 @@
 </head>
 <body>
     <div layout:fragment="content">
-        <h1>Detalle de Compra</h1>
+        <div class="header-with-actions">
+            <h1 class="page-title">Detalle de Compra</h1>
+            <a th:href="@{/admin/compras}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+        </div>
 
         <div class="detail-container">
             <div class="detail-section">
                 <h2>Información General</h2>
                 <div class="detail-grid">
                     <div class="detail-item">
-                        <strong>Fecha de Compra</strong>
-                        <span th:text="${compra.fecha != null ? #temporals.format(compra.fecha, 'dd/MM/yyyy') : '—'}"></span>
+                        <strong>ID</strong>
+                        <span th:text="${compra.id}">1</span>
+                    </div>
+                    <div class="detail-item">
+                        <strong>Fecha y Hora</strong>
+                        <span th:text="${compra.fecha != null ? #temporals.format(compra.fecha, 'dd/MM/yyyy HH:mm') : '—'}">01/01/2025 10:00</span>
                     </div>
                     <div class="detail-item">
                         <strong>Proveedor</strong>
-                        <span th:text="${compra.proveedor != null ? compra.proveedor.nombre : '—'}"></span>
+                        <span th:text="${compra.proveedor != null ? compra.proveedor.nombre : '—'}">Proveedor</span>
                     </div>
                     <div class="detail-item">
                         <strong>Sucursal</strong>
-                        <span th:text="${compra.sucursal != null ? (compra.sucursal.nombre + (compra.sucursal.ciudad != null ? ' — ' + compra.sucursal.ciudad : '') + (compra.sucursal.pais != null ? ', ' + compra.sucursal.pais : '')) : '—'}"></span>
+                        <span th:text="${compra.sucursal != null ? (compra.sucursal.nombre + (compra.sucursal.ciudad != null ? ' — ' + compra.sucursal.ciudad : '') + (compra.sucursal.pais != null ? ', ' + compra.sucursal.pais : '')) : '—'}">Sucursal</span>
                     </div>
                     <div class="detail-item">
-                        <strong>Número de Registro</strong>
-                        <span th:text="${compra.id}"></span>
+                        <strong>Total</strong>
+                        <span th:text="${'$' + #numbers.formatDecimal(compra.total, 1, 'COMMA', 2, 'POINT')}">$0.00</span>
                     </div>
                 </div>
             </div>
 
             <div class="detail-section">
                 <h2>Detalle(s) de la Compra</h2>
-                
-                <!-- Mostrar tabla si hay múltiples detalles -->
+
                 <div th:if="${compra.detalles != null && !#lists.isEmpty(compra.detalles)}">
                     <table class="table-admin">
                         <thead>
@@ -50,22 +58,21 @@
                         </thead>
                         <tbody>
                             <tr th:each="det : ${compra.detalles}">
-                                <td th:text="${det.producto != null ? det.producto.nombre : '—'}"></td>
-                                <td th:text="${det.cantidad}"></td>
-                                <td th:text="${'$' + #numbers.formatDecimal(det.precioUnitario != null ? det.precioUnitario : 0, 1, 'COMMA', 2, 'POINT')}"></td>
-                                <td th:text="${'$' + #numbers.formatDecimal((det.cantidad != null && det.precioUnitario != null ? det.cantidad * det.precioUnitario : 0), 1, 'COMMA', 2, 'POINT')}"></td>
+                                <td th:text="${det.producto != null ? det.producto.nombre : '—'}">Producto</td>
+                                <td th:text="${det.cantidad}">1</td>
+                                <td th:text="${'$' + #numbers.formatDecimal(det.precioUnitario != null ? det.precioUnitario : 0, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
+                                <td th:text="${'$' + #numbers.formatDecimal((det.cantidad != null && det.precioUnitario != null ? det.cantidad * det.precioUnitario : 0), 1, 'COMMA', 2, 'POINT')}">$0.00</td>
                             </tr>
                         </tbody>
                         <tfoot>
                             <tr>
                                 <td colspan="3" style="text-align:right"><strong>Total</strong></td>
-                                <td th:text="${'$' + #numbers.formatDecimal(compra.total, 1, 'COMMA', 2, 'POINT')}"></td>
+                                <td th:text="${'$' + #numbers.formatDecimal(compra.total, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
                             </tr>
                         </tfoot>
                     </table>
                 </div>
 
-                <!-- Si no hay lista de detalles, mostrar los campos directos de la compra (compra de un solo ítem) -->
                 <div class="detail-grid" th:if="${compra.detalles == null || #lists.isEmpty(compra.detalles)}">
                     <div class="detail-item">
                         <strong>Producto</strong>
@@ -83,6 +90,37 @@
                         <strong>Total</strong>
                         <span th:text="${'$' + #numbers.formatDecimal(compra.total, 1, 'COMMA', 2, 'POINT')}"></span>
                     </div>
+                </div>
+            </div>
+
+            <div class="detail-section">
+                <h2>Movimientos de inventario</h2>
+                <div th:if="${movimientos != null && !#lists.isEmpty(movimientos)}">
+                    <table class="table-admin">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Tipo</th>
+                                <th>Producto</th>
+                                <th>Lote</th>
+                                <th>Cantidad</th>
+                                <th>Costo unitario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="m : ${movimientos}">
+                                <td th:text="${#temporals.format(m.fecha, 'dd/MM/yyyy HH:mm')}">01/01/2025 10:00</td>
+                                <td th:text="${m.tipo}">COMPRA_ENTRADA</td>
+                                <td th:text="${m.producto != null ? m.producto.nombre : '—'}">Producto</td>
+                                <td th:text="${m.lote != null ? m.lote.codigoLote : '—'}">LOTE</td>
+                                <td th:text="${m.cantidad}">0</td>
+                                <td th:text="${m.costoUnitario != null ? #numbers.formatDecimal(m.costoUnitario, 1, 'COMMA', 2, 'POINT') : '—'}">0.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div th:if="${movimientos == null or #lists.isEmpty(movimientos)}">
+                    <p>No hay movimientos registrados para esta compra.</p>
                 </div>
             </div>
 

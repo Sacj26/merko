@@ -88,16 +88,23 @@
                         <th>Fecha</th>
                         <th>Cliente</th>
                         <th>Total</th>
+                        <th>Estado</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="venta : ${ultimasVentas}">
-                        <td th:text="${venta.fecha}">2025-01-01</td>
+                        <td th:text="${venta.fecha != null ? #temporals.format(venta.fecha, 'yyyy-MM-dd') : '-'}">2025-01-01</td>
                         <td th:text="${venta.cliente != null ? venta.cliente.nombre : '—'}">Cliente</td>
                         <td th:text="${venta.total}">0.00</td>
                         <td>
-                            <a th:href="@{'/admin/ventas/detalle/' + ${venta.id}}">Ver</a>
+                            <span th:if="${venta.estado == T(merko.merko.Entity.EstadoVenta).ANULADA}" class="badge badge-danger">Anulada</span>
+                            <span th:if="${venta.estado == T(merko.merko.Entity.EstadoVenta).ACTIVA}" class="badge badge-success">Activa</span>
+                        </td>
+                        <td>
+                            <a th:href="@{'/admin/ventas/detalle/' + ${venta.id}}" title="Ver">
+                                <i class="fas fa-eye"></i>
+                            </a>
                         </td>
                     </tr>
                 </tbody>

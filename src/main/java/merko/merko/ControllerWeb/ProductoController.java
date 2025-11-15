@@ -395,13 +395,16 @@ public class ProductoController {
                     .filter(pb -> pb.getProducto() != null && pb.getProducto().getEstado() == merko.merko.Entity.EstadoProducto.ACTIVO)
                     .map(pb -> {
                         Map<String, Object> m = new HashMap<>();
-                        m.put("id", pb.getProducto().getId());
-                        m.put("nombre", pb.getProducto().getNombre());
-                        // prefer branch-specific precio, fallback to producto.precioCompra
-                        Double precio = pb.getPrecio() != null ? pb.getPrecio() : pb.getProducto().getPrecioCompra();
-                        m.put("precioCompra", precio);
-                        m.put("tipo", pb.getProducto().getTipo() != null ? pb.getProducto().getTipo().name() : null);
-                        m.put("stock", pb.getStock() != null ? pb.getStock() : 0);
+                            m.put("id", pb.getProducto().getId());
+                            m.put("nombre", pb.getProducto().getNombre());
+                            // prefer branch-specific precio for both venta and compra if present
+                            Double branchPrecio = pb.getPrecio();
+                            Double ventaPrecio = branchPrecio != null ? branchPrecio : pb.getProducto().getPrecioVenta();
+                            Double compraPrecio = branchPrecio != null ? branchPrecio : pb.getProducto().getPrecioCompra();
+                            m.put("precioVenta", ventaPrecio);
+                            m.put("precioCompra", compraPrecio);
+                            m.put("tipo", pb.getProducto().getTipo() != null ? pb.getProducto().getTipo().name() : null);
+                            m.put("stock", pb.getStock() != null ? pb.getStock() : 0);
                         return m;
                     }).collect(Collectors.toList());
         } catch (Exception ex) {

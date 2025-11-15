@@ -37,6 +37,9 @@ public class CompraController {
 
     @Autowired
     private merko.merko.Service.CompraService compraService;
+    
+    @Autowired
+    private merko.merko.Repository.MovimientoInventarioRepository movimientoInventarioRepository;
 
     @GetMapping("/nueva")
     public String nuevaCompra(Model model) {
@@ -86,6 +89,8 @@ public class CompraController {
         Compra compra = compraRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Compra no encontrada"));
         model.addAttribute("compra", compra);
+        var movimientos = movimientoInventarioRepository.findByCompra_IdOrderByFechaAsc(compra.getId());
+        model.addAttribute("movimientos", movimientos);
         return "admin/compras/detalle";
     }
 }

@@ -54,6 +54,7 @@
                     <tr>
                         <th># Venta</th>
                         <th>Fecha</th>
+                        <th>Hora</th>
                         <th>Cliente</th>
                         <th>Ítems</th>
                         <th>Cantidad</th>
@@ -65,17 +66,18 @@
                 <tbody>
                     <tr th:each="venta : ${ventas}">
                         <td th:text="${'#' + venta.id}">#0</td>
-                        <td th:text="${#temporals.format(venta.fecha, 'dd/MM/yyyy HH:mm')}"></td>
+                        <td th:text="${venta.fecha != null ? #temporals.format(venta.fecha, 'dd/MM/yyyy') : '-'}"></td>
+                        <td th:text="${venta.fecha != null ? #temporals.format(venta.fecha, 'HH:mm') : '-'}"></td>
                         <td>
                             <span th:text="${venta.cliente != null ? venta.cliente.nombre : 'No registrado'}"></span>
                         </td>
                         <td th:text="${venta.detalles != null ? #lists.size(venta.detalles) : (venta.producto != null ? 1 : 0)}"></td>
-                        <td th:text="${venta.cantidad > 0 ? venta.cantidad : '-'}">0</td>
+                        <td th:text="${venta.detalles != null ? #lists.size(venta.detalles) : '-'}">0</td>
                         <td th:text="${'$' + #numbers.formatDecimal(venta.total, 1, 'COMMA', 2, 'POINT')}"></td>
                         <td>
-                            <span th:if="${venta.estado} == T(merko.merko.Entity.EstadoVenta).ACTIVA" class="badge badge-success">ACTIVA</span>
-                            <span th:if="${venta.estado} == T(merko.merko.Entity.EstadoVenta).ANULADA" class="badge badge-danger">ANULADA</span>
-                            <span th:if="${venta.estado} == null" class="badge badge-secondary">—</span>
+                            <span th:if="${venta.estado == T(merko.merko.Entity.EstadoVenta).ACTIVA}" class="badge badge-success">ACTIVA</span>
+                            <span th:if="${venta.estado == T(merko.merko.Entity.EstadoVenta).ANULADA}" class="badge badge-danger">ANULADA</span>
+                            <span th:if="${venta.estado == null}" class="badge badge-secondary">—</span>
                         </td>
                         <td class="actions-col">
                             <div class="actions-cell">

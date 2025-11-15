@@ -3,7 +3,7 @@ package merko.merko.Entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -18,7 +18,7 @@ public class Venta {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDate fecha;
+    private LocalDateTime fecha;
 
     @ManyToOne
     @JoinColumn(name = "cliente_id")

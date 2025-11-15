@@ -7,6 +7,140 @@
     <title>Nueva Venta</title>
     <link rel="stylesheet" th:href="@{/css/components/forms.css}">
     <link rel="stylesheet" th:href="@{/css/components/buttons.css}">
+    <link rel="stylesheet" th:href="@{/css/modules/compras.css}">
+    <!-- Reuse compras.css for table layout and spacing -->
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="header-with-actions">
+            <div class="title-group">
+                <h1 class="page-title">Registrar Nueva Venta</h1>
+                <p class="page-subtitle">Ingresa los datos de la venta al cliente</p>
+            </div>
+        </div>
+
+        <div class="form-container">
+            <form th:action="@{/admin/ventas/guardar}" method="post" id="ventaForm">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                <div class="alert alert-info" style="margin-bottom: 1.5rem; padding: 1rem; background-color: #fff7e6; border: 1px solid #ffdfb8; border-radius: 4px;">
+                    <div style="display: flex; gap: 0.75rem; align-items: start;">
+                        <i class="fas fa-info-circle" style="color: #b36b00; margin-top: 0.25rem;"></i>
+                        <div style="flex: 1;">
+                            <strong>Descuento automático de inventario</strong>
+                            <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem;">
+                                Al registrar esta venta se descontará el stock en inventario. Si la venta está asociada a una sucursal, se descontará el stock de la sucursal (y del producto global) según la configuración.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group two-columns">
+                    <div>
+                        <label for="cliente">Cliente</label>
+                        <div class="form-row">
+                            <div class="field-cell">
+                                <select id="cliente" name="clienteId" class="form-control" required>
+                                    <option value="">Seleccione un cliente</option>
+                                    <option th:each="cliente : ${clientes}"
+                                            th:value="${cliente.id}"
+                                            th:text="${cliente.nombre}"></option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="proveedor">Proveedor (opcional, para filtrar sucursales)</label>
+                        <div class="form-row">
+                            <div class="field-cell">
+                                <select id="proveedor" name="proveedorId" class="form-control">
+                                    <option value="">Seleccione un proveedor</option>
+                                    <option th:each="prov : ${proveedores}"
+                                            th:value="${prov.id}"
+                                            th:text="${prov.nombre}"></option>
+                                </select>
+                            </div>
+                            <div class="actions-cell">
+                                <button type="button" id="btnGestionarProveedor" class="btn-icon btn-icon-secondary" title="Gestionar proveedor" aria-label="Gestionar proveedor" onclick="window.location.href='/admin/proveedores'">
+                                    <i class="fas fa-truck"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="sucursal">Sucursal (opcional)</label>
+                    <div class="form-row">
+                        <div class="field-cell">
+                            <select id="sucursal" name="sucursalId" class="form-control">
+                                <option value="">(Sin sucursal)</option>
+                                <!-- Sucursales se cargan vía AJAX al seleccionar un proveedor. No mostrar lista por defecto aquí. -->
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Ítems de la venta <span class="text-muted" style="font-weight: normal;">(productos disponibles en la sucursal)</span></label>
+                    <div class="table-container" style="margin-top:.5rem;">
+                        <table class="table-admin" id="tablaItems">
+                            <thead>
+                                <tr>
+                                    <th style="min-width:260px;">Producto</th>
+                                    <th style="width:120px;">Cantidad</th>
+                                    <th style="width:160px;" title="Precio de Venta">P. Venta</th>
+                                    <th style="width:160px;">Total</th>
+                                    <th class="actions-col">
+                                        <div style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;">
+                                            <span>Acciones</span>
+                                            <button type="button" class="btn-icon btn-icon-primary" id="btnAgregarItem" title="Agregar ítem" aria-label="Agregar ítem">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="itemsBody">
+                                <!-- Filas dinámicas agregadas por JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="producto-info" id="resumenVenta" style="display:flex; justify-content: space-between; align-items:center; flex-wrap:wrap; gap:.75rem;">
+                    <div>
+                        <p style="margin:0;">Total de la venta: <strong id="totalVenta">$0.00</strong></p>
+                    </div>
+                </div>
+
+                <div class="btn-container">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Guardar venta
+                    </button>
+                    <a th:href="@{/admin/ventas}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <script th:src="@{/js/pages/ventas/crear.js}"></script>
+    </th:block>
+</body>
+</html>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{shared/layouts/admin}"
+      lang="es">
+<head>
+    <title>Nueva Venta</title>
+    <link rel="stylesheet" th:href="@{/css/components/forms.css}">
+    <link rel="stylesheet" th:href="@{/css/components/buttons.css}">
     <link rel="stylesheet" th:href="@{/css/modules/ventas.css}">
 </head>
 <body>
@@ -22,54 +156,78 @@
             <form th:action="@{/admin/ventas/guardar}" method="post" id="ventaForm">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-                <div class="form-group">
-                    <label for="cliente">Cliente</label>
-                    <select id="cliente" name="clienteId" class="form-control" required>
-                        <option value="">Seleccione un cliente</option>
-                        <option th:each="cliente : ${clientes}"
-                                th:value="${cliente.id}"
-                                th:text="${cliente.nombre}"></option>
-                    </select>
-                </div>
-
-                <div class="producto-list" id="productos">
-                    <div class="producto-item">
-                        <div class="cell-inline">
-                            <select name="detalles[0].productoId" class="producto-select" required>
-                                <option value="">Seleccione un producto</option>
-                                <option th:each="producto : ${productos}"
-                                        th:value="${producto.id}"
-                                        th:text="${producto.nombre}"
-                                        th:data-precio="${producto.precioVenta}"
-                                        th:data-stock="${producto.stock}"></option>
-                            </select>
-                            <div class="item-meta">
-                                <span class="badge price">P. Unit: $<span class="price-value">0.00</span></span>
-                                <span class="badge stock">Stock: <span class="stock-value">0</span></span>
-                            </div>
+                <div class="alert alert-info" style="margin-bottom: 1.5rem; padding: 1rem; background-color: #fff4e5; border: 1px solid #ffd9b3; border-radius: 4px;">
+                    <div style="display:flex; gap:.75rem; align-items:start;">
+                        <i class="fas fa-info-circle" style="color:#b36b00; margin-top:.25rem;"></i>
+                        <div style="flex:1;">
+                            <strong>Nota sobre ventas</strong>
+                            <p style="margin:0.5rem 0 0 0; font-size:0.9rem;">Este formulario funciona similar al de compras. Selecciona la sucursal para listar los productos locales (si aplica). Al guardar la venta se descontará stock (global y por sucursal si existe).</p>
                         </div>
-                        <input type="number" name="detalles[0].cantidad"
-                               min="1" value="1" required
-                               class="cantidad-input"
-                               onchange="actualizarFila(this.closest('.producto-item'))">
-                        <span class="subtotal">$0.00</span>
-                        <button type="button" class="btn btn-remove" onclick="eliminarProducto(this)">
-                            <i class="fas fa-trash"></i>
-                        </button>
                     </div>
                 </div>
 
-                <div class="table-actions">
-                    <button type="button" class="btn btn-add" onclick="agregarProducto()" title="Agregar ítem">
-                        <i class="fas fa-plus"></i>
-                    </button>
+                <div class="form-group">
+                    <label for="cliente">Cliente</label>
+                    <div class="form-row">
+                        <div class="field-cell">
+                            <select id="cliente" name="clienteId" class="form-control" required>
+                                <option value="">Seleccione un cliente</option>
+                                <option th:each="cliente : ${clientes}"
+                                        th:value="${cliente.id}"
+                                        th:text="${cliente.nombre}"></option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="total-section">
-                    Total: <strong id="totalVenta">$0.00</strong>
+                <div class="form-group">
+                    <label for="sucursal">Sucursal (opcional)</label>
+                    <div class="form-row">
+                        <div class="field-cell">
+                            <select id="sucursal" name="sucursalId" class="form-control">
+                                <option value="">(Sin sucursal)</option>
+                                <option th:each="s : ${sucursales}"
+                                        th:value="${s.id}"
+                                        th:text="${s.nombre + (s.ciudad != null ? ' — ' + s.ciudad : '') + (s.pais != null ? ', ' + s.pais : '')}"></option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="btn-container">
+                <div class="form-group">
+                    <label>Ítems de la venta <span class="text-muted" style="font-weight: normal;">(productos activos)</span></label>
+                    <div class="table-container" style="margin-top:.5rem;">
+                        <table class="table-admin" id="tablaItems">
+                            <thead>
+                                <tr>
+                                    <th style="min-width:260px;">Producto</th>
+                                    <th style="width:120px;">Cantidad</th>
+                                    <th style="width:160px;" title="Precio unitario">P. Unit</th>
+                                    <th style="width:160px;">Total</th>
+                                    <th class="actions-col">
+                                        <div style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;">
+                                            <span>Acciones</span>
+                                            <button type="button" class="btn-icon btn-icon-primary" id="btnAgregarItem" title="Agregar ítem" aria-label="Agregar ítem">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="itemsBody">
+                                <!-- Filas dinámicas -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="producto-info" id="resumenVenta" style="display:flex; justify-content: space-between; align-items:center; flex-wrap:wrap; gap:.75rem; margin-top:1rem;">
+                    <div>
+                        <p style="margin:0;">Total de la venta: <strong id="totalVenta">$0.00</strong></p>
+                    </div>
+                </div>
+
+                <div class="btn-container" style="margin-top:1rem;">
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save"></i> Guardar venta
                     </button>

@@ -10,10 +10,12 @@ import org.springframework.transaction.annotation.Transactional;
 import merko.merko.Entity.DetalleVenta;
 import merko.merko.Entity.Producto;
 import merko.merko.Entity.Venta;
+import merko.merko.Entity.ProductBranch;
 import merko.merko.Repository.MovimientoInventarioRepository;
 import merko.merko.Repository.ProductoRepository;
 import merko.merko.Repository.VentaRepository;
 import merko.merko.Repository.LoteRepository;
+import merko.merko.Repository.ProductBranchRepository;
 
 @Service
 public class VentaService {
@@ -22,15 +24,18 @@ public class VentaService {
     private final ProductoRepository productoRepository;
     private final MovimientoInventarioRepository movimientoInventarioRepository;
     private final LoteRepository loteRepository;
+    private final ProductBranchRepository productBranchRepository;
 
     public VentaService(VentaRepository ventaRepository,
                         ProductoRepository productoRepository,
                         MovimientoInventarioRepository movimientoInventarioRepository,
-                        LoteRepository loteRepository) {
+                        LoteRepository loteRepository,
+                        ProductBranchRepository productBranchRepository) {
         this.ventaRepository = ventaRepository;
         this.productoRepository = productoRepository;
         this.movimientoInventarioRepository = movimientoInventarioRepository;
         this.loteRepository = loteRepository;
+        this.productBranchRepository = productBranchRepository;
     }
 
     public List<Venta> getAllVentas() {
@@ -43,7 +48,7 @@ public class VentaService {
     }
 
     @Transactional
-    public Venta saveVenta(Venta venta) {
+    public Venta saveVenta(Venta venta, Long sucursalId) {
         if (venta.getCliente() == null) {
             throw new IllegalArgumentException("La venta debe estar asociada a un cliente.");
         }
@@ -65,7 +70,6 @@ public class VentaService {
             Producto producto = productoRepository.findById(detalle.getProducto().getId())
                     .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado: ID " + detalle.getProducto().getId()));
 
-
             // Solo se venden productos terminados activos
             if (producto.getEstado() != merko.merko.Entity.EstadoProducto.ACTIVO) {
                 throw new IllegalArgumentException("El producto " + producto.getNombre() + " no está activo para la venta.");
@@ -73,8 +77,21 @@ public class VentaService {
             if (producto.getTipo() != merko.merko.Entity.TipoProducto.PRODUCTO_TERMINADO) {
                 throw new IllegalArgumentException("No se puede vender materia prima: " + producto.getNombre());
             }
-            if (producto.getStock() < detalle.getCantidad()) {
-                throw new IllegalArgumentException("Stock insuficiente para el producto: " + producto.getNombre());
+
+            // Si se seleccionó sucursal, intentar obtener ProductBranch
+            Optional<ProductBranch> pbOpt = (sucursalId != null) ? productBranchRepository.findByProductoIdAndBranchId(producto.getId(), sucursalId) : Optional.empty();
+            ProductBranch pb = pbOpt.orElse(null);
+
+            // Validar stock: preferir stock por sucursal si existe
+            if (pb != null) {
+                int stockPb = pb.getStock() == null ? 0 : pb.getStock();
+                if (stockPb < detalle.getCantidad()) {
+                    throw new IllegalArgumentException("Stock insuficiente en la sucursal para el producto: " + producto.getNombre());
+                }
+            } else {
+                if (producto.getStock() < detalle.getCantidad()) {
+                    throw new IllegalArgumentException("Stock insuficiente para el producto: " + producto.getNombre());
+                }
             }
 
             // Asignación de lotes FEFO si el producto gestiona lotes
@@ -109,6 +126,7 @@ public class VentaService {
                     // usar el costo del lote como costo de salida
                     mov.setCostoUnitario(lote.getCostoUnitario());
                     mov.setFecha(java.time.LocalDateTime.now());
+                    if (pb != null) mov.setProductBranch(pb);
                     // venta y referencia se setean tras persistir la venta
                     movimientosDraft.add(mov);
                     porVender -= tomar;
@@ -123,6 +141,12 @@ public class VentaService {
             producto.setStock(producto.getStock() - detalle.getCantidad());
             productoRepository.save(producto);
 
+            // Si hay ProductBranch, decrementar stock por sucursal también
+            if (pb != null) {
+                int cur = pb.getStock() == null ? 0 : pb.getStock();
+                pb.setStock(cur - detalle.getCantidad());
+                productBranchRepository.save(pb);
+            }
 
             double subtotal = detalle.getCantidad() * producto.getPrecioVenta();
             detalle.setPrecioUnitario(producto.getPrecioVenta());
@@ -139,6 +163,7 @@ public class VentaService {
                 // sin lotes: usar precioCompra del producto como costo de salida (aproximación)
                 mov.setCostoUnitario(producto.getPrecioCompra());
                 mov.setFecha(java.time.LocalDateTime.now());
+                if (pb != null) mov.setProductBranch(pb);
                 movimientosDraft.add(mov);
             }
         }
@@ -147,8 +172,8 @@ public class VentaService {
             throw new IllegalArgumentException("El total de la venta no puede ser negativo.");
         }
 
-        venta.setTotal(totalVenta);
-        venta.setFecha(LocalDate.now());
+    venta.setTotal(totalVenta);
+    venta.setFecha(java.time.LocalDateTime.now());
 
         Venta saved = ventaRepository.save(venta);
         // Persistir movimientos preparados con referencia a la venta
@@ -208,6 +233,17 @@ public class VentaService {
             // Reponer stock total
             producto.setStock(producto.getStock() + cant);
             productoRepository.save(producto);
+
+            // Reponer stock de sucursal si aplica
+            var pb = mov.getProductBranch();
+            if (pb != null) {
+                var pbRef = productBranchRepository.findById(pb.getId()).orElse(null);
+                if (pbRef != null) {
+                    int cur = pbRef.getStock() == null ? 0 : pbRef.getStock();
+                    pbRef.setStock(cur + cant);
+                    productBranchRepository.save(pbRef);
+                }
+            }
 
             // Registrar ajuste de reversa
             var ajuste = new merko.merko.Entity.MovimientoInventario();

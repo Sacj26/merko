@@ -1,6 +1,6 @@
 package merko.merko.Service;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -110,8 +110,8 @@ public class CompraService {
         if (totalCompra <= 0) {
             throw new IllegalArgumentException("El total de la compra debe ser mayor a cero.");
         }
-        compra.setTotal(totalCompra);
-        compra.setFecha(LocalDate.now());
+    compra.setTotal(totalCompra);
+    compra.setFecha(LocalDateTime.now());
 
         return compraRepository.save(compra);
     }
@@ -127,8 +127,8 @@ public class CompraService {
                                 Long productoId,
                                 Integer cantidad,
                                 Double precioUnitario) {
-        Compra compra = new Compra();
-        compra.setFecha(LocalDate.now());
+    Compra compra = new Compra();
+    compra.setFecha(LocalDateTime.now());
 
         if (compraForm.getProveedorId() != null) {
             Optional<Proveedor> proveedorOpt = proveedorRepository.findById(compraForm.getProveedorId());
@@ -265,7 +265,7 @@ public class CompraService {
                     lote = new merko.merko.Entity.Lote();
                     lote.setProducto(p);
                     lote.setCodigoLote(java.util.UUID.randomUUID().toString());
-                    LocalDate hoy = LocalDate.now();
+                    java.time.LocalDate hoy = java.time.LocalDate.now();
                     lote.setFechaFabricacion(hoy);
                     if (Boolean.TRUE.equals(p.getRequiereVencimiento()) && p.getVidaUtilDias() != null && p.getVidaUtilDias() > 0) {
                         lote.setFechaVencimiento(hoy.plusDays(p.getVidaUtilDias()));

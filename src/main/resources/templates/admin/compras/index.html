@@ -54,6 +54,7 @@
                     <tr>
                         <th># Compra</th>
                         <th>Fecha</th>
+                        <th>Hora</th>
                         <th>Proveedor</th>
                         <th>Producto</th>
                         <th>Ítems</th>
@@ -65,7 +66,8 @@
                 <tbody>
                     <tr th:each="compra : ${compras}">
                         <td th:text="${'#' + compra.id}">#0</td>
-                        <td th:text="${#temporals.format(compra.fecha, 'dd/MM/yyyy')}"></td>
+                        <td th:text="${compra.fecha != null ? #temporals.format(compra.fecha, 'dd/MM/yyyy') : '-'}"></td>
+                        <td th:text="${compra.fecha != null ? #temporals.format(compra.fecha, 'HH:mm') : '-'}"></td>
                         <td th:text="${compra.proveedor != null ? compra.proveedor.nombre : '—'}"></td>
                         <td>
                             <span th:text="${compra.producto != null ? compra.producto.nombre : 'Múltiples'}">Producto</span>

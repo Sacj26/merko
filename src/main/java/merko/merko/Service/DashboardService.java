@@ -41,18 +41,26 @@ public class DashboardService {
     }
 
     public Map<String, Object> kpis() {
-        LocalDate hoy = LocalDate.now();
-        LocalDate inicioMes = hoy.withDayOfMonth(1);
+    LocalDate hoy = LocalDate.now();
+    LocalDate inicioMes = hoy.withDayOfMonth(1);
 
-        logger.info("Calculando KPIs para fecha: {}, inicio mes: {}", hoy, inicioMes);
+    logger.info("Calculando KPIs para fecha: {}, inicio mes: {}", hoy, inicioMes);
 
-        Double totalHoy = ventaRepository.sumTotalBetweenAndEstado(hoy, hoy, EstadoVenta.ACTIVA);
-        Double totalMes = ventaRepository.sumTotalBetweenAndEstado(inicioMes, hoy, EstadoVenta.ACTIVA);
-        long ventasHoy = ventaRepository.countByFechaBetweenAndEstado(hoy, hoy, EstadoVenta.ACTIVA);
+    // Convertir a LocalDateTime para consultar rangos sobre campos LocalDateTime
+    java.time.LocalDateTime startOfToday = hoy.atStartOfDay();
+    java.time.LocalDateTime endOfToday = hoy.atTime(23, 59, 59, 999_999_999);
+    java.time.LocalDateTime startOfMonth = inicioMes.atStartOfDay();
+
+    Double totalHoy = ventaRepository.sumTotalBetweenAndEstado(startOfToday, endOfToday, EstadoVenta.ACTIVA);
+    Double totalMes = ventaRepository.sumTotalBetweenAndEstado(startOfMonth, endOfToday, EstadoVenta.ACTIVA);
+    long ventasHoy = ventaRepository.countByFechaBetweenAndEstado(startOfToday, endOfToday, EstadoVenta.ACTIVA);
         double ticketPromedio = ventasHoy == 0 ? 0 : (totalHoy != null ? totalHoy : 0) / ventasHoy;
         long productosActivos = productoRepository.countByEstado(EstadoProducto.ACTIVO);
 
-    Double comprasMes = compraRepository.sumTotalBetween(inicioMes, hoy);
+    // Compras en el mes (usar LocalDateTime para rangos)
+    java.time.LocalDateTime startMonth = inicioMes.atStartOfDay();
+    java.time.LocalDateTime endOfTodayForCompras = hoy.atTime(23, 59, 59, 999_999_999);
+    Double comprasMes = compraRepository.sumTotalBetween(startMonth, endOfTodayForCompras);
 
     logger.info("KPIs calculados - totalHoy: {}, totalMes: {}, ventasHoy: {}, ticketPromedio: {}, productosActivos: {}, comprasMes: {}", 
             totalHoy, totalMes, ventasHoy, ticketPromedio, productosActivos, comprasMes);
@@ -68,14 +76,30 @@ public class DashboardService {
     }
 
     public List<Map<String, Object>> ventasDiarias(int dias) {
-        LocalDate fin = LocalDate.now();
-        LocalDate inicio = fin.minusDays(dias - 1L);
-        List<Object[]> rows = ventaRepository.dailyTotalsBetween(inicio, fin, EstadoVenta.ACTIVA);
+    LocalDate fin = LocalDate.now();
+    LocalDate inicio = fin.minusDays(dias - 1L);
+    java.time.LocalDateTime start = inicio.atStartOfDay();
+    java.time.LocalDateTime end = fin.atTime(23, 59, 59, 999_999_999);
+    List<Object[]> rows = ventaRepository.dailyTotalsBetween(start, end, EstadoVenta.ACTIVA);
         Map<LocalDate, Double> map = new HashMap<>();
         for (Object[] r : rows) {
-            LocalDate fecha = (LocalDate) r[0];
+            Object rawFecha = r[0];
+            LocalDate fecha = null;
+            if (rawFecha instanceof LocalDate) {
+                fecha = (LocalDate) rawFecha;
+            } else if (rawFecha instanceof java.sql.Date) {
+                fecha = ((java.sql.Date) rawFecha).toLocalDate();
+            } else if (rawFecha != null) {
+                // try to parse as ISO string
+                try {
+                    fecha = LocalDate.parse(rawFecha.toString());
+                } catch (Exception ex) {
+                    logger.warn("No se pudo parsear la fecha del row: {}", rawFecha);
+                    continue;
+                }
+            }
             Double total = (Double) r[1];
-            map.put(fecha, Optional.ofNullable(total).orElse(0d));
+            if (fecha != null) map.put(fecha, Optional.ofNullable(total).orElse(0d));
         }
         DateTimeFormatter fmt = DateTimeFormatter.ISO_DATE;
         List<Map<String, Object>> out = new ArrayList<>();
@@ -89,9 +113,11 @@ public class DashboardService {
     }
 
     public List<Map<String, Object>> topProductos(int dias, int n) {
-        LocalDate fin = LocalDate.now();
-        LocalDate inicio = fin.minusDays(dias - 1L);
-        List<Object[]> rows = detalleVentaRepository.topProductosPorCantidad(inicio, fin, EstadoVenta.ACTIVA);
+    LocalDate fin = LocalDate.now();
+    LocalDate inicio = fin.minusDays(dias - 1L);
+    java.time.LocalDateTime startTp = inicio.atStartOfDay();
+    java.time.LocalDateTime endTp = fin.atTime(23, 59, 59, 999_999_999);
+    List<Object[]> rows = detalleVentaRepository.topProductosPorCantidad(startTp, endTp, EstadoVenta.ACTIVA);
         return rows.stream().limit(n).map(r -> {
             Map<String, Object> m = new HashMap<>();
             m.put("productoId", r[0]);
@@ -104,17 +130,32 @@ public class DashboardService {
 
     // Compras
     public List<Map<String, Object>> comprasDiarias(int dias) {
-        LocalDate fin = LocalDate.now();
-        LocalDate inicio = fin.minusDays(dias - 1L);
-        logger.info("Consultando compras diarias desde {} hasta {}", inicio, fin);
-        List<Object[]> rows = compraRepository.dailyTotalsBetween(inicio, fin);
+    LocalDate fin = LocalDate.now();
+    LocalDate inicio = fin.minusDays(dias - 1L);
+    logger.info("Consultando compras diarias desde {} hasta {}", inicio, fin);
+    java.time.LocalDateTime startC = inicio.atStartOfDay();
+    java.time.LocalDateTime endC = fin.atTime(23, 59, 59, 999_999_999);
+    List<Object[]> rows = compraRepository.dailyTotalsBetween(startC, endC);
         logger.info("Compras diarias encontradas: {} filas", rows.size());
         Map<LocalDate, Double> map = new HashMap<>();
         for (Object[] r : rows) {
-            LocalDate fecha = (LocalDate) r[0];
+            Object rawFecha = r[0];
+            LocalDate fecha = null;
+            if (rawFecha instanceof LocalDate) {
+                fecha = (LocalDate) rawFecha;
+            } else if (rawFecha instanceof java.sql.Date) {
+                fecha = ((java.sql.Date) rawFecha).toLocalDate();
+            } else if (rawFecha != null) {
+                try {
+                    fecha = LocalDate.parse(rawFecha.toString());
+                } catch (Exception ex) {
+                    logger.warn("No se pudo parsear la fecha del row (compras): {}", rawFecha);
+                    continue;
+                }
+            }
             Double total = (Double) r[1];
             logger.debug("Compra en fecha {} con total {}", fecha, total);
-            map.put(fecha, Optional.ofNullable(total).orElse(0d));
+            if (fecha != null) map.put(fecha, Optional.ofNullable(total).orElse(0d));
         }
         DateTimeFormatter fmt = DateTimeFormatter.ISO_DATE;
         List<Map<String, Object>> out = new ArrayList<>();

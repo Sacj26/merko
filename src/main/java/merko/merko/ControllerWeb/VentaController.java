@@ -1,6 +1,6 @@
 package merko.merko.ControllerWeb;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +20,7 @@ import merko.merko.Entity.Rol;
 import merko.merko.Entity.Usuario;
 import merko.merko.Entity.Venta;
 import merko.merko.Repository.ProductoRepository;
+import merko.merko.Repository.BranchRepository;
 import merko.merko.Repository.MovimientoInventarioRepository;
 import merko.merko.Service.UsuarioService;
 import merko.merko.Service.VentaService;
@@ -35,6 +36,12 @@ public class VentaController {
 
     @Autowired
     private ProductoRepository productoRepository;
+
+    @Autowired
+    private BranchRepository branchRepository;
+
+    @Autowired
+    private merko.merko.Service.ProveedorService proveedorService;
 
 
     @Autowired
@@ -62,6 +69,11 @@ public class VentaController {
 
         model.addAttribute("clientes", usuarioService.getUsuariosByRol(Rol.CLIENTE));
 
+        // Sucursales para seleccionar origen de la venta
+    model.addAttribute("sucursales", branchRepository.findAll());
+    // Proveedores para filtrar sucursales (opcional)
+    model.addAttribute("proveedores", proveedorService.getAllProveedores());
+
         return "admin/ventas/crear";
     }
 
@@ -74,7 +86,7 @@ public class VentaController {
     @PostMapping("/guardar")
     public String guardarVenta(@ModelAttribute VentaForm ventaForm, Model model) {
         Venta venta = new Venta();
-        venta.setFecha(LocalDate.now());
+        venta.setFecha(LocalDateTime.now());
 
         if (ventaForm.getClienteId() != null) {
             Optional<Usuario> clienteOpt = usuarioService.getUsuarioById(ventaForm.getClienteId());
@@ -96,7 +108,7 @@ public class VentaController {
         venta.setDetalles(detalles);
 
         try {
-            ventaService.saveVenta(venta);
+            ventaService.saveVenta(venta, ventaForm.getSucursalId());
             return "redirect:/admin/ventas";
         } catch (IllegalArgumentException ex) {
             model.addAttribute("error", ex.getMessage());
@@ -107,6 +119,8 @@ public class VentaController {
                     .toList();
             model.addAttribute("productos", productos);
             model.addAttribute("clientes", usuarioService.getUsuariosByRol(Rol.CLIENTE));
+            model.addAttribute("sucursales", branchRepository.findAll());
+            model.addAttribute("proveedores", proveedorService.getAllProveedores());
             model.addAttribute("ventaForm", ventaForm);
             return "admin/ventas/crear";
         }

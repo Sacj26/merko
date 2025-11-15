@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -18,7 +19,7 @@ public interface DetalleVentaRepository extends JpaRepository<DetalleVenta, Long
 	    "where v.estado = :estado and v.fecha between :start and :end " +
 	    "group by dv.producto.id, dv.producto.nombre " +
 	    "order by cantidad desc")
-    List<Object[]> topProductosPorCantidad(@Param("start") LocalDate start,
-					   @Param("end") LocalDate end,
+	List<Object[]> topProductosPorCantidad(@Param("start") LocalDateTime start,
+					   @Param("end") LocalDateTime end,
 					   @Param("estado") EstadoVenta estado);
 }

@@ -42,5 +42,9 @@ public class MovimientoInventario {
     @JoinColumn(name = "venta_id")
     private Venta venta;
 
+    @ManyToOne
+    @JoinColumn(name = "product_branch_id")
+    private ProductBranch productBranch;
+
     private String referencia; // texto libre (p. ej., codigo de documento)
 }

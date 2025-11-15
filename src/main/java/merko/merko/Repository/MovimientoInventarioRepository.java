@@ -15,4 +15,5 @@ public interface MovimientoInventarioRepository extends JpaRepository<Movimiento
     List<MovimientoInventario> findByProductoAndFechaBetweenOrderByFechaDesc(Producto producto, LocalDateTime from, LocalDateTime to);
     List<MovimientoInventario> findByProductoAndTipoOrderByFechaDesc(Producto producto, TipoMovimiento tipo);
     List<MovimientoInventario> findByVenta_IdOrderByFechaAsc(Long ventaId);
+    List<MovimientoInventario> findByCompra_IdOrderByFechaAsc(Long compraId);
 }
