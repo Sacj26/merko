@@ -17,7 +17,11 @@
         </div>
 
         <div th:if="${clienteLogueado != null}" class="usuario-logged">
-            <span>Hola, <span th:text="${clienteLogueado.nombre}">Cliente</span></span>
+            <div class="user-info">
+                <img th:if="${clienteLogueado.fotoPerfil != null}" th:src="@{${clienteLogueado.fotoPerfil}}" alt="Avatar" class="header-avatar"/>
+                <img th:if="${clienteLogueado.fotoPerfil == null}" th:src="@{/img/placeholder.png}" alt="Avatar" class="header-avatar"/>
+                <span class="user-name">Hola, <span th:text="${clienteLogueado.nombre}">Cliente</span></span>
+            </div>
             <a th:href="@{/carrito}" class="btn-carrito">Mi Carrito</a>
             <form th:action="@{/logout}" method="post" style="display:inline">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />

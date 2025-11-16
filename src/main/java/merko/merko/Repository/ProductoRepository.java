@@ -14,10 +14,10 @@ import java.util.List;
 @Repository
 public interface ProductoRepository extends JpaRepository<Producto, Long> {
 
-    @Query("select p from Producto p where (:proveedorId is null or p.proveedor.id = :proveedorId) " +
-	    "and (:q is null or lower(p.nombre) like lower(concat('%',:q,'%')) " +
-	    "or lower(p.descripcion) like lower(concat('%',:q,'%')))")
-    Page<Producto> search(@Param("proveedorId") Long proveedorId,
+	@Query("select p from Producto p where (:proveedorId is null or p.proveedor.id = :proveedorId) " +
+		  "and (:q is null or lower(p.nombre) like lower(concat('%',:q,'%')) " +
+		  "or lower(p.descripcion) like lower(concat('%',:q,'%')))" )
+	Page<Producto> search(@Param("proveedorId") Long proveedorId,
 			  @Param("q") String q,
 			  Pageable pageable);
 

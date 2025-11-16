@@ -3,9 +3,9 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{shared/layouts/public}"
       lang="es">
-<head>
+<head layout:fragment="head">
     <title>Iniciar Sesión</title>
-    <link rel="stylesheet" th:href="@{/css/login.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/login.css}">
 </head>
 <body>
     <div layout:fragment="content">

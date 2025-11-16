@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mi Perfil - Merko</title>
+    <link rel="stylesheet" th:href="@{/css/publico/productos.css}">
+</head>
+<body>
+<header class="public-header">
+    <div class="container header-inner">
+        <a th:href="@{/}" class="brand">Merko</a>
+        <nav class="public-nav">
+            <a th:href="@{/publico/productos}">Tienda</a>
+            <a th:href="@{/carrito}">Carrito</a>
+            <a th:href="@{/logout}">Salir</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container perfil-container">
+    <h1>Mi perfil</h1>
+    <div th:if="${param.success}">
+        <div class="alert success">Perfil actualizado correctamente.</div>
+    </div>
+
+    <form th:action="@{/publico/perfil}" th:object="${usuario}" method="post" enctype="multipart/form-data" class="perfil-form">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <div class="form-row">
+            <label>Nombre</label>
+            <input type="text" th:field="*{nombre}" />
+        </div>
+        <div class="form-row">
+            <label>Apellido</label>
+            <input type="text" th:field="*{apellido}" />
+        </div>
+        <div class="form-row">
+            <label>Teléfono</label>
+            <input type="text" th:field="*{telefono}" />
+        </div>
+        <div class="form-row">
+            <label>Dirección</label>
+            <input type="text" th:field="*{direccion}" />
+        </div>
+        <div class="form-row">
+            <label>Correo</label>
+            <input type="email" th:value="${usuario.correo}" disabled />
+        </div>
+        <div class="form-row avatar-row">
+            <label>Foto de perfil</label>
+            <div class="avatar-wrap">
+                <img th:if="${usuario.fotoPerfil != null}" th:src="@{${usuario.fotoPerfil}}" alt="Avatar" class="avatar-img" />
+                <img th:if="${usuario.fotoPerfil == null}" th:src="@{/img/placeholder.png}" alt="Avatar" class="avatar-img" />
+            </div>
+            <input type="file" name="avatar" accept="image/*" />
+        </div>
+
+        <div class="form-actions">
+            <button class="btn">Guardar cambios</button>
+            <a th:href="@{/publico/productos}" class="btn btn-secondary">Volver a la tienda</a>
+        </div>
+    </form>
+</main>
+
+<footer class="public-footer">
+    <div class="container">
+        <p>© <span th:text="${T(java.time.Year).now().value}"></span> Merko</p>
+    </div>
+</footer>
+
+</body>
+</html>

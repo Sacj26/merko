@@ -7,6 +7,8 @@
     <title layout:title-pattern="$CONTENT_TITLE - Merko">Merko</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link rel="stylesheet" th:href="@{/css/productos-publicos.css}" />
+    <!-- Allow child templates to inject additional head content (styles, meta tags) -->
+    <th:block layout:fragment="head"></th:block>
 </head>
 <body>
     <!-- Header Fragment -->

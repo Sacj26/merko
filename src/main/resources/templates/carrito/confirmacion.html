@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Compra confirmada - Merko</title>
+    <link rel="stylesheet" th:href="@{/css/modules/carrito.css}">
+</head>
+<body>
+<header class="public-header">
+    <div class="container header-inner">
+        <a th:href="@{/}" class="brand">Merko</a>
+        <nav class="public-nav">
+            <a th:href="@{/publico/productos}">Tienda</a>
+        </nav>
+    </div>
+</header>
+
+<main class="carrito-container">
+    <h2>Compra realizada</h2>
+    <p class="message success">¡Gracias! Tu compra se ha registrado correctamente. En breve recibirás información en tu correo.</p>
+    <div class="buttons">
+        <a th:href="@{/publico/productos}" class="btn btn-seguir-comprando">Volver a la tienda</a>
+    </div>
+</main>
+
+<footer class="public-footer">
+    <div class="container">
+        <p>© <span th:text="${T(java.time.Year).now().value}"></span> Merko</p>
+    </div>
+</footer>
+</body>
+</html>

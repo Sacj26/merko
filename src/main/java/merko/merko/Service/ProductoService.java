@@ -27,7 +27,8 @@ public class ProductoService {
     }
 
     public Page<Producto> getProductos(String q, Long proveedorId, Pageable pageable) {
-        return productoRepository.search(proveedorId, (q != null && !q.isBlank()) ? q : null, pageable);
+        String qParam = (q != null && !q.isBlank()) ? q : null;
+        return productoRepository.search(proveedorId, qParam, pageable);
     }
 
     public Optional<Producto> getProductoById(Long id) {

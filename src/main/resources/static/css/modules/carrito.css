@@ -1,13 +1,14 @@
 /* Estilos específicos para el carrito de compras */
 
-/* Container principal */
+:root{ --color-primario: var(--accent, #16a34a); --color-secundario: var(--accent-2, #0ea5a4); --color-texto: #111827; }
+
 .carrito-container {
-    max-width: 900px;
+    max-width: 980px;
     margin: 40px auto;
-    background-color: white;
-    padding: 30px;
+    background-color: var(--card, #fff);
+    padding: 28px;
     border-radius: 12px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 30px rgba(12,18,28,0.06);
 }
 
 /* Tabla del carrito */
@@ -20,18 +21,17 @@
 .cart-table th, 
 .cart-table td {
     padding: 12px;
-    text-align: center;
-    border-bottom: 1px solid #ddd;
+    text-align: left;
+    border-bottom: 1px solid #f1f5f9;
 }
 
 .cart-table th {
-    background-color: var(--color-primario);
-    color: white;
+    background-color: transparent;
+    color: var(--muted, #6b7280);
+    font-weight:600;
 }
 
-.cart-table td {
-    background-color: #f9f9f9;
-}
+.cart-table td { background-color: transparent; }
 
 /* Control de cantidad */
 .quantity-control {
@@ -45,9 +45,9 @@
     background: var(--color-secundario);
     color: white;
     border: none;
-    width: 24px;
-    height: 24px;
-    border-radius: 4px;
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -65,13 +65,13 @@
 /* Sección de total */
 .total-section {
     text-align: right;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     margin-top: 15px;
-    font-weight: bold;
+    font-weight: 700;
     color: var(--color-texto);
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 8px;
+    background: linear-gradient(90deg, rgba(14,165,164,0.04), rgba(22,163,74,0.03));
+    padding: 14px;
+    border-radius: 10px;
 }
 
 .total-section .total-label {
@@ -90,16 +90,11 @@
     justify-content: space-between;
     margin-top: 20px;
     padding-top: 20px;
-    border-top: 1px solid #eee;
+    border-top: 1px dashed #eef2f6;
 }
 
-.cart-actions .btn-seguir-comprando {
-    background-color: var(--color-secundario);
-}
-
-.cart-actions .btn-finalizar {
-    background-color: var(--color-primario);
-}
+.cart-actions .btn-seguir-comprando { background-color: transparent; color: var(--muted); border:1px solid #e6eef2f0; padding:10px 12px; border-radius:8px; }
+.cart-actions .btn-finalizar { background-color: var(--color-primario); color:white; padding:10px 14px; border-radius:8px; border:none; }
 
 /* Mensajes */
 .message {

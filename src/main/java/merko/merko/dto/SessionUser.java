@@ -11,16 +11,22 @@ public class SessionUser {
     private String username;
     private String nombre;
     private String correo;
+    private String fotoPerfil;
     private Rol rol;
 
     public SessionUser() {
     }
 
     public SessionUser(Long id, String username, String nombre, String correo, Rol rol) {
+        this(id, username, nombre, correo, null, rol);
+    }
+
+    public SessionUser(Long id, String username, String nombre, String correo, String fotoPerfil, Rol rol) {
         this.id = id;
         this.username = username;
         this.nombre = nombre;
         this.correo = correo;
+        this.fotoPerfil = fotoPerfil;
         this.rol = rol;
     }
 
@@ -58,6 +64,14 @@ public class SessionUser {
 
     public Rol getRol() {
         return rol;
+    }
+
+    public String getFotoPerfil() {
+        return fotoPerfil;
+    }
+
+    public void setFotoPerfil(String fotoPerfil) {
+        this.fotoPerfil = fotoPerfil;
     }
 
     public void setRol(Rol rol) {

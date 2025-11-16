@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Productos - Merko</title>
+    <link rel="stylesheet" th:href="@{/css/publico/productos.css}">
+</head>
+<body>
+
+<header class="public-header">
+    <div class="container header-inner">
+        <a th:href="@{/}" class="brand">Merko</a>
+        <nav class="public-nav">
+            <div th:if="${clienteLogueado != null}">
+                <a th:href="@{/publico/perfil}" th:text="${clienteLogueado.nombre}">Perfil</a>
+                <a th:href="@{/carrito}">Carrito</a>
+            </div>
+            <div th:if="${clienteLogueado == null}">
+                <a th:href="@{/login}">Ingresar</a>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<main class="container">
+    <section class="hero">
+        <div class="hero-inner">
+            <h1>Alimentos frescos y seleccionados</h1>
+            <p>Compra productos de calidad, directo a tu mesa. Explora por categoría, marca o precio.</p>
+            <div class="hero-actions">
+                <input id="searchInput" type="search" placeholder="Buscar productos, ej. 'manzana'" th:value="${q}" />
+                <button id="searchBtn" class="btn">Buscar</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="filters">
+        <div class="filter-row">
+            <select id="categoriaFilter">
+                <option value="">Todas las categorías</option>
+                <option value="frutas" th:selected="${categoria == 'frutas'}">Frutas</option>
+                <option value="verduras" th:selected="${categoria == 'verduras'}">Verduras</option>
+                <option value="lacteos" th:selected="${categoria == 'lacteos'}">Lácteos</option>
+                <option value="carnes" th:selected="${categoria == 'carnes'}">Carnes</option>
+            </select>
+
+            <select id="ordenFilter">
+                <option value="default" th:selected="${orden == null or orden == 'default'}">Ordenar por</option>
+                <option value="precioAsc" th:selected="${orden == 'precioAsc'}">Precio: menor a mayor</option>
+                <option value="precioDesc" th:selected="${orden == 'precioDesc'}">Precio: mayor a menor</option>
+            </select>
+        </div>
+    </section>
+
+    <section class="product-grid" id="productGrid">
+        <!-- Thymeleaf renderiza lista de productos desde el modelo 'productosPage' -->
+        <div th:if="${productosPage == null or #lists.isEmpty(productosPage.content)}" class="empty">No hay productos disponibles.</div>
+
+        <div th:each="p : ${productosPage.content}" class="product-card">
+            <div class="product-image">
+                <img th:src="@{${p.imagenUrl != null ? p.imagenUrl : '/img/placeholder.png'}}" th:alt="${p.nombre}"/>
+            </div>
+            <div class="product-body">
+                <h3 th:text="${p.nombre}">Nombre producto</h3>
+                <p class="product-desc" th:text="${p.descripcion}">Descripción breve</p>
+                <div class="product-meta">
+                    <span class="price" th:text="${#numbers.formatDecimal(p.precioVenta, 0, 'COMMA', 2, 'POINT')} + ' COP'">$0</span>
+                    <button class="btn btn-outline add-to-cart" th:attr="data-id=${p.id}">Agregar</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="pagination" th:if="${productosPage != null and productosPage.totalPages > 1}">
+        <div class="container">
+            <div class="pager">
+                <a th:if="${productosPage.hasPrevious()}" th:href="@{/publico/productos(page=${productosPage.number - 1}, q=${q}, categoria=${categoria}, orden=${orden})}" class="btn">Anterior</a>
+                <span th:each="i : ${#numbers.sequence(0, productosPage.totalPages - 1)}">
+                    <a th:href="@{/publico/productos(page=${i}, q=${q}, categoria=${categoria}, orden=${orden})}"
+                       th:text="${i + 1}"
+                       th:classappend="${i == productosPage.number} ? ' active' : ''">1</a>
+                </span>
+                <a th:if="${productosPage.hasNext()}" th:href="@{/publico/productos(page=${productosPage.number + 1}, q=${q}, categoria=${categoria}, orden=${orden})}" class="btn">Siguiente</a>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<footer class="public-footer">
+    <div class="container">
+        <p>© <span th:text="${T(java.time.Year).now().value}"></span> Merko - Productos alimenticios</p>
+    </div>
+</footer>
+
+<script th:src="@{/js/publico/productos.js}"></script>
+</body>
+</html>
