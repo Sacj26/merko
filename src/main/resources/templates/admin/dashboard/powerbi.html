@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{shared/layouts/admin}"
+      lang="es">
+<head>
+    <title>Panel de Administración — Power BI</title>
+    <link rel="stylesheet" th:href="@{/css/pages/dashboard.css}">
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="admin-header">
+            <h1>Panel de Administración</h1>
+            <p>Vista integrada del dashboard Power BI.</p>
+            <a class="btn btn-secondary" th:href="@{/admin/dashboard}" title="Volver al panel">
+                <i class="fas fa-arrow-left" aria-hidden="true"></i> Volver al Panel
+            </a>
+        </div>
+
+        <section class="dashboard-embed" style="margin-top:1rem;">
+            <div style="width:100%;height:0;position:relative;padding-bottom:62.25%;">
+                <iframe
+                    title="Proyecto_Aula"
+                    src="https://app.powerbi.com/view?r=eyJrIjoiYTA3NDVjNTItZTkwOS00YzcyLThhMDgtMTA1NWJhN2YyN2M4IiwidCI6IjlkMTJiZjNmLWU0ZjYtNDdhYi05MTJmLTFhMmYwZmM0OGFhNCIsImMiOjR9"
+                    style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;"
+                    frameborder="0"
+                    allowFullScreen="true"
+                    aria-label="Power BI Dashboard Proyecto_Aula">
+                </iframe>
+            </div>
+        </section>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script th:src="@{/js/pages/admin/dashboard/index.js}"></script>
+    </th:block>
+</body>
+</html>
