@@ -72,7 +72,7 @@
                         <td th:text="${compra.branch != null ? compra.branch.nombre : '—'}"></td>
                         <td th:text="${compra.branch != null and compra.branch.proveedor != null ? compra.branch.proveedor.nombre : '—'}"></td>
                         <td>
-                            <span th:text="${compra.detalles != null and #lists.size(compra.detalles) == 1 ? compra.detalles[0].producto.nombre : 'Múltiples'}">Producto</span>
+                            <span th:text="${compra.detalles != null and #lists.size(compra.detalles) == 1 and compra.detalles[0].producto != null ? compra.detalles[0].producto.nombre : 'Múltiples'}">Producto</span>
                         </td>
                         <td th:text="${compra.detalles != null ? #lists.size(compra.detalles) : 0}"></td>
                         <td th:text="${compra.cantidad > 0 ? compra.cantidad : '-'}">0</td>

@@ -3,6 +3,7 @@ package merko.merko.ControllerWeb;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -77,7 +78,8 @@ public class CompraController {
 
     @GetMapping
     public String historialCompras(Model model) {
-        List<Compra> compras = compraRepository.findAllWithBranchAndDetalles();
+        // Obtener solo las últimas 10 compras para mejorar rendimiento
+        List<Compra> compras = compraRepository.findTop10ByOrderByFechaDesc(PageRequest.of(0, 10));
         model.addAttribute("compras", compras);
         // Añadir branches para filtros en la vista
         model.addAttribute("branches", branchRepository.findAll());
