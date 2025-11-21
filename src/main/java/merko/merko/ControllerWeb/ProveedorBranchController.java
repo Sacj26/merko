@@ -3,6 +3,7 @@ package merko.merko.ControllerWeb;
 import merko.merko.Entity.Branch;
 import merko.merko.Entity.Proveedor;
 import merko.merko.Repository.BranchRepository;
+import merko.merko.Repository.ProductBranchRepository;
 import merko.merko.Service.ProveedorService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,10 +18,12 @@ public class ProveedorBranchController {
 
     private final ProveedorService proveedorService;
     private final BranchRepository branchRepository;
+    private final ProductBranchRepository productBranchRepository;
 
-    public ProveedorBranchController(ProveedorService proveedorService, BranchRepository branchRepository) {
+    public ProveedorBranchController(ProveedorService proveedorService, BranchRepository branchRepository, ProductBranchRepository productBranchRepository) {
         this.proveedorService = proveedorService;
         this.branchRepository = branchRepository;
+        this.productBranchRepository = productBranchRepository;
     }
 
     @GetMapping
@@ -28,8 +31,17 @@ public class ProveedorBranchController {
         Proveedor proveedor = proveedorService.getProveedorById(proveedorId)
                 .orElseThrow(() -> new IllegalArgumentException("Proveedor no encontrado"));
         List<Branch> branches = proveedor.getBranches();
+        
+        // Crear un mapa con el conteo de productos por sucursal
+        java.util.Map<Long, Long> productCounts = new java.util.HashMap<>();
+        for (Branch branch : branches) {
+            long count = productBranchRepository.findByBranchId(branch.getId()).size();
+            productCounts.put(branch.getId(), count);
+        }
+        
         model.addAttribute("proveedor", proveedor);
         model.addAttribute("branches", branches);
+        model.addAttribute("productCounts", productCounts);
         return "admin/proveedores/sucursales/list";
     }
 
@@ -83,10 +95,12 @@ public class ProveedorBranchController {
     }
 
     @GetMapping("/editar/{id}")
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public String editar(@PathVariable Long proveedorId, @PathVariable Long id, Model model) {
         Proveedor proveedor = proveedorService.getProveedorById(proveedorId)
                 .orElseThrow(() -> new IllegalArgumentException("Proveedor no encontrado"));
-        Branch branch = branchRepository.findById(id)
+        // Cargar sucursal con contactos eager-loaded
+        Branch branch = branchRepository.findByIdWithContactsAndProveedor(id)
                 .orElseThrow(() -> new IllegalArgumentException("Sucursal no encontrada"));
         // asegurar que haya al menos un contacto para mostrar en el formulario
         if (branch.getContacts() == null || branch.getContacts().isEmpty()) {
@@ -99,8 +113,10 @@ public class ProveedorBranchController {
     }
 
     @PostMapping("/{id}/actualizar")
+    @org.springframework.transaction.annotation.Transactional
     public String actualizar(@PathVariable Long proveedorId, @PathVariable Long id, @ModelAttribute Branch branch, RedirectAttributes redirectAttributes) {
-        Branch existente = branchRepository.findById(id)
+        // Cargar sucursal con contactos eager-loaded
+        Branch existente = branchRepository.findByIdWithContactsAndProveedor(id)
                 .orElseThrow(() -> new IllegalArgumentException("Sucursal no encontrada"));
         existente.setNombre(branch.getNombre());
         existente.setDireccion(branch.getDireccion());

@@ -17,12 +17,7 @@ import merko.merko.Service.UserDetailsServicelmpl;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-
-    private final UserDetailsServicelmpl userDetailsService;
-
-    public SecurityConfig(UserDetailsServicelmpl userDetailsService) {
-        this.userDetailsService = userDetailsService;
-    }
+    // UserDetailsService se usa automáticamente por Spring Security, no necesita inyección aquí
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -32,7 +27,7 @@ public class SecurityConfig {
                         .requestMatchers("/", "/login", "/error", "/publico/**", "/css/**", "/js/**", "/images/**", "/img/**", "/uploads/**", "/registro/**").permitAll()
 
                         // Sólo accesible para administradores
-                        .requestMatchers("/admin/**").hasRole("ADMINISTRADOR")
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
 
                         // Rutas para clientes
                         .requestMatchers("/cliente/**", "/carrito/**").hasRole("CLIENTE")
@@ -59,23 +54,26 @@ public class SecurityConfig {
     @Bean
     public AuthenticationSuccessHandler successHandler() {
         return (request, response, authentication) -> {
+            // OPTIMIZACIÓN: Obtener Usuario desde CustomUserDetails sin query adicional a BD
+            UserDetailsServicelmpl.CustomUserDetails userDetails = 
+                    (UserDetailsServicelmpl.CustomUserDetails) authentication.getPrincipal();
+            Usuario usuario = userDetails.getUsuario();
+            
             boolean isAdmin = authentication.getAuthorities().stream()
-                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMINISTRADOR"));
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
             boolean isCliente = authentication.getAuthorities().stream()
                     .anyMatch(a -> a.getAuthority().equals("ROLE_CLIENTE"));
 
             if (isAdmin) {
-                Usuario admin = userDetailsService.findByUsername(authentication.getName());
                 // store a lightweight DTO in session to avoid keeping password or JPA proxies
                 merko.merko.dto.SessionUser sessionUser = new merko.merko.dto.SessionUser(
-                        admin.getId(), admin.getUsername(), admin.getNombre(), admin.getCorreo(), admin.getRol()
+                        usuario.getId(), usuario.getUsername(), usuario.getNombre(), usuario.getCorreo(), usuario.getRol()
                 );
                 request.getSession().setAttribute("usuarioLogueado", sessionUser);
                 response.sendRedirect("/admin");
             } else if (isCliente) {
-                Usuario cliente = userDetailsService.findByUsername(authentication.getName());
                 merko.merko.dto.SessionUser sessionUser = new merko.merko.dto.SessionUser(
-                        cliente.getId(), cliente.getUsername(), cliente.getNombre(), cliente.getCorreo(), cliente.getRol()
+                        usuario.getId(), usuario.getUsername(), usuario.getNombre(), usuario.getCorreo(), usuario.getRol()
                 );
                 request.getSession().setAttribute("usuarioLogueado", sessionUser);
                 response.sendRedirect("/publico/productos");
@@ -87,7 +85,8 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        // Strength 8 es más rápido que 10 (default) pero sigue siendo seguro
+        return new BCryptPasswordEncoder(8);
     }
 
     @Bean

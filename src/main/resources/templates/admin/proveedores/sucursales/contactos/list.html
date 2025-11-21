@@ -1,88 +1,172 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{shared/layouts/admin}" lang="es">
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" 
+      layout:decorate="~{shared/layouts/admin}" 
+      lang="es">
 <head>
     <title>Contactos</title>
+    <link rel="stylesheet" th:href="@{/css/modules/proveedores.css}">
 </head>
 <body>
 <div layout:fragment="content">
     <div class="header-with-actions">
         <div class="title-group">
-            <h1 class="page-title" th:text="${proveedor.nombre} + ' — ' + ${branch.nombre} + ' — Contactos'">Contactos</h1>
-            <p class="page-subtitle">Gestiona los contactos de la sucursal</p>
+            <h1 class="page-title">
+                <i class="fas fa-address-book"></i>
+                <span>Contactos</span>
+            </h1>
+            <p class="page-subtitle">
+                <i class="fas fa-store"></i>
+                <strong th:text="${branch.nombre}">Sucursal</strong>
+                <span class="text-muted">—</span>
+                <i class="fas fa-truck"></i>
+                <span th:text="${proveedor.nombre}">Proveedor</span>
+                <span class="text-muted">—</span>
+                <span th:text="${#lists.size(contacts)} + ' contacto' + (${#lists.size(contacts)} != 1 ? 's' : '')">0 contactos</span>
+            </p>
         </div>
-    <div class="actions">
-            <!-- Volver al listado de proveedores (icono) -->
-            <a th:href="@{/admin/proveedores}" class="btn btn-secondary btn-icon-only" title="Volver a proveedores">
-                <i class="fas fa-arrow-left" aria-hidden="true"></i>
-                <span class="sr-only">Volver a proveedores</span>
+        <div class="actions">
+            <a th:href="@{/admin/proveedores/{id}/sucursales(id=${proveedor.id})}" 
+               class="btn btn-secondary" 
+               title="Volver a sucursales">
+                <i class="fas fa-arrow-left"></i>
+                <span class="hide-sm">Volver a sucursales</span>
+            </a>
+            
+            <a th:href="@{/admin/sucursales/ver/{id}(id=${branch.id})}" 
+               class="btn btn-secondary hide-sm" 
+               title="Ver sucursal">
+                <i class="fas fa-eye"></i> Ver sucursal
             </a>
 
-            <!-- (El botón "Volver a sucursal" se eliminó intencionalmente) -->
-
-            <!-- Volver al listado de sucursales del proveedor (icono) -->
-            <a th:href="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales'}" class="btn btn-secondary btn-icon-only" title="Volver a sucursales">
-                <i class="fas fa-store" aria-hidden="true"></i>
-                <span class="sr-only">Volver a sucursales</span>
-            </a>
-
-            <!-- Nuevo contacto (icono) -->
-            <a th:href="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales/' + ${branch.id} + '/contactos/nuevo'}" class="btn btn-primary btn-icon-only" title="Nuevo contacto">
-                <i class="fas fa-user-plus" aria-hidden="true"></i>
-                <span class="sr-only">Nuevo contacto</span>
+            <a th:href="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales/' + ${branch.id} + '/contactos/nuevo'}" 
+               class="btn btn-primary">
+                <i class="fas fa-user-plus"></i>
+                <span class="hide-sm">Nuevo contacto</span>
             </a>
         </div>
     </div>
-    <div class="form-container">
-            <div th:if="${#lists.isEmpty(contacts)}" class="alert alert-info">No hay contactos registrados para esta sucursal.</div>
-            <div th:if="${!#lists.isEmpty(contacts)}">
-                <div class="table-container table-scroll">
-                    <table class="table-admin">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Nombre</th>
-                                <th>Rol</th>
-                                <th>Teléfono</th>
-                                <th>Email</th>
-                                <th>Principal</th>
-                                <th class="actions-col">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="c : ${contacts}">
-                                <td th:text="${c.id}">1</td>
-                                <td>
-                                    <div class="cell-text-ellipsis">
-                                        <div class="cell-title" th:text="${c.nombre}">Nombre</div>
-                                        <small class="cell-subtitle" th:text="${c.rol}">Rol</small>
+
+    <div class="content-container">
+        <!-- Estado vacío -->
+        <div th:if="${#lists.isEmpty(contacts)}" class="empty-state">
+            <div class="empty-state-icon">
+                <i class="fas fa-user-slash"></i>
+            </div>
+            <h3 class="empty-state-title">No hay contactos registrados</h3>
+            <p class="empty-state-text">
+                Esta sucursal no tiene contactos asociados. Agrega el primer contacto para comenzar.
+            </p>
+            <a th:href="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales/' + ${branch.id} + '/contactos/nuevo'}" 
+               class="btn btn-primary btn-lg">
+                <i class="fas fa-user-plus"></i> Crear primer contacto
+            </a>
+        </div>
+
+        <!-- Lista de contactos -->
+        <div th:if="${!#lists.isEmpty(contacts)}" class="contacts-list-view">
+            <div class="table-controls">
+                <div class="table-controls-left">
+                    <span class="results-count">
+                        <i class="fas fa-list"></i>
+                        <span th:text="${#lists.size(contacts)} + ' contacto' + (${#lists.size(contacts)} != 1 ? 's' : '')">0 contactos</span>
+                    </span>
+                </div>
+                <div class="table-controls-right">
+                    <label for="toggleDenseContactos" class="hide-sm">
+                        <input type="checkbox" id="toggleDenseContactos" /> Vista compacta
+                    </label>
+                </div>
+            </div>
+
+            <div class="table-container table-scroll">
+                <table class="table-admin" id="tablaContactos">
+                    <thead>
+                        <tr>
+                            <th class="col-id">ID</th>
+                            <th class="col-nombre">Nombre</th>
+                            <th class="col-rol hide-md">Cargo</th>
+                            <th class="col-telefono hide-sm">Teléfono</th>
+                            <th class="col-email hide-md">Email</th>
+                            <th class="col-principal">Principal</th>
+                            <th class="actions-col">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="c : ${contacts}" th:classappend="${c.isPrimary ? 'row-highlight' : ''}">
+                            <td class="col-id" th:text="${c.id}">1</td>
+                            <td class="col-nombre">
+                                <div class="cell-text-ellipsis">
+                                    <div class="cell-title">
+                                        <i th:class="${c.isPrimary ? 'fas fa-star text-warning' : 'fas fa-user text-muted'}"></i>
+                                        <strong th:text="${c.nombre}">Nombre</strong>
                                     </div>
-                                </td>
-                                <td th:text="${c.rol}">Rol</td>
-                                <td th:text="${c.telefono}">Tel</td>
-                                <td th:text="${c.email}">Email</td>
-                                <td>
-                                    <span th:if="${c.isPrimary}" class="badge badge-success">Principal</span>
-                                    <span th:unless="${c.isPrimary}" class="text-muted">—</span>
-                                </td>
-                                <td class="actions-col">
-                                    <div class="actions-cell">
-                                        <a th:href="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales/' + ${branch.id} + '/contactos/editar/' + ${c.id}}" class="btn-icon btn-icon-primary" title="Editar contacto">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <form th:action="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales/' + ${branch.id} + '/contactos/' + ${c.id} + '/eliminar'}" method="post" style="display:inline">
-                                            <button type="submit" class="btn-icon btn-icon-danger" title="Eliminar contacto" onclick="return confirm('¿Eliminar contacto?')">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
+                                    <small class="cell-subtitle" th:if="${c.rol != null}" th:text="${c.rol}">Rol</small>
+                                </div>
+                            </td>
+                            <td class="col-rol hide-md">
+                                <span th:if="${c.rol != null}">
+                                    <i class="fas fa-briefcase text-muted"></i>
+                                    <span th:text="${c.rol}">Rol</span>
+                                </span>
+                                <span th:unless="${c.rol != null}" class="text-muted">—</span>
+                            </td>
+                            <td class="col-telefono hide-sm">
+                                <span th:if="${c.telefono != null}">
+                                    <i class="fas fa-phone text-muted"></i>
+                                    <a th:href="'tel:' + ${c.telefono}" th:text="${c.telefono}">Tel</a>
+                                </span>
+                                <span th:unless="${c.telefono != null}" class="text-muted">—</span>
+                            </td>
+                            <td class="col-email hide-md">
+                                <span th:if="${c.email != null}">
+                                    <i class="fas fa-envelope text-muted"></i>
+                                    <a th:href="'mailto:' + ${c.email}" th:text="${c.email}">Email</a>
+                                </span>
+                                <span th:unless="${c.email != null}" class="text-muted">—</span>
+                            </td>
+                            <td class="col-principal">
+                                <span th:if="${c.isPrimary}" class="badge badge-warning" title="Contacto principal">
+                                    <i class="fas fa-star"></i> Principal
+                                </span>
+                                <span th:unless="${c.isPrimary}" class="text-muted">—</span>
+                            </td>
+                            <td class="actions-col">
+                                <div class="actions-cell">
+                                    <a th:href="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales/' + ${branch.id} + '/contactos/editar/' + ${c.id}}" 
+                                       class="btn-icon btn-icon-primary" 
+                                       title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form th:action="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales/' + ${branch.id} + '/contactos/' + ${c.id} + '/eliminar'}" 
+                                          method="post" 
+                                          style="display:inline" 
+                                          class="delete-form">
+                                        <button type="submit" 
+                                                class="btn-icon btn-icon-danger" 
+                                                title="Eliminar" 
+                                                onclick="return confirm('¿Está seguro de eliminar este contacto?\n\nEsta acción no se puede deshacer.')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<th:block layout:fragment="scripts">
+    <script>
+        // Toggle vista compacta
+        document.getElementById('toggleDenseContactos')?.addEventListener('change', function(e) {
+            document.getElementById('tablaContactos')?.classList.toggle('table-dense', e.target.checked);
+        });
+    </script>
+</th:block>
 </body>
 </html>

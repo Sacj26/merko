@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import jakarta.servlet.http.HttpSession;
 
 @ControllerAdvice
 public class GlobalModelAttributes {
@@ -21,7 +22,11 @@ public class GlobalModelAttributes {
     }
 
     @ModelAttribute("clienteLogueado")
-    public SessionUser addClienteLogueado() {
+    public SessionUser addClienteLogueado(HttpSession session) {
+        // prefer cached session user to avoid DB hits on every request
+        Object obj = session.getAttribute("usuarioLogueado");
+        if (obj instanceof SessionUser) return (SessionUser) obj;
+
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
             return null;
@@ -30,6 +35,9 @@ public class GlobalModelAttributes {
         Usuario u = usuarioService.findByUsername(username);
         if (u == null) return null;
         if (u.getRol() != Rol.CLIENTE) return null;
-        return new SessionUser(u.getId(), u.getUsername(), u.getNombre(), u.getCorreo(), u.getFotoPerfil(), u.getRol());
+
+        SessionUser su = new SessionUser(u.getId(), u.getUsername(), u.getNombre(), u.getCorreo(), u.getFotoPerfil(), u.getRol());
+        session.setAttribute("usuarioLogueado", su);
+        return su;
     }
 }

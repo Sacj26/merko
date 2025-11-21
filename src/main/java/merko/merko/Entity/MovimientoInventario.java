@@ -17,10 +17,6 @@ public class MovimientoInventario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "producto_id")
-    private Producto producto;
-
     @ManyToOne
     @JoinColumn(name = "lote_id")
     private Lote lote;
@@ -42,8 +38,8 @@ public class MovimientoInventario {
     @JoinColumn(name = "venta_id")
     private Venta venta;
 
-    @ManyToOne
-    @JoinColumn(name = "product_branch_id")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "product_branch_id", nullable = false)
     private ProductBranch productBranch;
 
     private String referencia; // texto libre (p. ej., codigo de documento)

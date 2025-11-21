@@ -1,14 +1,7 @@
 package merko.merko.ControllerWeb;
 
 import jakarta.validation.Valid;
-import merko.merko.Entity.Producto;
-import merko.merko.Entity.TipoProducto;
-import merko.merko.Entity.EstadoProducto;
-import merko.merko.Entity.UnidadMedida;
-import merko.merko.Entity.Almacenamiento;
-import merko.merko.Entity.Proveedor;
-import merko.merko.Entity.Branch;
-import merko.merko.Entity.ContactPerson;
+import merko.merko.Entity.*;
 import merko.merko.Service.ProductoService;
 import merko.merko.Service.ProveedorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,12 +70,7 @@ public class ProveedorController {
         proveedor.setCiudad(allParams.get("ciudad"));
         proveedor.setPais(allParams.get("pais"));
         proveedor.setDescripcion(allParams.get("descripcion"));
-        proveedor.setNombreContacto(allParams.get("nombreContacto"));
-        proveedor.setCargoContacto(allParams.get("cargoContacto"));
-        proveedor.setTelefonoContacto(allParams.get("telefonoContacto"));
-        
-        String emailContacto = allParams.get("emailContacto");
-        proveedor.setEmailContacto((emailContacto != null && !emailContacto.trim().isEmpty()) ? emailContacto : null);
+        // Nota: Los contactos ahora se manejan a través de Branch > ContactPerson
         
         proveedor.setFechaRegistro(LocalDate.now());
         proveedor.setActivo(true);
@@ -133,34 +121,34 @@ public class ProveedorController {
                 String marca = allParams.get("productos[" + index + "].marca");
                 producto.setMarca((marca != null && !marca.trim().isEmpty()) ? marca.trim() : null);
 
-                // Enums: Tipo, Estado
+                // Tipo, Estado y Unidad son String
                 String tipoStr = allParams.get("productos[" + index + "].tipo");
                 if (tipoStr != null && !tipoStr.trim().isEmpty()) {
-                    try { producto.setTipo(TipoProducto.valueOf(tipoStr)); } catch (IllegalArgumentException ignored) {}
+                    producto.setTipo(tipoStr.trim());
                 }
                 String estadoStr = allParams.get("productos[" + index + "].estado");
                 if (estadoStr != null && !estadoStr.trim().isEmpty()) {
-                    try { producto.setEstado(EstadoProducto.valueOf(estadoStr)); } catch (IllegalArgumentException ignored) {}
+                    producto.setEstado(estadoStr.trim());
                 }
 
                 // Unidades y presentación
                 String unidadStr = allParams.get("productos[" + index + "].unidadMedida");
                 if (unidadStr != null && !unidadStr.trim().isEmpty()) {
-                    try { producto.setUnidadMedida(UnidadMedida.valueOf(unidadStr)); } catch (IllegalArgumentException ignored) {}
+                    producto.setUnidadMedida(unidadStr.trim());
                 }
                 String contenidoNetoStr = allParams.get("productos[" + index + "].contenidoNeto");
                 if (contenidoNetoStr != null && !contenidoNetoStr.trim().isEmpty()) {
                     try { producto.setContenidoNeto(Double.valueOf(contenidoNetoStr)); } catch (NumberFormatException ignored) {}
                 }
-                String contenidoUomStr = allParams.get("productos[" + index + "].contenidoUoM");
+                String contenidoUomStr = allParams.get("productos[" + index + "].contenidoUom");
                 if (contenidoUomStr != null && !contenidoUomStr.trim().isEmpty()) {
-                    try { producto.setContenidoUoM(UnidadMedida.valueOf(contenidoUomStr)); } catch (IllegalArgumentException ignored) {}
+                    producto.setContenidoUom(contenidoUomStr.trim());
                 }
                 
                 try {
                     producto.setPrecioCompra(Double.parseDouble(allParams.get("productos[" + index + "].precioCompra")));
                     producto.setPrecioVenta(Double.parseDouble(allParams.get("productos[" + index + "].precioVenta")));
-                    producto.setStock(Integer.parseInt(allParams.get("productos[" + index + "].stock")));
+                    // Nota: El stock se gestiona en ProductBranch, no directamente en Producto
                 } catch (NumberFormatException e) {
                     model.addAttribute("error", "Error en los valores numéricos del producto " + (index + 1));
                     model.addAttribute("proveedor", proveedor);
@@ -190,7 +178,7 @@ public class ProveedorController {
                 }
                 String almacStr = allParams.get("productos[" + index + "].almacenamiento");
                 if (almacStr != null && !almacStr.trim().isEmpty()) {
-                    try { producto.setAlmacenamiento(Almacenamiento.valueOf(almacStr)); } catch (IllegalArgumentException ignored) {}
+                    try { producto.setAlmacenamiento(TipoAlmacenamiento.valueOf(almacStr)); } catch (IllegalArgumentException ignored) {}
                 }
                 String regSan = allParams.get("productos[" + index + "].registroSanitario");
                 producto.setRegistroSanitario((regSan != null && !regSan.trim().isEmpty()) ? regSan.trim() : null);
@@ -202,8 +190,7 @@ public class ProveedorController {
                     producto.setImagenUrl(rutaImagen);
                 }
                 
-                // Asociar al proveedor en memoria (el service puede volver a asociar al persistir)
-                producto.setProveedor(proveedor);
+                // Nota: La relación Producto-Proveedor se gestiona a través de ProductoProveedor
                 productos.add(producto);
             }
             index++;
@@ -361,8 +348,7 @@ public class ProveedorController {
         proveedor.setId(id);
         proveedor.setFechaRegistro(proveedorExistente.getFechaRegistro());
         
-        // Mantener los productos existentes
-        proveedor.setProductos(proveedorExistente.getProductos());
+        // Nota: Los productos se gestionan a través de ProductoProveedor, no directamente
 
         proveedorService.saveProveedor(proveedor);
         redirectAttributes.addFlashAttribute("mensaje", "Proveedor actualizado exitosamente");
@@ -475,7 +461,7 @@ public class ProveedorController {
                 Producto producto = new Producto();
                 producto.setNombre(nombre);
                 producto.setDescripcion(allParams.get("productos[" + index + "].descripcion"));
-                producto.setProveedor(proveedor);
+                // Nota: La relación Producto-Proveedor se gestiona a través de ProductoProveedor
                 
                 // Identificación comercial
                 String sku = allParams.get("productos[" + index + "].sku");
@@ -485,35 +471,34 @@ public class ProveedorController {
                 String marca = allParams.get("productos[" + index + "].marca");
                 producto.setMarca((marca != null && !marca.trim().isEmpty()) ? marca.trim() : null);
 
-                // Enums: Tipo, Estado
+                // Tipo y Estado (son String en la base de datos)
                 String tipoStr = allParams.get("productos[" + index + "].tipo");
                 if (tipoStr != null && !tipoStr.trim().isEmpty()) {
-                    try { producto.setTipo(TipoProducto.valueOf(tipoStr)); } catch (IllegalArgumentException ignored) {}
+                    producto.setTipo(tipoStr.trim());
                 }
                 String estadoStr = allParams.get("productos[" + index + "].estado");
                 if (estadoStr != null && !estadoStr.trim().isEmpty()) {
-                    try { producto.setEstado(EstadoProducto.valueOf(estadoStr)); } catch (IllegalArgumentException ignored) {}
+                    producto.setEstado(estadoStr.trim());
                 }
 
                 // Unidades y presentación
                 String unidadStr = allParams.get("productos[" + index + "].unidadMedida");
                 if (unidadStr != null && !unidadStr.trim().isEmpty()) {
-                    try { producto.setUnidadMedida(UnidadMedida.valueOf(unidadStr)); } catch (IllegalArgumentException ignored) {}
+                    producto.setUnidadMedida(unidadStr.trim());
                 }
                 String contenidoNetoStr = allParams.get("productos[" + index + "].contenidoNeto");
                 if (contenidoNetoStr != null && !contenidoNetoStr.trim().isEmpty()) {
                     try { producto.setContenidoNeto(Double.valueOf(contenidoNetoStr)); } catch (NumberFormatException ignored) {}
                 }
-                String contenidoUomStr = allParams.get("productos[" + index + "].contenidoUoM");
+                String contenidoUomStr = allParams.get("productos[" + index + "].contenidoUom");
                 if (contenidoUomStr != null && !contenidoUomStr.trim().isEmpty()) {
-                    // Nota: el form envía texto libre, no enum
-                    // Si quieres mapear a UnidadMedida enum, agregar lógica aquí
+                    producto.setContenidoUom(contenidoUomStr.trim());
                 }
                 
                 try {
                     producto.setPrecioCompra(Double.parseDouble(allParams.get("productos[" + index + "].precioCompra")));
                     producto.setPrecioVenta(Double.parseDouble(allParams.get("productos[" + index + "].precioVenta")));
-                    producto.setStock(Integer.parseInt(allParams.get("productos[" + index + "].stock")));
+                    // Nota: El stock se gestiona en ProductBranch, no directamente en Producto
                 } catch (NumberFormatException e) {
                     model.addAttribute("error", "Error en los valores numéricos del producto " + (index + 1));
                     model.addAttribute("proveedor", proveedor);
@@ -543,7 +528,7 @@ public class ProveedorController {
                 }
                 String almacStr = allParams.get("productos[" + index + "].almacenamiento");
                 if (almacStr != null && !almacStr.trim().isEmpty()) {
-                    try { producto.setAlmacenamiento(Almacenamiento.valueOf(almacStr)); } catch (IllegalArgumentException ignored) {}
+                    try { producto.setAlmacenamiento(TipoAlmacenamiento.valueOf(almacStr)); } catch (IllegalArgumentException ignored) {}
                 }
                 String regSan = allParams.get("productos[" + index + "].registroSanitario");
                 producto.setRegistroSanitario((regSan != null && !regSan.trim().isEmpty()) ? regSan.trim() : null);
@@ -583,7 +568,8 @@ public class ProveedorController {
             @RequestParam(value = "imagenUrl", required = false) MultipartFile imagenArchivo
     ) {
         try {
-            Proveedor proveedor = proveedorService.getProveedorById(proveedorId)
+            // Verificar que el proveedor existe
+            proveedorService.getProveedorById(proveedorId)
                     .orElseThrow(() -> new IllegalArgumentException("Proveedor no encontrado"));
 
             Producto producto = new Producto();
@@ -591,8 +577,7 @@ public class ProveedorController {
             producto.setDescripcion(descripcion);
             producto.setPrecioCompra(precioCompra);
             producto.setPrecioVenta(precioVenta);
-            producto.setStock(stock);
-            producto.setProveedor(proveedor);
+            // Nota: Stock y Proveedor se gestionan a través de ProductBranch y ProductoProveedor
 
             if (imagenArchivo != null && !imagenArchivo.isEmpty()) {
                 String rutaImagen = proveedorService.guardarImagenProducto(imagenArchivo);

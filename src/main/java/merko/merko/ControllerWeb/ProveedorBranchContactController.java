@@ -31,7 +31,8 @@ public class ProveedorBranchContactController {
     public String listar(@PathVariable Long proveedorId, @PathVariable Long branchId, Model model) {
         Proveedor proveedor = proveedorService.getProveedorById(proveedorId)
                 .orElseThrow(() -> new IllegalArgumentException("Proveedor no encontrado"));
-        Branch branch = branchRepository.findById(branchId)
+        // Usar método con eager loading para evitar LazyInitializationException
+        Branch branch = branchRepository.findByIdWithContactsAndProveedor(branchId)
                 .orElseThrow(() -> new IllegalArgumentException("Sucursal no encontrada"));
         List<ContactPerson> contacts = branch.getContacts();
         model.addAttribute("proveedor", proveedor);
@@ -44,7 +45,7 @@ public class ProveedorBranchContactController {
     public String nuevo(@PathVariable Long proveedorId, @PathVariable Long branchId, Model model) {
         Proveedor proveedor = proveedorService.getProveedorById(proveedorId)
                 .orElseThrow(() -> new IllegalArgumentException("Proveedor no encontrado"));
-        Branch branch = branchRepository.findById(branchId)
+        Branch branch = branchRepository.findByIdWithContactsAndProveedor(branchId)
                 .orElseThrow(() -> new IllegalArgumentException("Sucursal no encontrada"));
         ContactPerson contact = new ContactPerson();
         model.addAttribute("proveedor", proveedor);
@@ -72,7 +73,7 @@ public class ProveedorBranchContactController {
     public String editar(@PathVariable Long proveedorId, @PathVariable Long branchId, @PathVariable Long id, Model model) {
         Proveedor proveedor = proveedorService.getProveedorById(proveedorId)
                 .orElseThrow(() -> new IllegalArgumentException("Proveedor no encontrado"));
-        Branch branch = branchRepository.findById(branchId)
+        Branch branch = branchRepository.findByIdWithContactsAndProveedor(branchId)
                 .orElseThrow(() -> new IllegalArgumentException("Sucursal no encontrada"));
         ContactPerson contact = contactPersonRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Contacto no encontrado"));

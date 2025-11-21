@@ -19,9 +19,9 @@ import merko.merko.Entity.Producto;
 import merko.merko.Entity.Rol;
 import merko.merko.Entity.Usuario;
 import merko.merko.Entity.Venta;
-import merko.merko.Repository.ProductoRepository;
 import merko.merko.Repository.BranchRepository;
 import merko.merko.Repository.MovimientoInventarioRepository;
+import merko.merko.Repository.ProductoRepository;
 import merko.merko.Service.UsuarioService;
 import merko.merko.Service.VentaService;
 import merko.merko.dto.DetalleVentaForm;
@@ -52,7 +52,7 @@ public class VentaController {
 
     @GetMapping
     public String listarVentas(Model model) {
-        List<Venta> ventas = ventaService.getAllVentas();
+        List<Venta> ventas = ventaService.getAllVentasWithDetalles();
         model.addAttribute("ventas", ventas);
         return "admin/ventas/index";
     }
@@ -60,20 +60,12 @@ public class VentaController {
     @GetMapping("/nueva")
     public String nuevaVenta(Model model) {
         model.addAttribute("ventaForm", new VentaForm());
-        // Mostrar sólo productos terminados activos para venta
-        var productos = productoRepository.findAll().stream()
-                .filter(p -> p.getEstado() == merko.merko.Entity.EstadoProducto.ACTIVO)
-                .filter(p -> p.getTipo() == merko.merko.Entity.TipoProducto.PRODUCTO_TERMINADO)
-                .toList();
-        model.addAttribute("productos", productos);
-
+        // Cargar clientes y sucursales (datos pequeños)
         model.addAttribute("clientes", usuarioService.getUsuariosByRol(Rol.CLIENTE));
-
-        // Sucursales para seleccionar origen de la venta
-    model.addAttribute("sucursales", branchRepository.findAll());
-    // Proveedores para filtrar sucursales (opcional)
-    model.addAttribute("proveedores", proveedorService.getAllProveedores());
-
+        model.addAttribute("sucursales", branchRepository.findAll());
+        // Proveedores para filtrar sucursales
+        model.addAttribute("proveedores", proveedorService.getAllProveedores());
+        // Productos se cargarán dinámicamente via AJAX para mejor rendimiento
         return "admin/ventas/crear";
     }
 
@@ -114,8 +106,7 @@ public class VentaController {
             model.addAttribute("error", ex.getMessage());
             // recargar combos
             var productos = productoRepository.findAll().stream()
-                    .filter(p -> p.getEstado() == merko.merko.Entity.EstadoProducto.ACTIVO)
-                    .filter(p -> p.getTipo() == merko.merko.Entity.TipoProducto.PRODUCTO_TERMINADO)
+                    .filter(p -> p.getEstado() != null)
                     .toList();
             model.addAttribute("productos", productos);
             model.addAttribute("clientes", usuarioService.getUsuariosByRol(Rol.CLIENTE));

@@ -45,19 +45,19 @@
                     <div class="info-field">
                         <span class="info-label">Estado</span>
                         <span class="info-value">
-                            <span th:if="${producto.estado == T(merko.merko.Entity.EstadoProducto).ACTIVO}" class="badge badge-success">
-                                <i class="fas fa-check-circle"></i> Activo
+                            <span th:if="${producto.estado != null and #strings.toLowerCase(producto.estado).contains('activo')}" class="badge badge-success">
+                                <i class="fas fa-check-circle"></i> <span th:text="${producto.estado}">Activo</span>
                             </span>
-                            <span th:unless="${producto.estado == T(merko.merko.Entity.EstadoProducto).ACTIVO}" class="badge badge-danger">
-                                <i class="fas fa-times-circle"></i> Inactivo
+                            <span th:unless="${producto.estado != null and #strings.toLowerCase(producto.estado).contains('activo')}" 
+                                  th:class="${producto.estado != null ? 'badge badge-warning' : 'badge badge-secondary'}">
+                                <i class="fas fa-info-circle"></i> <span th:text="${producto.estado ?: 'Sin estado'}">--</span>
                             </span>
                         </span>
                     </div>
                     <div class="info-field">
                         <span class="info-label">Tipo de Producto</span>
                         <span class="info-value">
-                            <span th:if="${producto.tipo == T(merko.merko.Entity.TipoProducto).MATERIA_PRIMA}" class="badge badge-info">Materia Prima</span>
-                            <span th:if="${producto.tipo == T(merko.merko.Entity.TipoProducto).PRODUCTO_TERMINADO}" class="badge badge-success">Producto Terminado</span>
+                            <span class="badge badge-info" th:if="${producto.tipo != null}" th:text="${producto.tipo}">Tipo</span>
                             <span th:if="${producto.tipo == null}">--</span>
                         </span>
                     </div>
@@ -72,7 +72,7 @@
         </div>
 
         <!-- Sección: Proveedor -->
-        <div class="info-section" th:if="${producto.proveedor != null}">
+        <div class="info-section" th:if="${proveedor != null}">
             <h3 class="info-section-title">
                 <i class="fas fa-building"></i> Proveedor
             </h3>
@@ -80,22 +80,22 @@
                 <div class="info-row">
                     <div class="info-field">
                         <span class="info-label">Nombre</span>
-                        <span class="info-value" th:text="${producto.proveedor.nombre}">--</span>
+                        <span class="info-value" th:text="${proveedor.nombre}">--</span>
                     </div>
                     <div class="info-field">
                         <span class="info-label">NIT</span>
-                        <span class="info-value" th:text="${producto.proveedor.nit}">--</span>
+                        <span class="info-value" th:text="${proveedor.nit}">--</span>
                     </div>
                     <div class="info-field">
                         <span class="info-label">Teléfono</span>
                         <span class="info-value">
-                            <i class="fas fa-phone"></i> <span th:text="${producto.proveedor.telefono}">--</span>
+                            <i class="fas fa-phone"></i> <span th:text="${proveedor.telefono}">--</span>
                         </span>
                     </div>
                     <div class="info-field">
                         <span class="info-label"></span>
                         <span class="info-value">
-                            <a th:href="@{/admin/proveedores/ver/{id}(id=${producto.proveedor.id})}" class="btn btn-sm btn-secondary">
+                            <a th:href="@{/admin/proveedores/ver/{id}(id=${proveedor.id})}" class="btn btn-sm btn-secondary">
                                 <i class="fas fa-external-link-alt"></i> Ver proveedor
                             </a>
                         </span>
@@ -122,9 +122,9 @@
                     <div class="info-field">
                         <span class="info-label">Stock Actual</span>
                         <span class="info-value">
-                            <span th:classappend="${producto.stock != null and producto.stockMinimo != null and producto.stock <= producto.stockMinimo} ? 'badge badge-warning' : 
-                                              (${producto.stock != null and producto.stock <= 5} ? 'badge badge-warning' : 'badge badge-success')"
-                                  th:text="${producto.stock}">0</span>
+                            <span th:classappend="${totalStock != null and producto.stockMinimo != null and totalStock <= producto.stockMinimo} ? 'badge badge-warning' : 
+                                              (${totalStock != null and totalStock <= 5} ? 'badge badge-warning' : 'badge badge-success')"
+                                  th:text="${totalStock != null ? totalStock : 0}">0</span>
                         </span>
                     </div>
                     <div class="info-field">
@@ -162,7 +162,7 @@
                 <div class="info-row">
                     <div class="info-field">
                         <span class="info-label">Contenido</span>
-                        <span class="info-value" th:text="${producto.contenidoNeto != null ? producto.contenidoNeto + ' ' + (producto.contenidoUoM != null ? producto.contenidoUoM : '') : 'No especificado'}">--</span>
+                        <span class="info-value" th:text="${producto.contenidoNeto != null ? producto.contenidoNeto + ' ' + (producto.contenidoUom != null ? producto.contenidoUom : '') : 'No especificado'}">--</span>
                     </div>
                     <div class="info-field">
                         <span class="info-label">Unidad de Medida Base</span>

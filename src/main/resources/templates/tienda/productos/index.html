@@ -28,27 +28,27 @@
             </div>
 
             <div class="productos-grid">
-                <div th:each="producto : ${productos}" class="producto-card">
-                    <img th:if="${producto.imagen}" 
-                         th:src="@{'/uploads/imagenes-productos/' + ${producto.imagen}}"
-                         th:alt="${producto.nombre}"
-                         class="producto-imagen">
-                    <img th:unless="${producto.imagen}" 
-                         th:src="@{/img/producto-default.jpg}"
-                         th:alt="${producto.nombre}"
-                         class="producto-imagen">
+                 <div th:each="producto : ${productos}" class="producto-card">
+                    <img th:if="${producto.imagenUrl != null}" 
+                        th:src="@{${producto.imagenUrl}}"
+                        th:alt="${producto.nombre}"
+                        class="producto-imagen">
+                    <img th:unless="${producto.imagenUrl != null}" 
+                        th:src="@{/img/producto-default.jpg}"
+                        th:alt="${producto.nombre}"
+                        class="producto-imagen">
                     
                     <div class="producto-info">
                         <h3 th:text="${producto.nombre}"></h3>
                         <p class="descripcion" th:text="${producto.descripcion}"></p>
-                        <p class="categoria" th:text="${producto.categoria}"></p>
-                        <p class="precio">$<span th:text="${#numbers.formatDecimal(producto.precio, 1, 'COMMA', 2, 'POINT')}"></span></p>
+                        <p class="categoria" th:text="${producto.categoria != null ? producto.categoria.nombre : ''}"></p>
+                        <p class="precio">$<span th:text="${#numbers.formatDecimal(producto.precioVenta, 1, 'COMMA', 2, 'POINT')}"></span></p>
                         
                         <div class="producto-actions">
                             <div class="cantidad-control">
                                 <button class="btn-cantidad" onclick="decrementarCantidad(this)">-</button>
-                                <input type="number" class="cantidad-input" value="1" min="1" 
-                                       th:max="${producto.stock}">
+                                    <input type="number" class="cantidad-input" value="1" min="1" 
+                                        th:attr="max=${availableStockByProductId[producto.id] != null ? availableStockByProductId[producto.id] : 0}">
                                 <button class="btn-cantidad" onclick="incrementarCantidad(this)">+</button>
                             </div>
                             <button class="btn-agregar" 
@@ -57,7 +57,7 @@
                             </button>
                         </div>
                         
-                        <p class="stock" th:text="'Stock: ' + ${producto.stock}"></p>
+                        <p class="stock" th:text="'Stock: ' + (${availableStockByProductId[producto.id] != null ? availableStockByProductId[producto.id] : 0})"></p>
                     </div>
                 </div>
             </div>

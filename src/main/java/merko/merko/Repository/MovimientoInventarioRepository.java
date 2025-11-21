@@ -11,9 +11,9 @@ import java.util.List;
 
 @Repository
 public interface MovimientoInventarioRepository extends JpaRepository<MovimientoInventario, Long> {
-    List<MovimientoInventario> findByProductoOrderByFechaDesc(Producto producto);
-    List<MovimientoInventario> findByProductoAndFechaBetweenOrderByFechaDesc(Producto producto, LocalDateTime from, LocalDateTime to);
-    List<MovimientoInventario> findByProductoAndTipoOrderByFechaDesc(Producto producto, TipoMovimiento tipo);
+    List<MovimientoInventario> findByProductBranch_ProductoOrderByFechaDesc(Producto producto);
+    List<MovimientoInventario> findByProductBranch_ProductoAndFechaBetweenOrderByFechaDesc(Producto producto, LocalDateTime from, LocalDateTime to);
+    List<MovimientoInventario> findByProductBranch_ProductoAndTipoOrderByFechaDesc(Producto producto, TipoMovimiento tipo);
     List<MovimientoInventario> findByVenta_IdOrderByFechaAsc(Long ventaId);
     List<MovimientoInventario> findByCompra_IdOrderByFechaAsc(Long compraId);
 }

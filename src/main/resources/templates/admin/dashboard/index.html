@@ -8,7 +8,7 @@
     <link rel="stylesheet" th:href="@{/css/pages/dashboard.css}">
 </head>
 <body>
-    <div layout:fragment="content">
+    <div layout:fragment="content" class="dashboard-container">
         <div class="admin-header">
             <h1>Panel de Administración</h1>
             <p>Bienvenido, aquí tienes un resumen rápido del sistema.</p>
@@ -17,186 +17,207 @@
             </a>
         </div>
 
-    <!-- KPIs: Ventas (agrupadas) -->
-    <h3 class="dashboard-section">Ventas</h3>
-    <section class="dashboard-cards section-sales">
-            <div class="card">
-                <div class="card-icon"><i class="fas fa-cash-register"></i></div>
-                <div class="card-body">
-                    <h2 th:text="${totalHoy != null ? #numbers.formatDecimal(totalHoy, 1, 'POINT', 2, 'COMMA') : '0.00'}">0.00</h2>
-                    <p>Ventas de hoy</p>
+        <!-- KPIs Esenciales -->
+        <h2 class="dashboard-section-title">Resumen General</h2>
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-icon sales">
+                    <i class="fas fa-cash-register"></i>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-value" th:text="${totalHoy != null ? '$' + #numbers.formatDecimal(totalHoy, 1, 'COMMA', 0, 'POINT') : '$0'}">$0</div>
+                    <div class="kpi-label">Ventas de hoy</div>
                 </div>
             </div>
-            <div class="card">
-                <div class="card-icon"><i class="fas fa-calendar-alt"></i></div>
-                <div class="card-body">
-                    <h2 th:text="${totalMes != null ? #numbers.formatDecimal(totalMes, 1, 'POINT', 2, 'COMMA') : '0.00'}">0.00</h2>
-                    <p>Ventas del mes</p>
+            
+            <div class="kpi-card">
+                <div class="kpi-icon sales">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-value" th:text="${totalMes != null ? '$' + #numbers.formatDecimal(totalMes, 1, 'COMMA', 0, 'POINT') : '$0'}">$0</div>
+                    <div class="kpi-label">Ventas del mes</div>
                 </div>
             </div>
-            <div class="card">
-                <div class="card-icon"><i class="fas fa-boxes"></i></div>
-                <div class="card-body">
-                    <h2 th:text="${totalVentas != null ? totalVentas : 0}">0</h2>
-                    <p>Total Ventas</p>
+            
+            <div class="kpi-card">
+                <div class="kpi-icon products">
+                    <i class="fas fa-boxes"></i>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-value" th:text="${productosActivos != null ? #numbers.formatInteger(productosActivos, 0, 'COMMA') : '0'}">0</div>
+                    <div class="kpi-label">Productos activos</div>
                 </div>
             </div>
-            <div class="card">
-                <div class="card-icon"><i class="fas fa-receipt"></i></div>
-                <div class="card-body">
-                    <h2 th:text="${ticketPromedio != null ? #numbers.formatDecimal(ticketPromedio, 1, 'POINT', 2, 'COMMA') : '0.00'}">0.00</h2>
-                    <p>Ticket promedio</p>
+            
+            <div class="kpi-card">
+                <div class="kpi-icon purchases">
+                    <i class="fas fa-truck"></i>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-value" th:text="${comprasMes != null ? '$' + #numbers.formatDecimal(comprasMes, 1, 'COMMA', 0, 'POINT') : '$0'}">$0</div>
+                    <div class="kpi-label">Compras del mes</div>
                 </div>
             </div>
-        </section>
+        </div>
 
-    <!-- KPIs: Productos y Clientes -->
-    <h3 class="dashboard-section">Productos y compras</h3>
-    <section class="dashboard-cards section-products">
-            <div class="card">
-                <div class="card-icon"><i class="fas fa-boxes"></i></div>
-                <div class="card-body">
-                    <h2 th:text="${productosActivos != null ? productosActivos : 0}">0</h2>
-                    <p>Productos activos</p>
+        <!-- Totales Históricos (Valores) -->
+        <h2 class="dashboard-section-title">Totales Históricos</h2>
+        <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+            <div class="kpi-card">
+                <div class="kpi-icon sales">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-value" th:text="${totalVentasHistorico != null ? '$' + #numbers.formatDecimal(totalVentasHistorico, 1, 'COMMA', 0, 'POINT') : '$0'}">$0</div>
+                    <div class="kpi-label">Total de Ventas</div>
+                    <div style="font-size: 0.75rem; color: #666; margin-top: 0.25rem;">
+                        <span th:text="${totalDetallesVenta != null ? #numbers.formatInteger(totalDetallesVenta, 0, 'COMMA') : '0'}">0</span> items vendidos
+                    </div>
                 </div>
             </div>
-            <div class="card">
-                <div class="card-icon"><i class="fas fa-box"></i></div>
-                <div class="card-body">
-                    <h2 th:text="${totalProductos != null ? totalProductos : 0}">0</h2>
-                    <p>Total Productos</p>
+            
+            <div class="kpi-card">
+                <div class="kpi-icon purchases">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <div class="kpi-content">
+                    <div class="kpi-value" th:text="${totalComprasHistorico != null ? '$' + #numbers.formatDecimal(totalComprasHistorico, 1, 'COMMA', 0, 'POINT') : '$0'}">$0</div>
+                    <div class="kpi-label">Total de Compras</div>
+                    <div style="font-size: 0.75rem; color: #666; margin-top: 0.25rem;">
+                        <span th:text="${totalDetallesCompra != null ? #numbers.formatInteger(totalDetallesCompra, 0, 'COMMA') : '0'}">0</span> items comprados
+                    </div>
                 </div>
             </div>
-            <div class="card">
-                <div class="card-icon"><i class="fas fa-users"></i></div>
-                <div class="card-body">
-                    <h2 th:text="${totalClientes != null ? totalClientes : 0}">0</h2>
-                    <p>Total Clientes</p>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-icon"><i class="fas fa-truck-loading"></i></div>
-                <div class="card-body">
-                    <h2 th:text="${comprasMes != null ? #numbers.formatDecimal(comprasMes, 1, 'POINT', 2, 'COMMA') : '0.00'}">0.00</h2>
-                    <p>Compras del mes</p>
-                </div>
-            </div>
-        </section>
+        </div>
 
-        <section class="dashboard-recent table-container" th:if="${ultimasVentas != null and !#lists.isEmpty(ultimasVentas)}">
-            <h3 class="section-title">Últimas ventas</h3>
-            <table class="table-admin">
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Cliente</th>
-                        <th>Total</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="venta : ${ultimasVentas}">
-                        <td th:text="${venta.fecha != null ? #temporals.format(venta.fecha, 'yyyy-MM-dd') : '-'}">2025-01-01</td>
-                        <td th:text="${venta.cliente != null ? venta.cliente.nombre : '—'}">Cliente</td>
-                        <td th:text="${venta.total}">0.00</td>
-                        <td>
-                            <span th:if="${venta.estado == T(merko.merko.Entity.EstadoVenta).ANULADA}" class="badge badge-danger">Anulada</span>
-                            <span th:if="${venta.estado == T(merko.merko.Entity.EstadoVenta).ACTIVA}" class="badge badge-success">Activa</span>
-                        </td>
-                        <td>
-                            <a th:href="@{'/admin/ventas/detalle/' + ${venta.id}}" title="Ver">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </section>
+        <!-- Gráficas -->
+        <h2 class="dashboard-section-title">Actividad</h2>
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h4>Ventas de los últimos 30 días</h4>
+                <canvas id="ventasDiariasChart"></canvas>
+                <p id="ventasEmpty" class="no-data" style="display:none">No hay ventas registradas en los últimos 30 días.</p>
+            </div>
+            
+            <div class="chart-card">
+                <h4>Compras de los últimos 30 días</h4>
+                <canvas id="comprasDiariasChart"></canvas>
+                <p id="comprasEmpty" class="no-data" style="display:none">No hay compras registradas en los últimos 30 días.</p>
+            </div>
+        </div>
         
-        <section class="dashboard-recent table-container" th:if="${ultimasVentas == null or #lists.isEmpty(ultimasVentas)}">
-            <h3 class="section-title">Últimas ventas</h3>
-            <p class="muted">No hay ventas registradas todavía.</p>
-        </section>
-
-        <h3 class="section-title">Actividad</h3>
-        <div class="grid-2">
-            <section class="chart-card">
-                <h4 class="section-subtitle">Ventas de los últimos 30 días</h4>
-                <canvas id="ventasDiariasChart" height="120"></canvas>
-                <p id="ventasEmpty" class="muted" style="display:none">No hay ventas registradas en los últimos 30 días.</p>
-            </section>
-            <section class="chart-card">
-                <h4 class="section-subtitle">Top 5 productos vendidos (30 días)</h4>
-                <canvas id="topProductosChart" height="120"></canvas>
-                <p id="topVentasEmpty" class="muted" style="display:none">No hay productos vendidos en este periodo.</p>
-            </section>
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h4>Top 5 productos vendidos (30 días)</h4>
+                <canvas id="topProductosChart"></canvas>
+                <p id="topVentasEmpty" class="no-data" style="display:none">No hay productos vendidos en este periodo.</p>
+            </div>
+            
+            <div class="chart-card">
+                <h4>Top 5 productos comprados (30 días)</h4>
+                <canvas id="topProductosComprasChart"></canvas>
+                <p id="topComprasEmpty" class="no-data" style="display:none">No hay productos comprados en este periodo.</p>
+            </div>
         </div>
 
-        <div class="grid-2">
-            <section class="chart-card">
-                <h4 class="section-subtitle">Compras de los últimos 30 días</h4>
-                <canvas id="comprasDiariasChart" height="120"></canvas>
-                <p id="comprasEmpty" class="muted" style="display:none">No hay compras registradas en los últimos 30 días.</p>
-            </section>
-            <section class="chart-card">
-                <h4 class="section-subtitle">Top 5 productos comprados (30 días)</h4>
-                <canvas id="topProductosComprasChart" height="120"></canvas>
-                <p id="topComprasEmpty" class="muted" style="display:none">No hay productos comprados en este periodo.</p>
-            </section>
+        <!-- Alertas -->
+        <h2 class="dashboard-section-title">Alertas de Inventario</h2>
+        <div class="alert-grid">
+            <!-- Stock Crítico -->
+            <div class="alert-card">
+                <h3><i class="fas fa-exclamation-triangle"></i> Stock Crítico</h3>
+                <div th:if="${stockCritico != null and !#lists.isEmpty(stockCritico)}">
+                    <table class="alert-table">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Stock</th>
+                                <th>Mínimo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="item : ${stockCritico}">
+                                <td th:text="${item.nombre}">Producto</td>
+                                <td class="stock-warning" th:text="${item.stock}">0</td>
+                                <td th:text="${item.stockMinimo}">0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div th:if="${stockCritico == null or #lists.isEmpty(stockCritico)}" class="no-data">
+                    <i class="fas fa-check-circle" style="font-size: 2rem; color: #27ae60;"></i>
+                    <p>No hay productos con stock crítico</p>
+                </div>
+            </div>
+            
+            <!-- Próximos Vencimientos -->
+            <div class="alert-card">
+                <h3><i class="fas fa-calendar-times"></i> Próximos Vencimientos (30 días)</h3>
+                <div th:if="${proximosVencimientos != null and !#lists.isEmpty(proximosVencimientos)}">
+                    <table class="alert-table">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Lote</th>
+                                <th>Vence</th>
+                                <th>Cant.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="item : ${proximosVencimientos}">
+                                <td th:text="${item.lote.producto != null ? item.lote.producto.nombre : '—'}">Producto</td>
+                                <td th:text="${item.lote.codigoLote}">Lote</td>
+                                <td th:text="${#temporals.format(item.lote.fechaVencimiento, 'dd/MM/yyyy')}">01/01/2025</td>
+                                <td th:text="${item.lote.cantidadDisponible}">0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div th:if="${proximosVencimientos == null or #lists.isEmpty(proximosVencimientos)}" class="no-data">
+                    <i class="fas fa-check-circle" style="font-size: 2rem; color: #27ae60;"></i>
+                    <p>No hay lotes próximos a vencer</p>
+                </div>
+            </div>
         </div>
 
-        <h3 class="section-title">Inventario</h3>
-        <div class="grid-2">
-            <section class="table-container">
-                <h3 class="section-title">Stock crítico</h3>
-                <table class="table-admin" th:if="${stockCritico != null and !#lists.isEmpty(stockCritico)}">
+        <!-- Últimas Ventas -->
+        <h2 class="dashboard-section-title">Últimas Ventas</h2>
+        <div class="alert-card">
+            <div th:if="${ultimasVentas != null and !#lists.isEmpty(ultimasVentas)}">
+                <table class="alert-table">
                     <thead>
-                    <tr>
-                        <th>Producto</th>
-                        <th>Stock</th>
-                        <th>Mínimo</th>
-                    </tr>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Fecha</th>
+                            <th>Total</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="p : ${stockCritico}">
-                        <td th:text="${p.nombre}">Nombre</td>
-                        <td th:text="${p.stock}">0</td>
-                        <td th:text="${p.stockMinimo}">0</td>
-                    </tr>
+                        <tr th:each="venta : ${ultimasVentas}">
+                            <td th:text="${venta.usuario != null ? venta.usuario.nombre : '—'}">Cliente</td>
+                            <td th:text="${#temporals.format(venta.fecha, 'dd/MM/yyyy HH:mm')}">01/01/2024 10:30</td>
+                            <td th:text="'$' + ${#numbers.formatDecimal(venta.total, 1, 'COMMA', 0, 'POINT')}">$0</td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${venta.estado == T(merko.merko.Entity.EstadoVenta).ACTIVA ? 'badge-success' : 'badge-danger'}"
+                                      th:text="${venta.estado != null ? venta.estado.getDisplayName() : '—'}">Estado</span>
+                            </td>
+                            <td>
+                                <a th:href="@{/admin/ventas/{id}(id=${venta.id})}" 
+                                   style="color: #3498db; text-decoration: none;">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
-                <p class="muted" th:if="${stockCritico == null or #lists.isEmpty(stockCritico)}">No hay productos con stock crítico.</p>
-            </section>
-            <section class="table-container">
-                <h3 class="section-title">Próximos vencimientos (30 días)</h3>
-                <table class="table-admin" th:if="${proximosVencimientos != null and !#lists.isEmpty(proximosVencimientos)}">
-                    <thead>
-                    <tr>
-                        <th>Producto</th>
-                        <th>Lote</th>
-                        <th>Vence</th>
-                        <th>Disponible</th>
-                        <th>Sucursales</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="item : ${proximosVencimientos}">
-                        <td class="product-name" th:text="${item.lote.producto != null ? item.lote.producto.nombre : '—'}">Prod</td>
-                        <td th:text="${item.lote.codigoLote}">Lote</td>
-                        <td th:text="${item.lote.fechaVencimiento}">2025-01-01</td>
-                        <td th:text="${item.lote.cantidadDisponible}">0</td>
-                        <td>
-                            <span th:if="${item.branches != null and !#lists.isEmpty(item.branches)}">
-                                <span th:each="b : ${item.branches}" class="branch-badge">[[${b.nombre}]]<span th:text="${(b.ciudad != null) ? ' — ' + b.ciudad : ''}"></span></span>
-                            </span>
-                            <span th:if="${item.branches == null or #lists.isEmpty(item.branches)}">—</span>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-                <p class="muted" th:if="${proximosVencimientos == null or #lists.isEmpty(proximosVencimientos)}">No hay lotes por vencer en los próximos 30 días.</p>
-            </section>
+            </div>
+            <div th:if="${ultimasVentas == null or #lists.isEmpty(ultimasVentas)}" class="no-data">
+                No hay ventas registradas recientemente
+            </div>
         </div>
     </div>
 

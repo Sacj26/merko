@@ -22,11 +22,11 @@
         </div>
 
         <div class="filters">
-            <select id="filterProveedor" class="form-control">
-                <option value="">Todos los proveedores</option>
-                <option th:each="proveedor : ${proveedores}" 
-                        th:value="${proveedor.id}" 
-                        th:text="${proveedor.nombre}"></option>
+            <select id="filterBranch" class="form-control">
+                <option value="">Todas las sucursales</option>
+                <option th:each="branch : ${branches}" 
+                        th:value="${branch.id}" 
+                        th:text="${branch.nombre + ' (' + (branch.proveedor != null ? branch.proveedor.nombre : 'Sin proveedor') + ')'}"></option>
             </select>
             <input type="date" id="filterFecha" class="form-control" placeholder="Filtrar por fecha">
         </div>
@@ -55,6 +55,7 @@
                         <th># Compra</th>
                         <th>Fecha</th>
                         <th>Hora</th>
+                        <th>Sucursal</th>
                         <th>Proveedor</th>
                         <th>Producto</th>
                         <th>Ítems</th>
@@ -68,11 +69,12 @@
                         <td th:text="${'#' + compra.id}">#0</td>
                         <td th:text="${compra.fecha != null ? #temporals.format(compra.fecha, 'dd/MM/yyyy') : '-'}"></td>
                         <td th:text="${compra.fecha != null ? #temporals.format(compra.fecha, 'HH:mm') : '-'}"></td>
-                        <td th:text="${compra.proveedor != null ? compra.proveedor.nombre : '—'}"></td>
+                        <td th:text="${compra.branch != null ? compra.branch.nombre : '—'}"></td>
+                        <td th:text="${compra.branch != null and compra.branch.proveedor != null ? compra.branch.proveedor.nombre : '—'}"></td>
                         <td>
-                            <span th:text="${compra.producto != null ? compra.producto.nombre : 'Múltiples'}">Producto</span>
+                            <span th:text="${compra.detalles != null and #lists.size(compra.detalles) == 1 ? compra.detalles[0].producto.nombre : 'Múltiples'}">Producto</span>
                         </td>
-                        <td th:text="${compra.detalles != null ? #lists.size(compra.detalles) : (compra.producto != null ? 1 : 0)}"></td>
+                        <td th:text="${compra.detalles != null ? #lists.size(compra.detalles) : 0}"></td>
                         <td th:text="${compra.cantidad > 0 ? compra.cantidad : '-'}">0</td>
                         <td th:text="${'$' + #numbers.formatDecimal(compra.total, 1, 'COMMA', 2, 'POINT')}"></td>
                         <td class="actions-col">
@@ -85,7 +87,7 @@
                         </td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(compras)}">
-                        <td colspan="8" class="empty-message">
+                        <td colspan="10" class="empty-message">
                             No hay compras registradas.
                         </td>
                     </tr>

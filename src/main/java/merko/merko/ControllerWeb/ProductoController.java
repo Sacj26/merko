@@ -1,66 +1,70 @@
 package merko.merko.ControllerWeb;
 
-import merko.merko.Entity.Producto;
-import merko.merko.Entity.Proveedor;
-import merko.merko.Service.CompraService;
-import merko.merko.Service.ProductoService;
-import merko.merko.Service.ProveedorService;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
-import org.springframework.http.MediaType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.UUID;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Arrays;
-import java.util.stream.Collectors;
-import java.util.TreeMap;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-// imports above already include UUID and List
-
-import merko.merko.dto.ProductCreateDto;
-import merko.merko.dto.ProductBranchAssignDto;
-import merko.merko.Service.ProductoApiService;
+import merko.merko.Entity.Producto;
+import merko.merko.Entity.Proveedor;
 import merko.merko.Repository.ProductBranchRepository;
+import merko.merko.Repository.ProductoProveedorRepository;
+import merko.merko.Service.ProductoApiService;
+import merko.merko.Service.ProductoService;
+import merko.merko.Service.ProveedorService;
+import merko.merko.dto.ProductBranchAssignDto;
+import merko.merko.dto.ProductCreateDto;
 
 @Controller
 @RequestMapping("/admin/productos")
 public class ProductoController {
 
     private final ProductoService productoService;
-    private final CompraService compraService;
     private final ProveedorService proveedorService;
     private final ProductoApiService productoApiService;
     private final ProductBranchRepository productBranchRepository;
+    private final ProductoProveedorRepository productoProveedorRepository;
+    private final merko.merko.Repository.CategoriaRepository categoriaRepository;
     private static final Logger log = LoggerFactory.getLogger(ProductoController.class);
 
-    public ProductoController(ProductoService productoService, CompraService compraService, ProveedorService proveedorService, ProductoApiService productoApiService, ProductBranchRepository productBranchRepository) {
+    public ProductoController(ProductoService productoService, ProveedorService proveedorService, ProductoApiService productoApiService, ProductBranchRepository productBranchRepository, ProductoProveedorRepository productoProveedorRepository, merko.merko.Repository.CategoriaRepository categoriaRepository) {
         this.productoService = productoService;
-        this.compraService = compraService;
         this.proveedorService = proveedorService;
         this.productoApiService = productoApiService;
         this.productBranchRepository = productBranchRepository;
+        this.productoProveedorRepository = productoProveedorRepository;
+        this.categoriaRepository = categoriaRepository;
     }
 
 
@@ -85,7 +89,8 @@ public class ProductoController {
 
         model.addAttribute("page", pageProductos);
         model.addAttribute("productos", pageProductos.getContent());
-        model.addAttribute("compras", compraService.getAllCompras());
+        // Removed: model.addAttribute("compras", compraService.getAllComprasWithBranchAndDetalles()); 
+        // This was loading ALL purchases on every product list load, causing performance issues
         // Para filtros
         List<Proveedor> proveedores = proveedorService.getAllProveedores();
         model.addAttribute("proveedores", proveedores);
@@ -94,6 +99,22 @@ public class ProductoController {
         model.addAttribute("sort", sort);
         model.addAttribute("dir", dir);
         model.addAttribute("size", size);
+
+        // Calcular stock agregado por producto (sumatoria de ProductBranch) para mostrar en la lista
+        Map<Long, Integer> availableStockByProductId = new HashMap<>();
+        Map<Long, String> proveedorNameByProductId = new HashMap<>();
+        for (Producto p : pageProductos.getContent()) {
+            if (p.getId() == null) continue;
+            int totalStock = productBranchRepository.findByProductoId(p.getId())
+                .stream().mapToInt(pb -> pb.getStock() == null ? 0 : pb.getStock()).sum();
+            availableStockByProductId.put(p.getId(), totalStock);
+
+            var pps = productoProveedorRepository.findByProductoId(p.getId());
+            if (!pps.isEmpty() && pps.get(0).getProveedor() != null) proveedorNameByProductId.put(p.getId(), pps.get(0).getProveedor().getNombre());
+            else proveedorNameByProductId.put(p.getId(), "—");
+        }
+        model.addAttribute("availableStockByProductId", availableStockByProductId);
+        model.addAttribute("proveedorNameByProductId", proveedorNameByProductId);
 
         return "admin/productos/list";
     }
@@ -105,9 +126,13 @@ public class ProductoController {
         // Obtener todos los productos y aplicar filtros básicos en memoria (suficiente para volúmenes pequeños/medios)
         List<Producto> productos = productoService.getAllProductos();
         if (proveedorId != null) {
+            // obtener ids de productos asociados al proveedor
+            java.util.List<Long> productoIds = productoProveedorRepository.findByProveedorId(proveedorId)
+                .stream().map(pp -> pp.getProducto() != null ? pp.getProducto().getId() : null)
+                .filter(id -> id != null).collect(Collectors.toList());
             productos = productos.stream()
-                    .filter(p -> p.getProveedor() != null && proveedorId.equals(p.getProveedor().getId()))
-                    .collect(Collectors.toList());
+                .filter(p -> p.getId() != null && productoIds.contains(p.getId()))
+                .collect(Collectors.toList());
         }
         if (query != null && !query.trim().isEmpty()) {
             String q = query.trim().toLowerCase();
@@ -120,15 +145,21 @@ public class ProductoController {
         StringBuilder sb = new StringBuilder();
         sb.append("ID,Nombre,Proveedor,Descripción,Precio,Stock\n");
         for (Producto p : productos) {
-            String proveedorNombre = (p.getProveedor() != null && p.getProveedor().getNombre() != null) ? p.getProveedor().getNombre() : "";
+            // proveedor (primer proveedor asociado si existe)
+            String proveedorNombre = "";
+            var pps = productoProveedorRepository.findByProductoId(p.getId());
+            if (!pps.isEmpty() && pps.get(0).getProveedor() != null) proveedorNombre = pps.get(0).getProveedor().getNombre();
             String nombre = p.getNombre() != null ? p.getNombre() : "";
             String desc = p.getDescripcion() != null ? p.getDescripcion().replaceAll("[\r\n]", " ") : "";
-                            sb.append(p.getId() != null ? p.getId() : "").append(',')
-                                .append('"').append(nombre.replace("\"", "\"\"")).append('"').append(',')
-                                .append('"').append(proveedorNombre.replace("\"", "\"\"")).append('"').append(',')
-                                .append('"').append(desc.replace("\"", "\"\"")).append('"').append(',')
-                                .append(p.getPrecioVenta()).append(',')
-                                .append(p.getStock()).append('\n');
+            // stock total agregado por sucursal
+            int totalStock = productBranchRepository.findByProductoId(p.getId())
+                .stream().mapToInt(pb -> pb.getStock() == null ? 0 : pb.getStock()).sum();
+            sb.append(p.getId() != null ? p.getId() : "").append(',')
+                .append('"').append(nombre.replace("\"", "\"\"")).append('"').append(',')
+                .append('"').append(proveedorNombre.replace("\"", "\"\"")).append('"').append(',')
+                .append('"').append(desc.replace("\"", "\"\"")).append('"').append(',')
+                .append(p.getPrecioVenta()).append(',')
+                .append(totalStock).append('\n');
         }
 
         byte[] data = sb.toString().getBytes(StandardCharsets.UTF_8);
@@ -146,20 +177,16 @@ public class ProductoController {
             Model model) {
 
         Producto producto = new Producto();
-        if (proveedorId != null) {
-            proveedorService.getProveedorById(proveedorId).ifPresent(p -> producto.setProveedor(p));
-        }
 
-    model.addAttribute("producto", producto);
-    model.addAttribute("titulo", "Nuevo Producto");
-    // Si abrimos la vista desde proveedor/sucursal queremos enviar al endpoint batch
-    model.addAttribute("accion", "/admin/productos/guardar-batch");
+        model.addAttribute("producto", producto);
+        model.addAttribute("titulo", "Nuevo Producto");
+        model.addAttribute("accion", "/admin/productos/guardar-batch");
         model.addAttribute("proveedores", proveedorService.getAllProveedores());
         model.addAttribute("selectedProveedorId", proveedorId);
         model.addAttribute("selectedBranchId", branchId);
-        // Si se proporciona proveedorId o branchId, reutilizamos el diseño de 'agregar-productos'
-        // que usa el CSS/UX que solicitaste (misma vista que se usaba desde proveedores).
-        if (proveedorId != null || branchId != null) {
+        
+        // If coming from a branch, load proveedor and branch details for display
+        if (proveedorId != null) {
             proveedorService.getProveedorById(proveedorId).ifPresent(p -> {
                 model.addAttribute("proveedor", p);
                 if (branchId != null && p.getBranches() != null) {
@@ -169,10 +196,14 @@ public class ProductoController {
                             .ifPresent(b -> model.addAttribute("branch", b));
                 }
             });
-            // la plantilla 'admin/proveedores/agregar-productos' usa 'accion' como action del form
-            return "admin/proveedores/agregar-productos";
         }
-
+        // categorías reales desde repo
+        try {
+            model.addAttribute("categorias", categoriaRepository.findAll());
+        } catch (Exception ex) {
+            model.addAttribute("categorias", java.util.Arrays.asList());
+        }
+        // Always use modern form design
         return "admin/productos/form";
     }
 
@@ -180,7 +211,8 @@ public class ProductoController {
     @PostMapping("/guardar")
     public String guardarProducto(@ModelAttribute Producto producto,
                                   @RequestParam("imagen") MultipartFile imagen,
-                                  @RequestParam(value = "branchId", required = false) Long branchId) {
+                                  @RequestParam(value = "branchId", required = false) Long branchId,
+                                  @RequestParam(value = "categoriaId", required = false) Long categoriaId) {
 
         if (!imagen.isEmpty()) {
             try {
@@ -192,6 +224,11 @@ public class ProductoController {
             } catch (IOException e) {
                 log.error("Error al guardar imagen de producto", e);
             }
+        }
+
+        // Asignar categoría si se proporcionó
+        if (categoriaId != null) {
+            categoriaRepository.findById(categoriaId).ifPresent(producto::setCategoria);
         }
 
         productoService.saveProducto(producto);
@@ -220,6 +257,9 @@ public class ProductoController {
                 String val = request.getParameter(name);
                 ProductCreateDto dto = indexed.computeIfAbsent(idx, k -> new ProductCreateDto());
                 switch (field) {
+                                        case "categoriaId":
+                                            try { if (val != null && !val.isEmpty()) dto.categoriaId = Long.parseLong(val); } catch (NumberFormatException ignored) {}
+                                            break;
                     case "nombre": dto.nombre = val; break;
                     case "descripcion": dto.descripcion = val; break;
                     case "precioVenta":
@@ -326,15 +366,27 @@ public class ProductoController {
         Producto producto = productoService.getProductoById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado con id: " + id));
         model.addAttribute("producto", producto);
-        // Agregar datos por sucursal si existen (ProductBranch)
+        // Agregar datos por sucursal si existen (ProductBranch) y total agregado
+        // Usar findByProductoIdWithBranch para cargar eager la relación branch
         try {
-            List<merko.merko.Entity.ProductBranch> pbs = productBranchRepository.findAll().stream()
-                    .filter(pb -> pb.getProducto() != null && pb.getProducto().getId() != null && pb.getProducto().getId().equals(id))
-                    .collect(Collectors.toList());
+            List<merko.merko.Entity.ProductBranch> pbs = productBranchRepository.findByProductoIdWithBranch(id);
             model.addAttribute("productBranches", pbs);
+            int totalStock = pbs.stream().mapToInt(pb -> pb.getStock() == null ? 0 : pb.getStock()).sum();
+            model.addAttribute("totalStock", totalStock);
         } catch (Exception ex) {
             log.debug("No se pudieron recuperar ProductBranch para producto {}: {}", id, ex.getMessage());
+            model.addAttribute("productBranches", java.util.Collections.emptyList());
+            model.addAttribute("totalStock", 0);
         }
+
+        // proveedor asociado (primer proveedor si existe)
+        try {
+            var pps = productoProveedorRepository.findByProductoId(id);
+            if (!pps.isEmpty() && pps.get(0).getProveedor() != null) {
+                model.addAttribute("proveedor", pps.get(0).getProveedor());
+            }
+        } catch (Exception ignored) {}
+
         return "admin/productos/ver";
     }
 
@@ -346,15 +398,47 @@ public class ProductoController {
         model.addAttribute("titulo", "Editar Producto");
         model.addAttribute("accion", "/admin/productos/actualizar/" + id);
         model.addAttribute("proveedores", proveedorService.getAllProveedores());
-        model.addAttribute("categorias", Arrays.asList("Electrónica", "Ropa", "Alimentos", "Hogar", "Deportes"));
-        return "admin/productos/editar";
+        // categorías reales desde repo
+        try {
+            model.addAttribute("categorias", categoriaRepository.findAll());
+        } catch (Exception ex) {
+            model.addAttribute("categorias", Arrays.asList("Electrónica", "Ropa", "Alimentos", "Hogar", "Deportes"));
+        }
+        // seleccionar proveedor asociado (si existe)
+        var pps = productoProveedorRepository.findByProductoId(id);
+        if (!pps.isEmpty() && pps.get(0).getProveedor() != null) {
+            model.addAttribute("selectedProveedorId", pps.get(0).getProveedor().getId());
+        } else {
+            model.addAttribute("selectedProveedorId", null);
+        }
+        return "admin/productos/form";
     }
 
 
     @PostMapping("/actualizar/{id}")
     public String actualizarProducto(@PathVariable Long id,
-                                     @ModelAttribute Producto productoActualizado) {
-    productoService.updateProducto(id, productoActualizado);
+                                     @ModelAttribute Producto productoActualizado,
+                                     @RequestParam(value = "imagen", required = false) MultipartFile imagen,
+                                     @RequestParam(value = "categoriaId", required = false) Long categoriaId) {
+        
+        // Manejar subida de imagen si se proporcionó
+        if (imagen != null && !imagen.isEmpty()) {
+            try {
+                String nombreArchivo = UUID.randomUUID() + "_" + imagen.getOriginalFilename();
+                Path ruta = Paths.get("src/main/resources/static/images/" + nombreArchivo);
+                Files.write(ruta, imagen.getBytes());
+                productoActualizado.setImagenUrl("/images/" + nombreArchivo);
+            } catch (IOException e) {
+                log.error("Error al guardar imagen de producto", e);
+            }
+        }
+        
+        // Asignar categoría si se proporcionó
+        if (categoriaId != null) {
+            categoriaRepository.findById(categoriaId).ifPresent(productoActualizado::setCategoria);
+        }
+        
+        productoService.updateProducto(id, productoActualizado);
         return "redirect:/admin/productos";
     }
 
@@ -368,18 +452,20 @@ public class ProductoController {
     @GetMapping(value = "/por-proveedor/{proveedorId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public List<Map<String, Object>> productosPorProveedor(@PathVariable("proveedorId") Long proveedorId) {
-        return productoService.getAllProductos().stream()
-                .filter(p -> p.getProveedor() != null && p.getProveedor().getId() != null && p.getProveedor().getId().equals(proveedorId))
-                .filter(p -> p.getEstado() == merko.merko.Entity.EstadoProducto.ACTIVO)
-                // Permitir tanto materias primas como productos terminados
+        // Obtener productos asociados al proveedor mediante la tabla de relación
+        var relaciones = productoProveedorRepository.findByProveedorId(proveedorId);
+        return relaciones.stream()
+                .map(rel -> rel.getProducto())
+                .filter(p -> p != null && p.getEstado() != null)
                 .map(p -> {
                     Map<String, Object> m = new HashMap<>();
                     m.put("id", p.getId());
                     m.put("nombre", p.getNombre());
                     m.put("precioVenta", p.getPrecioVenta());
                     m.put("precioCompra", p.getPrecioCompra());
-                    m.put("tipo", p.getTipo() != null ? p.getTipo().name() : null);
-                    m.put("stock", p.getStock());
+                    m.put("tipo", p.getTipo());
+                    int totalStock = productBranchRepository.findByProductoId(p.getId()).stream().mapToInt(pb -> pb.getStock() == null ? 0 : pb.getStock()).sum();
+                    m.put("stock", totalStock);
                     return m;
                 })
                 .collect(Collectors.toList());
@@ -392,7 +478,7 @@ public class ProductoController {
         try {
             java.util.List<merko.merko.Entity.ProductBranch> pbs = productBranchRepository.findByBranchId(branchId);
             return pbs.stream()
-                    .filter(pb -> pb.getProducto() != null && pb.getProducto().getEstado() == merko.merko.Entity.EstadoProducto.ACTIVO)
+                    .filter(pb -> pb.getProducto() != null && pb.getProducto().getEstado() != null)
                     .map(pb -> {
                         Map<String, Object> m = new HashMap<>();
                             m.put("id", pb.getProducto().getId());
@@ -403,7 +489,7 @@ public class ProductoController {
                             Double compraPrecio = branchPrecio != null ? branchPrecio : pb.getProducto().getPrecioCompra();
                             m.put("precioVenta", ventaPrecio);
                             m.put("precioCompra", compraPrecio);
-                            m.put("tipo", pb.getProducto().getTipo() != null ? pb.getProducto().getTipo().name() : null);
+                            m.put("tipo", pb.getProducto().getTipo());
                             m.put("stock", pb.getStock() != null ? pb.getStock() : 0);
                         return m;
                     }).collect(Collectors.toList());

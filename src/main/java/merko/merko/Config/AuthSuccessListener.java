@@ -13,19 +13,20 @@ import java.time.LocalDateTime;
 @Component
 public class AuthSuccessListener implements ApplicationListener<AuthenticationSuccessEvent> {
 
-    private final UserDetailsServicelmpl userDetailsService;
     private final UsuarioService usuarioService;
 
-    public AuthSuccessListener(UserDetailsServicelmpl userDetailsService, UsuarioService usuarioService) {
-        this.userDetailsService = userDetailsService;
+    public AuthSuccessListener(UsuarioService usuarioService) {
         this.usuarioService = usuarioService;
     }
 
     @Override
     public void onApplicationEvent(AuthenticationSuccessEvent event) {
         try {
-            String username = event.getAuthentication().getName();
-            Usuario u = userDetailsService.findByUsername(username);
+            // OPTIMIZACIÓN: Obtener Usuario desde CustomUserDetails sin query adicional
+            UserDetailsServicelmpl.CustomUserDetails userDetails = 
+                    (UserDetailsServicelmpl.CustomUserDetails) event.getAuthentication().getPrincipal();
+            Usuario u = userDetails.getUsuario();
+            
             if (u != null) {
                 u.setUltimoLogin(LocalDateTime.now());
                 usuarioService.saveUsuario(u);

@@ -30,7 +30,7 @@
                     </div>
                     <div class="detail-item">
                         <strong>Proveedor</strong>
-                        <span th:text="${compra.proveedor != null ? compra.proveedor.nombre : '—'}">Proveedor</span>
+                        <span th:text="${compra.branch != null ? compra.branch.name : '—'}">Sucursal</span>
                     </div>
                     <div class="detail-item">
                         <strong>Sucursal</strong>
@@ -76,7 +76,7 @@
                 <div class="detail-grid" th:if="${compra.detalles == null || #lists.isEmpty(compra.detalles)}">
                     <div class="detail-item">
                         <strong>Producto</strong>
-                        <span th:text="${compra.producto != null ? compra.producto.nombre : '—'}"></span>
+                        <span th:text="${compra.detalles != null and #lists.size(compra.detalles) == 1 ? compra.detalles[0].producto.nombre : 'Múltiples productos'}"></span>
                     </div>
                     <div class="detail-item">
                         <strong>Cantidad</strong>

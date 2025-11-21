@@ -19,5 +19,10 @@ public interface DetalleCompraRepository extends JpaRepository<DetalleCompra, Lo
 	    "group by dc.producto.id, dc.producto.nombre " +
 	    "order by cantidad desc")
     List<Object[]> topProductosCompradosPorCantidad(@Param("start") LocalDate start,
-						    @Param("end") LocalDate end);
+					    @Param("end") LocalDate end);
+
+    // Contar total de detalles de compra en un rango de fechas
+    @Query("select count(dc) from DetalleCompra dc join dc.compra c where c.fecha between :start and :end")
+    Long countByFechaBetween(@Param("start") java.time.LocalDateTime start,
+                             @Param("end") java.time.LocalDateTime end);
 }

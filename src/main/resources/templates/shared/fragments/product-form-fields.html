@@ -34,23 +34,25 @@
             </div>
 
             <div class="form-group">
-                <label for="tipo">Tipo de Producto: <span class="required">*</span></label>
-                <select id="tipo" th:field="*{tipo}" class="form-control" required>
-                    <option value="">Seleccione...</option>
-                    <option th:each="t : ${T(merko.merko.Entity.TipoProducto).values()}" 
-                            th:value="${t}" 
-                            th:text="${#strings.capitalize(#strings.replace(t.name(), '_', ' '))}"></option>
+                <label for="categoria">Categoría:</label>
+                <select id="categoria" name="categoriaId" class="form-control">
+                    <option value="">-- Sin categoría --</option>
+                    <option th:each="c : ${categorias}" th:value="${c.id}"
+                            th:selected="${producto != null and producto.categoria != null and producto.categoria.id == c.id}"
+                            th:text="${c.nombre}"></option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label for="estado">Estado: <span class="required">*</span></label>
-                <select id="estado" th:field="*{estado}" class="form-control" required>
-                    <option value="">Seleccione...</option>
-                    <option th:each="e : ${T(merko.merko.Entity.EstadoProducto).values()}" 
-                            th:value="${e}" 
-                            th:text="${#strings.capitalize(#strings.replace(e.name(), '_', ' '))}"></option>
-                </select>
+                <label for="tipo">Tipo de Producto:</label>
+                <input type="text" id="tipo" th:field="*{tipo}" class="form-control" placeholder="Ej: Simple, Compuesto, Servicio" />
+                <small class="form-text text-muted">Ejemplos: Simple, Compuesto, Servicio, Materia Prima</small>
+            </div>
+
+            <div class="form-group">
+                <label for="estado">Estado:</label>
+                <input type="text" id="estado" th:field="*{estado}" class="form-control" placeholder="Ej: Activo, Descontinuado" />
+                <small class="form-text text-muted">Ejemplos: Activo, Descontinuado, En Revisión</small>
             </div>
 
             <div class="form-group" style="grid-column: 1 / -1;">
@@ -106,8 +108,9 @@
             </div>
 
             <div class="form-group">
-                <label for="stock">Stock Actual: <span class="required">*</span></label>
-                <input type="number" id="stock" th:field="*{stock}" class="form-control" min="0" required />
+                <label for="initialStock">Stock inicial (opcional):</label>
+                <input type="number" id="initialStock" name="initialStock" class="form-control" min="0" />
+                <small style="color:#6c757d; font-size:0.85rem;">Si desea asignar stock inicial, indique la sucursal en el formulario o use el flujo de asignación por sucursal.</small>
             </div>
 
             <div class="form-group">
@@ -127,24 +130,21 @@
         </div>
     </fieldset>
 
-    <!-- Sección: Proveedor (SOLO LECTURA) -->
+    <!-- Sección: Proveedor -->
     <fieldset class="form-section">
         <legend><i class="fas fa-truck"></i> Proveedor</legend>
         <div class="form-grid">
             <div class="form-group">
-                <label>Proveedor Asignado:</label>
-                <input type="text" class="form-control" 
-                       th:value="${producto.proveedor != null ? producto.proveedor.nombre : 'Sin proveedor asignado'}" 
-                       readonly 
-                       style="background-color: #f8f9fa; cursor: not-allowed;">
+                <label for="proveedorId">Proveedor (opcional):</label>
+                <select id="proveedorId" name="proveedorId" class="form-control">
+                    <option value="">Sin proveedor asignado</option>
+                    <option th:each="prov : ${proveedores}" th:value="${prov.id}"
+                            th:selected="${selectedProveedorId != null and selectedProveedorId == prov.id}"
+                            th:text="${prov.nombre}"></option>
+                </select>
                 <small class="error-message" style="color: #6c757d; font-size: 0.85rem;">
-                    <i class="fas fa-info-circle"></i> 
-                    <span th:if="${producto.proveedor != null}">
-                        Este producto está asociado al proveedor <strong th:text="${producto.proveedor.nombre}"></strong>
-                    </span>
-                    <span th:if="${producto.proveedor == null}">
-                        Este producto no tiene proveedor asignado
-                    </span>
+                    <i class="fas fa-info-circle"></i>
+                    Seleccione un proveedor para crear la relación `ProductoProveedor` al guardar.
                 </small>
             </div>
         </div>
@@ -247,19 +247,21 @@
             </div>
 
             <div class="form-group">
-                <label th:for="${prefix + '.tipo'}">Tipo de Producto: <span class="required">*</span></label>
-                <select th:id="${prefix + '.tipo'}" th:attr="name=${prefix + '.tipo'}" class="form-control" required>
-                    <option value="">Seleccione...</option>
-                    <option th:each="t : ${T(merko.merko.Entity.TipoProducto).values()}" th:value="${t}" th:text="${#strings.capitalize(#strings.replace(t.name(), '_', ' '))}"></option>
+                <label th:for="${prefix + '.categoriaId'}">Categoría:</label>
+                <select th:id="${prefix + '.categoriaId'}" th:attr="name=${prefix + '.categoriaId'}" class="form-control">
+                    <option value="">-- Sin categoría --</option>
+                    <option th:each="c : ${categorias}" th:value="${c.id}" th:text="${c.nombre}"></option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label th:for="${prefix + '.estado'}">Estado: <span class="required">*</span></label>
-                <select th:id="${prefix + '.estado'}" th:attr="name=${prefix + '.estado'}" class="form-control" required>
-                    <option value="">Seleccione...</option>
-                    <option th:each="e : ${T(merko.merko.Entity.EstadoProducto).values()}" th:value="${e}" th:text="${#strings.capitalize(#strings.replace(e.name(), '_', ' '))}"></option>
-                </select>
+                <label th:for="${prefix + '.tipo'}">Tipo de Producto:</label>
+                <input type="text" th:id="${prefix + '.tipo'}" th:attr="name=${prefix + '.tipo'}" class="form-control" placeholder="Ej: Simple, Compuesto, Servicio" />
+            </div>
+
+            <div class="form-group">
+                <label th:for="${prefix + '.estado'}">Estado:</label>
+                <input type="text" th:id="${prefix + '.estado'}" th:attr="name=${prefix + '.estado'}" class="form-control" placeholder="Ej: Activo, Descontinuado" />
             </div>
 
             <div class="form-group" style="grid-column: 1 / -1;">

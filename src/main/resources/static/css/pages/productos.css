@@ -252,9 +252,9 @@ h2 {
 
 /* Imagen del producto */
 .producto-imagen {
-    width: 100%;
-    max-width: 200px;
-    height: 200px;
+    width: 80px;
+    max-width: 80px;
+    height: 80px;
     border-radius: 8px;
     overflow: hidden;
     border: 2px solid #e2e8f0;
@@ -262,12 +262,13 @@ h2 {
     align-items: center;
     justify-content: center;
     background: white;
+    flex-shrink: 0;
 }
 
 .producto-imagen img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
 }
 
 /* Badges adicionales para productos */
@@ -284,4 +285,152 @@ h2 {
 .badge-secondary {
     background: #e2e8f0;
     color: #475569;
+}
+
+/* === Estilos mejorados para tablas de historial (estilo dashboard) === */
+.historial-section .table-container {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    overflow: hidden;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.historial-section .alert-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.historial-section .alert-table th {
+    background: #f8f9fa;
+    padding: 0.7rem 0.8rem;
+    text-align: left;
+    font-size: 0.8rem;
+    color: #495057;
+    font-weight: 600;
+    border-bottom: 2px solid #dee2e6;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.historial-section .alert-table td {
+    padding: 0.7rem 0.8rem;
+    border-bottom: 1px solid #e9ecef;
+    color: #495057;
+    vertical-align: middle;
+}
+
+.historial-section .alert-table tbody tr {
+    transition: background 0.15s ease;
+}
+
+.historial-section .alert-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.historial-section .alert-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Números formateados */
+.historial-section .alert-table td {
+    white-space: nowrap;
+}
+
+/* Scrollbar suave para historial */
+.historial-section .table-container::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.historial-section .table-container::-webkit-scrollbar-thumb {
+    background: #cbd5e6;
+    border-radius: 8px;
+}
+
+.historial-section .table-container::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+.historial-section .table-container::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+/* Títulos de secciones consistentes */
+.section-title {
+    font-size: 1.1rem;
+    color: #34495e;
+    margin: 1.5rem 0 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+}
+
+.section-title i {
+    color: #667eea;
+}
+
+/* No data messages */
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: #95a5a6;
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+.empty-state i {
+    font-size: 2.5rem;
+    color: #bdc3c7;
+    display: block;
+    margin-bottom: 0.75rem;
+}
+
+/* Badges mejorados para estados */
+.status-badge {
+    padding: 0.25rem 0.65rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.status-badge.success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-badge.warning {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-badge.danger {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.status-badge.info {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+/* Valores destacados (cantidades, precios) */
+.highlight-value {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.price-value {
+    color: #059669;
+    font-weight: 600;
+}
+
+.quantity-value {
+    color: #2563eb;
+    font-weight: 600;
 }

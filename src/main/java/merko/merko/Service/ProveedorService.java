@@ -1,52 +1,71 @@
 package merko.merko.Service;
 
-import merko.merko.Entity.Producto;
-import merko.merko.Entity.Proveedor;
-import merko.merko.Repository.ProductoRepository;
-import merko.merko.Repository.ProveedorRepository;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import merko.merko.Entity.Branch;
-import merko.merko.Entity.ContactPerson;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import merko.merko.Entity.Branch;
+import merko.merko.Entity.ContactPerson;
+import merko.merko.Entity.Producto;
+import merko.merko.Entity.Proveedor;
+import merko.merko.Repository.ProductoProveedorRepository;
+import merko.merko.Repository.ProductoRepository;
+import merko.merko.Repository.ProveedorRepository;
+
+/**
+ * Servicio simplificado para Proveedores - BD: proveedor (id, nombre, contacto, email)
+ */
 @Service
 public class ProveedorService {
 
     private final ProveedorRepository proveedorRepository;
     private final ProductoRepository productoRepository;
+    private final ProductoProveedorRepository productoProveedorRepository;
 
-    public ProveedorService(ProveedorRepository proveedorRepository, ProductoRepository productoRepository) {
+    public ProveedorService(ProveedorRepository proveedorRepository, ProductoRepository productoRepository, ProductoProveedorRepository productoProveedorRepository) {
         this.proveedorRepository = proveedorRepository;
         this.productoRepository = productoRepository;
+        this.productoProveedorRepository = productoProveedorRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<Proveedor> getAllProveedores() {
-        return proveedorRepository.findAll();
+        List<Proveedor> proveedores = proveedorRepository.findAllWithBranches();
+        // Forzar carga de contacts dentro de la transacción para evitar LazyInitializationException
+        proveedores.forEach(p -> p.getBranches().forEach(b -> b.getContacts().size()));
+        return proveedores;
     }
 
+    @Transactional(readOnly = true)
     public List<Proveedor> getProveedoresActivos() {
-        return proveedorRepository.findAll().stream()
-                .filter(p -> p.getActivo() != null && p.getActivo())
-                .toList();
+        // BD simplificada: no hay campo 'activo', retornar todos
+        List<Proveedor> proveedores = proveedorRepository.findAllWithBranches();
+        // Forzar carga de contacts dentro de la transacción
+        proveedores.forEach(p -> p.getBranches().forEach(b -> b.getContacts().size()));
+        return proveedores;
     }
 
+    @Transactional(readOnly = true)
     public Optional<Proveedor> getProveedorById(Long id) {
-        return proveedorRepository.findById(id);
+        Optional<Proveedor> proveedor = proveedorRepository.findByIdWithBranches(id);
+        // Forzar carga de contacts dentro de la transacción
+        proveedor.ifPresent(p -> p.getBranches().forEach(b -> b.getContacts().size()));
+        return proveedor;
     }
 
-    public Optional<Proveedor> getProveedorByNit(String nit) {
+    public Optional<Proveedor> getProveedorByNombre(String nombre) {
+        // BD simplificada: buscar por nombre en lugar de NIT
         return proveedorRepository.findAll().stream()
-                .filter(p -> p.getNit() != null && p.getNit().equals(nit))
+                .filter(p -> p.getNombre() != null && p.getNombre().equalsIgnoreCase(nombre))
                 .findFirst();
     }
 
@@ -54,15 +73,6 @@ public class ProveedorService {
     public Proveedor saveProveedor(Proveedor proveedor) {
         if (proveedor.getNombre() == null || proveedor.getNombre().trim().isEmpty()) {
             throw new IllegalArgumentException("El nombre del proveedor no puede estar vacío");
-        }
-        
-        // Validar NIT único solo si es un proveedor nuevo o si el NIT cambió
-        if (proveedor.getNit() != null) {
-            Optional<Proveedor> proveedorExistente = getProveedorByNit(proveedor.getNit());
-            if (proveedorExistente.isPresent() && 
-                !proveedorExistente.get().getId().equals(proveedor.getId())) {
-                throw new IllegalArgumentException("Ya existe un proveedor con este NIT/RUC");
-            }
         }
         
         return proveedorRepository.save(proveedor);
@@ -83,8 +93,14 @@ public class ProveedorService {
         }
 
         Proveedor proveedorGuardado = proveedorRepository.save(proveedor);
-        producto.setProveedor(proveedorGuardado);
-        productoRepository.save(producto);
+        Producto productoGuardado = productoRepository.save(producto);
+        
+        // Crear relación proveedor-producto
+        merko.merko.Entity.ProductoProveedor pp = new merko.merko.Entity.ProductoProveedor();
+        pp.setProducto(productoGuardado);
+        pp.setProveedor(proveedorGuardado);
+        productoProveedorRepository.save(pp);
+        
         return proveedorGuardado;
     }
 
@@ -93,114 +109,92 @@ public class ProveedorService {
         if (proveedor.getNombre() == null || proveedor.getNombre().trim().isEmpty()) {
             throw new IllegalArgumentException("El nombre del proveedor no puede estar vacío");
         }
-        
-        // Validar NIT único (mismo criterio que saveProveedor)
-        if (proveedor.getNit() != null) {
-            Optional<Proveedor> proveedorExistente = getProveedorByNit(proveedor.getNit());
-            if (proveedorExistente.isPresent() &&
-                !proveedorExistente.get().getId().equals(proveedor.getId())) {
-                throw new IllegalArgumentException("Ya existe un proveedor con este NIT/RUC");
-            }
-        }
 
         if (productos == null || productos.isEmpty()) {
             throw new IllegalArgumentException("Debe proporcionar al menos un producto");
         }
 
         Proveedor proveedorGuardado = proveedorRepository.save(proveedor);
-        
+
         for (Producto producto : productos) {
-            producto.setProveedor(proveedorGuardado);
-            productoRepository.save(producto);
+            Producto productoGuardado = productoRepository.save(producto);
+            merko.merko.Entity.ProductoProveedor pp = new merko.merko.Entity.ProductoProveedor();
+            pp.setProducto(productoGuardado);
+            pp.setProveedor(proveedorGuardado);
+            productoProveedorRepository.save(pp);
         }
-        
+
         return proveedorGuardado;
     }
 
     public String guardarImagenProducto(MultipartFile archivo) {
         try {
-
             String carpetaUploads = "src/main/resources/static/uploads/imagenes-productos/";
             Path carpetaPath = Paths.get(carpetaUploads);
-
 
             if (!Files.exists(carpetaPath)) {
                 Files.createDirectories(carpetaPath);
             }
 
-
             String nombreOriginal = archivo.getOriginalFilename();
-            String extension = "";
+            String extension = ".png";
 
             if (nombreOriginal != null && nombreOriginal.contains(".")) {
                 extension = nombreOriginal.substring(nombreOriginal.lastIndexOf("."));
-            } else {
-                extension = ".png";
             }
 
             String nombreArchivo = System.currentTimeMillis() + extension;
-
-
             Path archivoPath = carpetaPath.resolve(nombreArchivo);
-
-
             Files.copy(archivo.getInputStream(), archivoPath, StandardCopyOption.REPLACE_EXISTING);
-
 
             return "/uploads/imagenes-productos/" + nombreArchivo;
 
         } catch (Exception e) {
-            e.printStackTrace();
             return null;
         }
     }
 
     /**
-     * Construye una lista de Branch (y sus ContactPerson) a partir de los parámetros
-     * del formulario. Esta lógica fue extraída del controlador para facilitar pruebas
-     * y futuras refactorizaciones.
+     * Construye una lista de Branch a partir de los parámetros del formulario.
+     * BD simplificada: Branch solo tiene (id, nombre, direccion)
+     * ContactPerson tiene FK a proveedor_id, no a branch_id
      */
     public List<Branch> buildBranchesFromParams(Map<String, String> allParams, Proveedor proveedor) {
         List<Branch> branches = new ArrayList<>();
         int bIndex = 0;
+        
         while (allParams.containsKey("branches[" + bIndex + "].nombre")) {
             Branch branch = new Branch();
             branch.setNombre(allParams.get("branches[" + bIndex + "].nombre"));
             branch.setDireccion(allParams.get("branches[" + bIndex + "].direccion"));
-            branch.setTelefono(allParams.get("branches[" + bIndex + "].telefono"));
-            branch.setCiudad(allParams.get("branches[" + bIndex + "].ciudad"));
-            branch.setPais(allParams.get("branches[" + bIndex + "].pais"));
-            branch.setActivo(allParams.get("branches[" + bIndex + "].activo") != null);
-
-            List<ContactPerson> contacts = new ArrayList<>();
-            int cIndex = 0;
-            while (allParams.containsKey("branches[" + bIndex + "].contacts[" + cIndex + "].nombre")) {
-                ContactPerson contact = new ContactPerson();
-                contact.setNombre(allParams.get("branches[" + bIndex + "].contacts[" + cIndex + "].nombre"));
-                contact.setRol(allParams.get("branches[" + bIndex + "].contacts[" + cIndex + "].rol"));
-                contact.setTelefono(allParams.get("branches[" + bIndex + "].contacts[" + cIndex + "].telefono"));
-                contact.setEmail(allParams.get("branches[" + bIndex + "].contacts[" + cIndex + "].email"));
-                contact.setNotas(allParams.get("branches[" + bIndex + "].contacts[" + cIndex + "].notas"));
-                String isPrimaryStr = allParams.get("branches[" + bIndex + "].contacts[" + cIndex + "].isPrimary");
-                contact.setIsPrimary(isPrimaryStr != null && (isPrimaryStr.equalsIgnoreCase("true") || isPrimaryStr.equalsIgnoreCase("on")));
-                contact.setBranch(branch);
-                contacts.add(contact);
-                cIndex++;
-            }
-
-            boolean foundPrimary = false;
-            for (ContactPerson cp : contacts) {
-                if (cp.getIsPrimary() != null && cp.getIsPrimary()) {
-                    if (!foundPrimary) foundPrimary = true;
-                    else cp.setIsPrimary(false);
-                }
-            }
-
-            branch.setContacts(contacts);
-            branch.setProveedor(proveedor);
+            // BD simplificada: Branch no tiene telefono, ciudad, pais, activo, contacts, proveedor
+            
             branches.add(branch);
             bIndex++;
         }
+        
         return branches;
+    }
+
+    /**
+     * Construye una lista de ContactPerson a partir de los parámetros del formulario.
+     * BD simplificada: ContactPerson tiene (id, nombre, telefono, email, proveedor_id)
+     */
+    public List<ContactPerson> buildContactsFromParams(Map<String, String> allParams, Proveedor proveedor) {
+        List<ContactPerson> contacts = new ArrayList<>();
+        int cIndex = 0;
+        
+        while (allParams.containsKey("contacts[" + cIndex + "].nombre")) {
+            ContactPerson contact = new ContactPerson();
+            contact.setNombre(allParams.get("contacts[" + cIndex + "].nombre"));
+            contact.setTelefono(allParams.get("contacts[" + cIndex + "].telefono"));
+            contact.setEmail(allParams.get("contacts[" + cIndex + "].email"));
+            // ContactPerson usa branch_id, no proveedor_id
+            
+            contacts.add(contact);
+            cIndex++;
+        }
+        
+        return contacts;
     }
 }

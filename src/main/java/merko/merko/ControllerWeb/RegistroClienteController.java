@@ -1,44 +1,35 @@
 package merko.merko.ControllerWeb;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import merko.merko.Entity.Rol;
 import merko.merko.Entity.Usuario;
-import merko.merko.Service.UsuarioService;
 import merko.merko.Service.UserDetailsServicelmpl;
+import merko.merko.Service.UsuarioService;
 import merko.merko.dto.RegistroDTO;
-import merko.merko.Entity.Usuario;
 
 @Controller
 public class RegistroClienteController {
 
     private final UsuarioService usuarioService;
-    private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
-    private final UserDetailsServicelmpl userDetailsServicelmpl;
 
     public RegistroClienteController(UsuarioService usuarioService,
-                                     PasswordEncoder passwordEncoder,
-                                     AuthenticationManager authenticationManager,
-                                     UserDetailsServicelmpl userDetailsServicelmpl) {
+                                     AuthenticationManager authenticationManager) {
         this.usuarioService = usuarioService;
-        this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
-        this.userDetailsServicelmpl = userDetailsServicelmpl;
     }
 
     @GetMapping("/registro")
@@ -81,7 +72,11 @@ public class RegistroClienteController {
             Authentication authentication = authenticationManager.authenticate(authToken);
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            merko.merko.Entity.Usuario cliente = userDetailsServicelmpl.findByUsername(authentication.getName());
+            // OPTIMIZACIÓN: Obtener Usuario desde CustomUserDetails sin query adicional a BD
+            UserDetailsServicelmpl.CustomUserDetails userDetails = 
+                    (UserDetailsServicelmpl.CustomUserDetails) authentication.getPrincipal();
+            merko.merko.Entity.Usuario cliente = userDetails.getUsuario();
+            
             merko.merko.dto.SessionUser sessionUser = new merko.merko.dto.SessionUser(
                     cliente.getId(), cliente.getUsername(), cliente.getNombre(), cliente.getCorreo(), cliente.getRol()
             );

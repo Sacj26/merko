@@ -28,6 +28,9 @@ public class CarritoController {
     private ProductoRepository productoRepository;
 
     @Autowired
+    private merko.merko.Repository.ProductBranchRepository productBranchRepository;
+
+    @Autowired
     private VentaRepository ventaRepository;
 
     @Autowired
@@ -69,7 +72,10 @@ public class CarritoController {
                 .mapToInt(CarritoItem::getCantidad)
                 .sum();
 
-        int stockDisponible = producto.getStock() - cantidadEnCarrito;
+        // calcular stock total disponible en todas las sucursales para el producto
+        int totalStock = productBranchRepository.findByProductoId(productoId)
+                .stream().mapToInt(pb -> pb.getStock() == null ? 0 : pb.getStock()).sum();
+        int stockDisponible = totalStock - cantidadEnCarrito;
 
         if (cantidad > stockDisponible) {
             redirectAttributes.addFlashAttribute("error", "No hay suficiente stock disponible. Stock restante: " + stockDisponible);
@@ -113,21 +119,29 @@ public class CarritoController {
         @SuppressWarnings("unchecked")
         List<CarritoItem> carrito = (List<CarritoItem>) session.getAttribute("carrito");
 
-        // Prefer authenticated principal from SecurityContext
+        // Prefer session-stored SessionUser/clienteLogueado to avoid DB hits
         Usuario cliente = null;
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken)) {
-            String username = auth.getName();
-            cliente = usuarioService.findByUsername(username);
-        }
-        // fallback to session-stored SessionUser or legacy clienteLogueado
-        if (cliente == null) {
-            SessionUser sessionUser = (SessionUser) session.getAttribute("usuarioLogueado");
-            if (sessionUser != null) {
-                cliente = usuarioService.getUsuarioById(sessionUser.getId()).orElse(null);
+        Object suObj = session.getAttribute("usuarioLogueado");
+        if (suObj instanceof SessionUser sessionUser) {
+            // Use a JPA reference instead of fetching the full entity to avoid
+            // triggering a select for simple FK assignments (the reference will
+            // supply the id to Hibernate when persisting the Venta).
+            cliente = usuarioService.getUsuarioReference(sessionUser.getId());
+        } else {
+            Object legacy = session.getAttribute("clienteLogueado");
+            if (legacy instanceof Usuario u) {
+                cliente = u;
             } else {
-                Object obj = session.getAttribute("clienteLogueado");
-                if (obj instanceof Usuario u) cliente = u;
+                // fallback to authenticated principal and load once from DB, then cache in session
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                if (auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken)) {
+                    String username = auth.getName();
+                    cliente = usuarioService.findByUsername(username);
+                    if (cliente != null) {
+                        SessionUser cached = new SessionUser(cliente.getId(), cliente.getUsername(), cliente.getNombre(), cliente.getCorreo(), cliente.getFotoPerfil(), cliente.getRol());
+                        session.setAttribute("usuarioLogueado", cached);
+                    }
+                }
             }
         }
 
@@ -153,7 +167,12 @@ public class CarritoController {
 
             Producto producto = productoOpt.get();
 
-            if (producto.getStock() < item.getCantidad()) {
+
+            // Buscar una sucursal que tenga suficiente stock para el producto
+            Optional<merko.merko.Entity.ProductBranch> pbOpt = productBranchRepository.findByProductoId(item.getProductoId())
+                    .stream().filter(pb -> (pb.getStock() != null ? pb.getStock() : 0) >= item.getCantidad()).findFirst();
+
+            if (pbOpt.isEmpty()) {
                 model.addAttribute("error", "Stock insuficiente para " + producto.getNombre());
                 return "redirect:/carrito?error=true";
             }
@@ -166,8 +185,11 @@ public class CarritoController {
 
             detalles.add(detalle);
 
-            producto.setStock(producto.getStock() - item.getCantidad());
-            productoRepository.save(producto);
+            // decrementar stock en la sucursal seleccionada
+            merko.merko.Entity.ProductBranch targetPb = pbOpt.get();
+            int cur = targetPb.getStock() == null ? 0 : targetPb.getStock();
+            targetPb.setStock(cur - item.getCantidad());
+            productBranchRepository.save(targetPb);
 
             totalVenta += item.getCantidad() * producto.getPrecioVenta();
         }

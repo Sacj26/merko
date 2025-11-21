@@ -1,8 +1,5 @@
 package merko.merko.Entity;
 
-import java.util.List;
-
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,19 +7,25 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-
 @Setter
 @Getter
 @Entity
+@Table(name = "producto", indexes = {
+    @Index(name = "idx_producto_sku", columnList = "sku"),
+    @Index(name = "idx_producto_estado", columnList = "estado"),
+    @Index(name = "idx_producto_nombre", columnList = "nombre"),
+    @Index(name = "idx_producto_categoria_id", columnList = "categoria_id")
+})
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
@@ -32,52 +35,76 @@ public class Producto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String nombre;
-    private String descripcion;
-    private double precioCompra;
-    private double precioVenta;
-    private int stock;
-
-    // Identificación comercial
     @Column(unique = true)
-    private String sku;               // Código interno
+    private String sku;
+
+    private String nombre;
+
+    private String descripcion;
+
+    @Column(name = "precio_compra", nullable = false)
+    private Double precioCompra;
+
+    @Column(name = "precio_venta", nullable = false)
+    private Double precioVenta;
+
+    @Column(length = 100)
+    private String estado;
+
+    @Column(length = 100)
+    private String tipo;
+
+    @Column(name = "gestiona_lotes")
+    private Boolean gestionaLotes;
+
     @Column(name = "codigo_barras", unique = true)
-    private String codigoBarras;      // EAN/UPC
+    private String codigoBarras;
+
     private String marca;
 
-    // Clasificación y estado
-    @Enumerated(EnumType.STRING)
-    private TipoProducto tipo = TipoProducto.MATERIA_PRIMA;
-    @Enumerated(EnumType.STRING)
-    private EstadoProducto estado = EstadoProducto.ACTIVO;
+    @Column(name = "unidad_medida")
+    private String unidadMedida;
 
-    // Unidades y presentación
-    @Enumerated(EnumType.STRING)
-    private UnidadMedida unidadMedida = UnidadMedida.UNID;
-    private Double contenidoNeto; // p. ej. 500
-    @Enumerated(EnumType.STRING)
-    private UnidadMedida contenidoUoM; // p. ej. G, ML
+    @Column(name = "stock_minimo")
+    private Integer stockMinimo;
 
-    // Lotes y vencimientos
-    private Boolean gestionaLotes = Boolean.TRUE;
-    private Boolean requiereVencimiento = Boolean.TRUE;
-    private Integer vidaUtilDias; // días de vida útil
-    @Enumerated(EnumType.STRING)
-    private Almacenamiento almacenamiento = Almacenamiento.AMBIENTE;
-    private String registroSanitario; // INVIMA u otro
-
-    // Reabastecimiento
-    private Integer stockMinimo = 0;
-    private Integer puntoReorden = 0;
-    private Integer leadTimeDias = 0; // tiempo de reposición
+    @Column(name = "punto_reorden")
+    private Integer puntoReorden;
 
     @Column(name = "imagen_url")
     private String imagenUrl;
 
-    @ManyToOne
-    @JoinColumn(name = "proveedor_id")
-    private Proveedor proveedor;
+    @Enumerated(EnumType.STRING)
+    private TipoAlmacenamiento almacenamiento;
 
-    @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Compra> compras;
+    @Column(name = "requiere_vencimiento")
+    private Boolean requiereVencimiento;
+
+    @Column(name = "vida_util_dias")
+    private Integer vidaUtilDias;
+
+    @Column(name = "contenido_neto")
+    private Double contenidoNeto;
+
+    @Column(name = "contenido_uom")
+    private String contenidoUom;
+
+    @Column(name = "registro_sanitario")
+    private String registroSanitario;
+
+    @Column(name = "lead_time_dias")
+    private Integer leadTimeDias;
+
+    @ManyToOne
+    @JoinColumn(name = "categoria_id")
+    private Categoria categoria;
+
+    // Alias para compatibilidad con código antiguo que usa "precioBase"
+    public Double getPrecioBase() {
+        return this.precioVenta;
+    }
+
+    public void setPrecioBase(Double precioBase) {
+        this.precioVenta = precioBase;
+    }
 }

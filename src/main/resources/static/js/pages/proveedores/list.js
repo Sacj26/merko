@@ -17,20 +17,85 @@
     });
   }
 
-  // Selector de tamaño de página (placeholder - requiere backend con paginación)
+  // Selector de tamaño de página con filtrado
+  let pageSize = 10;
   if (pageSizeSelector) {
-    pageSizeSelector.addEventListener('change', () => {
-      // Por ahora solo guarda la preferencia
-      localStorage.setItem('proveedoresPageSize', pageSizeSelector.value);
-      // Si hay soporte de paginación en el backend, aquí iría la lógica de recarga
-      console.log('Tamaño de página cambiado a:', pageSizeSelector.value);
-    });
-    
     // Restaurar preferencia guardada
     const savedSize = localStorage.getItem('proveedoresPageSize');
     if (savedSize) {
       pageSizeSelector.value = savedSize;
+      pageSize = parseInt(savedSize);
     }
+    
+    pageSizeSelector.addEventListener('change', () => {
+      pageSize = parseInt(pageSizeSelector.value);
+      localStorage.setItem('proveedoresPageSize', pageSize);
+      applyFilters();
+    });
+  }
+
+  // Filtros en tiempo real
+  const filterNombre = document.getElementById('filterNombre');
+  const filterNit = document.getElementById('filterNit');
+  const filterEstado = document.getElementById('filterEstado');
+  const filterCiudad = document.getElementById('filterCiudad');
+  const tbody = document.querySelector('.table-admin tbody');
+  let allRows = [];
+  
+  if (tbody) {
+    // Guardar todas las filas originales
+    allRows = Array.from(tbody.querySelectorAll('tr')).filter(row => !row.querySelector('.empty-message'));
+    
+    function applyFilters() {
+      const nombreValue = filterNombre ? filterNombre.value.toLowerCase().trim() : '';
+      const nitValue = filterNit ? filterNit.value.toLowerCase().trim() : '';
+      const estadoValue = filterEstado ? filterEstado.value.toLowerCase() : '';
+      const ciudadValue = filterCiudad ? filterCiudad.value.toLowerCase().trim() : '';
+      
+      let filteredRows = allRows.filter(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length === 0) return false;
+        
+        const nombre = cells[1]?.textContent.toLowerCase() || '';
+        const nit = cells[2]?.textContent.toLowerCase() || '';
+        const ciudad = cells[5]?.textContent.toLowerCase() || '';
+        const estado = cells[7]?.textContent.toLowerCase() || '';
+        
+        const matchNombre = !nombreValue || nombre.includes(nombreValue);
+        const matchNit = !nitValue || nit.includes(nitValue);
+        const matchCiudad = !ciudadValue || ciudad.includes(ciudadValue);
+        const matchEstado = !estadoValue || estado.includes(estadoValue);
+        
+        return matchNombre && matchNit && matchCiudad && matchEstado;
+      });
+      
+      // Limpiar tbody
+      tbody.innerHTML = '';
+      
+      if (filteredRows.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="empty-message"><i class="fas fa-search"></i><br/>No se encontraron proveedores con los filtros aplicados.</td></tr>';
+      } else {
+        // Aplicar paginación
+        const visibleRows = filteredRows.slice(0, pageSize);
+        visibleRows.forEach(row => tbody.appendChild(row));
+        
+        // Mostrar mensaje si hay más resultados
+        if (filteredRows.length > pageSize) {
+          const infoRow = document.createElement('tr');
+          infoRow.innerHTML = `<td colspan="9" class="empty-message" style="background:#f8f9fa; padding:0.5rem; font-size:0.85rem;"><i class="fas fa-info-circle"></i> Mostrando ${pageSize} de ${filteredRows.length} resultados. Cambia el tamaño de página para ver más.</td>`;
+          tbody.appendChild(infoRow);
+        }
+      }
+    }
+    
+    // Event listeners para filtros
+    if (filterNombre) filterNombre.addEventListener('input', applyFilters);
+    if (filterNit) filterNit.addEventListener('input', applyFilters);
+    if (filterEstado) filterEstado.addEventListener('change', applyFilters);
+    if (filterCiudad) filterCiudad.addEventListener('input', applyFilters);
+    
+    // Aplicar filtros iniciales con el pageSize cargado
+    applyFilters();
   }
 })();
 

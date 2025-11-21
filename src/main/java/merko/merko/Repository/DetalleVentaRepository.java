@@ -16,10 +16,16 @@ public interface DetalleVentaRepository extends JpaRepository<DetalleVenta, Long
 
     @Query("select dv.producto.id as productoId, dv.producto.nombre as nombre, sum(dv.cantidad) as cantidad " +
 	    "from DetalleVenta dv join dv.venta v " +
-	    "where v.estado = :estado and v.fecha between :start and :end " +
+	    "where (v.estado = :estado OR (v.estado IS NULL AND :estado = 'ACTIVA')) and v.fecha between :start and :end " +
 	    "group by dv.producto.id, dv.producto.nombre " +
 	    "order by cantidad desc")
 	List<Object[]> topProductosPorCantidad(@Param("start") LocalDateTime start,
 					   @Param("end") LocalDateTime end,
 					   @Param("estado") EstadoVenta estado);
+
+    // Contar total de detalles de venta en un rango de fechas
+    @Query("select count(dv) from DetalleVenta dv join dv.venta v where (v.estado = :estado OR (v.estado IS NULL AND :estado = 'ACTIVA')) and v.fecha between :start and :end")
+    Long countByFechaBetweenAndEstado(@Param("start") LocalDateTime start,
+                                      @Param("end") LocalDateTime end,
+                                      @Param("estado") EstadoVenta estado);
 }

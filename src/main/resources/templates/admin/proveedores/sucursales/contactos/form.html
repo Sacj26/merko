@@ -1,52 +1,161 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{shared/layouts/admin}" lang="es">
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" 
+      layout:decorate="~{shared/layouts/admin}" 
+      lang="es">
 <head>
     <title>Contacto</title>
+    <link rel="stylesheet" th:href="@{/css/modules/proveedores.css}">
 </head>
 <body>
 <div layout:fragment="content">
     <div class="header-with-actions">
         <div class="title-group">
-            <h1 class="page-title" th:text="${branch.nombre} + ' — Contacto'">Contacto</h1>
+            <h1 class="page-title">
+                <i class="fas fa-user"></i>
+                <span th:text="${contact.id != null ? 'Editar' : 'Nuevo'} + ' Contacto'">Nuevo Contacto</span>
+            </h1>
+            <p class="page-subtitle">
+                <i class="fas fa-store"></i>
+                <span th:text="${branch.nombre}">Sucursal</span>
+                <span class="text-muted">—</span>
+                <i class="fas fa-truck"></i>
+                <span th:text="${proveedor.nombre}">Proveedor</span>
+            </p>
         </div>
         <div class="actions">
-            <a th:href="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales/' + ${branch.id} + '/contactos'}" class="btn btn-secondary">Volver a contactos</a>
+            <a th:href="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales/' + ${branch.id} + '/contactos'}" 
+               class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> 
+                <span class="hide-sm">Volver a contactos</span>
+            </a>
         </div>
     </div>
 
-    <div class="form-container">
-        <form th:action="${accion}" th:object="${contact}" method="post">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="nombre">Nombre:</label>
-                    <input type="text" id="nombre" th:field="*{nombre}" class="form-control" required />
-                </div>
-                <div class="form-group">
-                    <label for="rol">Rol / Cargo:</label>
-                    <input type="text" id="rol" th:field="*{rol}" class="form-control" />
-                </div>
-                <div class="form-group">
-                    <label for="telefono">Teléfono:</label>
-                    <input type="text" id="telefono" th:field="*{telefono}" class="form-control" />
-                </div>
-                <div class="form-group">
-                    <label for="email">Email:</label>
-                    <input type="email" id="email" th:field="*{email}" class="form-control" />
-                </div>
-                <div class="form-group full-width">
-                    <label for="notas">Notas:</label>
-                    <textarea id="notas" th:field="*{notas}" class="form-control" rows="3"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="isPrimary">Principal:</label>
-                    <input type="hidden" name="isPrimary" value="false" />
-                    <input type="checkbox" id="isPrimary" th:field="*{isPrimary}" value="true" />
+    <div class="form-container contact-form">
+        <form th:action="${accion}" th:object="${contact}" method="post" class="admin-form">
+            
+            <!-- Sección: Información personal -->
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    <i class="fas fa-id-card"></i> Información Personal
+                </h3>
+                
+                <div class="form-grid form-grid-2">
+                    <div class="form-group">
+                        <label for="nombre" class="form-label required">
+                            <i class="fas fa-user-circle"></i> Nombre completo
+                        </label>
+                        <input type="text" 
+                               id="nombre" 
+                               th:field="*{nombre}" 
+                               class="form-control" 
+                               placeholder="Ej: Juan Pérez García"
+                               required 
+                               maxlength="100" />
+                        <small class="form-help">Nombre completo de la persona de contacto</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="rol" class="form-label">
+                            <i class="fas fa-briefcase"></i> Cargo / Rol
+                        </label>
+                        <input type="text" 
+                               id="rol" 
+                               th:field="*{rol}" 
+                               class="form-control" 
+                               placeholder="Ej: Gerente de sucursal"
+                               maxlength="50" />
+                        <small class="form-help">Cargo o posición en la empresa</small>
+                    </div>
                 </div>
             </div>
 
+            <!-- Sección: Información de contacto -->
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    <i class="fas fa-phone"></i> Información de Contacto
+                </h3>
+                
+                <div class="form-grid form-grid-2">
+                    <div class="form-group">
+                        <label for="telefono" class="form-label">
+                            <i class="fas fa-mobile-alt"></i> Teléfono
+                        </label>
+                        <input type="tel" 
+                               id="telefono" 
+                               th:field="*{telefono}" 
+                               class="form-control" 
+                               placeholder="Ej: +57 300 123 4567"
+                               maxlength="20" />
+                        <small class="form-help">Número de teléfono directo</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email" class="form-label">
+                            <i class="fas fa-envelope"></i> Correo electrónico
+                        </label>
+                        <input type="email" 
+                               id="email" 
+                               th:field="*{email}" 
+                               class="form-control" 
+                               placeholder="Ej: contacto@empresa.com"
+                               maxlength="100" />
+                        <small class="form-help">Correo electrónico profesional</small>
+                    </div>
+
+                    <div class="form-group form-group-full">
+                        <label for="notas" class="form-label">
+                            <i class="fas fa-sticky-note"></i> Notas adicionales
+                        </label>
+                        <textarea id="notas" 
+                                  th:field="*{notas}" 
+                                  class="form-control" 
+                                  rows="4"
+                                  placeholder="Información adicional, horarios de disponibilidad, preferencias de contacto, etc."
+                                  maxlength="500"></textarea>
+                        <small class="form-help">Cualquier información relevante sobre el contacto</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección: Configuración -->
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    <i class="fas fa-cog"></i> Configuración
+                </h3>
+                
+                <div class="form-grid form-grid-1">
+                    <div class="form-group form-group-checkbox">
+                        <label for="isPrimary" class="checkbox-label checkbox-label-prominent">
+                            <input type="hidden" name="isPrimary" value="false" />
+                            <input type="checkbox" 
+                                   id="isPrimary" 
+                                   th:field="*{isPrimary}" 
+                                   value="true" 
+                                   class="form-checkbox" />
+                            <span class="checkbox-text">
+                                <i class="fas fa-star"></i> Contacto principal de la sucursal
+                            </span>
+                        </label>
+                        <small class="form-help">
+                            <i class="fas fa-info-circle"></i> 
+                            El contacto principal será el que se muestre por defecto en la información de la sucursal. Solo puede haber un contacto principal por sucursal.
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acciones del formulario -->
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Guardar</button>
-                <a th:href="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales/' + ${branch.id} + '/contactos'}" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-save"></i> 
+                    <span th:text="${contact.id != null ? 'Actualizar' : 'Crear'} + ' Contacto'">Guardar Contacto</span>
+                </button>
+                <a th:href="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales/' + ${branch.id} + '/contactos'}" 
+                   class="btn btn-secondary btn-lg">
+                    <i class="fas fa-times"></i> Cancelar
+                </a>
             </div>
         </form>
     </div>

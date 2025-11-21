@@ -36,6 +36,17 @@
         <button id="btnCancelCreateBranch" type="button" class="btn btn-secondary">Cancelar</button>
     </div>
 
+    <div class="filters">
+        <input type="text" id="filterNombre" class="form-control" placeholder="Buscar por nombre">
+        <input type="text" id="filterNit" class="form-control" placeholder="Buscar por NIT/RUC">
+        <select id="filterEstado" class="form-control">
+            <option value="">Todos los estados</option>
+            <option value="activo">Activo</option>
+            <option value="inactivo">Inactivo</option>
+        </select>
+        <input type="text" id="filterCiudad" class="form-control" placeholder="Buscar por ciudad">
+    </div>
+
     <div class="table-controls">
         <div class="table-controls-left">
             <label class="hide-sm">Mostrar</label>
@@ -82,23 +93,15 @@
                 <td th:text="${prov.email ?: 'N/A'}">Email</td>
                 <td th:text="${prov.ciudad ?: 'N/A'}">Ciudad</td>
                 <td>
-                    <!-- Legacy: proveedor may have flattened contact fields; prefer branch->contacts now -->
-                    <div th:if="${prov.nombreContacto}" class="cell-text-ellipsis">
-                        <div class="cell-title" th:text="${prov.nombreContacto}">Contacto</div>
-                        <small class="cell-subtitle" th:text="${prov.cargoContacto}">Cargo</small>
-                    </div>
-
-                    <!-- New: buscar el primer contacto disponible en las sucursales del proveedor -->
-                    <div th:if="${prov.nombreContacto == null}">
-                        <div th:if="${prov.branches != null and !#lists.isEmpty(prov.branches)}" th:with="firstBranch=${prov.branches[0]}">
-                            <div th:if="${firstBranch.contacts != null and !#lists.isEmpty(firstBranch.contacts)}" class="cell-text-ellipsis">
-                                <div class="cell-title" th:text="${firstBranch.contacts[0].nombre}">Contacto</div>
-                                <small class="cell-subtitle" th:text="${firstBranch.contacts[0].rol}">Rol</small>
-                            </div>
-                            <span th:unless="${firstBranch.contacts != null and !#lists.isEmpty(firstBranch.contacts)}" class="text-muted">Sin contacto</span>
+                    <!-- Prefer branch->contacts: show first available contact from provider branches -->
+                    <div th:if="${prov.branches != null and !#lists.isEmpty(prov.branches)}" th:with="firstBranch=${prov.branches[0]}">
+                        <div th:if="${firstBranch.contacts != null and !#lists.isEmpty(firstBranch.contacts)}" class="cell-text-ellipsis">
+                            <div class="cell-title" th:text="${firstBranch.contacts[0].nombre}">Contacto</div>
+                            <small class="cell-subtitle" th:text="${firstBranch.contacts[0].rol}">Rol</small>
                         </div>
-                        <span th:if="${prov.branches == null or #lists.isEmpty(prov.branches)}" class="text-muted">Sin contacto</span>
+                        <span th:unless="${firstBranch.contacts != null and !#lists.isEmpty(firstBranch.contacts)}" class="text-muted">Sin contacto</span>
                     </div>
+                    <span th:if="${prov.branches == null or #lists.isEmpty(prov.branches)}" class="text-muted">Sin contacto</span>
                 </td>
                 <td>
                     <span th:if="${prov.activo}" class="badge badge-success">

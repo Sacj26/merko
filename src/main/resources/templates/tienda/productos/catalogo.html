@@ -38,13 +38,13 @@
                         <p th:text="${producto.descripcion}">Descripción</p>
                         <span class="etiqueta">¡Nuevo!</span>
                         <p class="precio" th:text="'$' + ${producto.precioVenta}">Precio</p>
-                        <p class="cantidad-disponible" th:text="'Disponible: ' + ${producto.stock}">Cantidad disponible</p>
+                        <p class="cantidad-disponible" th:text="'Disponible: ' + (${availableStockByProductId[producto.id] != null ? availableStockByProductId[producto.id] : 0})">Cantidad disponible</p>
 
                         <form th:action="@{/carrito/agregar}" method="post" class="form-agregar-carrito">
                             <input type="hidden" name="productoId" th:value="${producto.id}" />
                             <label>
                                 Cantidad:
-                                <input type="number" name="cantidad" value="1" min="1" th:attr="max=${producto.stock}" required />
+                                <input type="number" name="cantidad" value="1" min="1" th:attr="max=${availableStockByProductId[producto.id] != null ? availableStockByProductId[producto.id] : 0}" required />
                             </label>
                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                             <button type="submit" class="btn-comprar">Agregar al carrito</button>

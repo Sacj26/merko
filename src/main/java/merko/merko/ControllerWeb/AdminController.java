@@ -1,5 +1,8 @@
 package merko.merko.ControllerWeb;
 
+import java.util.List;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -15,9 +18,6 @@ import merko.merko.Service.DashboardService;
 import merko.merko.Service.ProductoService;
 import merko.merko.Service.UsuarioService;
 import merko.merko.Service.VentaService;
-
-import java.util.List;
-import java.util.Map;
 
 @Controller
 @RequestMapping("/admin")
@@ -44,6 +44,8 @@ public class AdminController {
         this.detalleCompraRepository = detalleCompraRepository;
     }
 
+
+
     @GetMapping
     public String rootAdmin() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -58,17 +60,18 @@ public class AdminController {
         logger.info("Accediendo a /admin/dashboard con usuario: {}", auth.getName());
         logger.info("Autoridades del usuario: {}", auth.getAuthorities());
 
-        // Datos para el dashboard existentes
-        int totalVentas = ventaService.getAllVentas().size();
-        int totalProductos = productoService.getAllProductos().size();
-        int totalClientes = (int) usuarioService.getAllUsuarios().stream().filter(u -> u.getRol() != null).count();
+        // Datos para el dashboard existentes (optimizado con count())
+        long totalVentas = ventaService.countAll();
+        long totalProductos = productoService.countAll();
+        // BD simplificada: Usuario sin campo rol
+        long totalClientes = usuarioService.countAll();
 
         model.addAttribute("totalVentas", totalVentas);
         model.addAttribute("totalProductos", totalProductos);
         model.addAttribute("totalClientes", totalClientes);
 
-        // Últimas ventas (limitar a 5)
-        var ventas = ventaService.getAllVentas();
+        // Últimas ventas (limitar a 5) - usar query optimizada
+        var ventas = ventaService.getAllVentasWithDetalles();
         if (ventas.size() > 5) {
             model.addAttribute("ultimasVentas", ventas.subList(0, 5));
         } else {
@@ -95,15 +98,19 @@ public class AdminController {
                 for (merko.merko.Entity.Lote l : proxVenc) {
                     java.util.Map<String, Object> m = new java.util.HashMap<>();
                     m.put("lote", l);
-                    java.util.List<merko.merko.Entity.ProductBranch> pbs = productBranchRepository.findByProductoId(l.getProducto().getId());
+                    // Lote tiene FK a producto_id
+                    Long productoId = (l.getProducto() != null) ? l.getProducto().getId() : null;
+                    java.util.List<merko.merko.Entity.ProductBranch> pbs = (productoId != null) 
+                        ? productBranchRepository.findByProductoId(productoId) 
+                        : new java.util.ArrayList<>();
                     java.util.List<java.util.Map<String, Object>> branches = new java.util.ArrayList<>();
                     for (merko.merko.Entity.ProductBranch pb : pbs) {
                         java.util.Map<String, Object> b = new java.util.HashMap<>();
                         if (pb.getBranch() != null) {
                             b.put("id", pb.getBranch().getId());
                             b.put("nombre", pb.getBranch().getNombre());
-                            b.put("ciudad", pb.getBranch().getCiudad());
-                            b.put("pais", pb.getBranch().getPais());
+                            b.put("direccion", pb.getBranch().getDireccion());
+                            // BD simplificada: Branch solo tiene id, nombre, direccion
                         }
                         branches.add(b);
                     }
@@ -124,6 +131,8 @@ public class AdminController {
 
         return "admin/dashboard/index";
     }
+
+
 
     // Endpoints JSON para gráficos del dashboard
     @GetMapping("/dashboard/api/ventas-diarias")

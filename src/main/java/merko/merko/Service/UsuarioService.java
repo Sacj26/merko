@@ -1,15 +1,16 @@
 package merko.merko.Service;
 
-import merko.merko.Entity.Rol;
-import merko.merko.Entity.Usuario;
-import merko.merko.Repository.UsuarioRepository;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import merko.merko.Entity.Rol;
+import merko.merko.Entity.Usuario;
+import merko.merko.Repository.UsuarioRepository;
 
 @Service
 public class UsuarioService {
@@ -26,8 +27,20 @@ public class UsuarioService {
         return usuarioRepository.findAll();
     }
 
+    public long countAll() {
+        return usuarioRepository.count();
+    }
+
     public Optional<Usuario> getUsuarioById(Long id) {
         return usuarioRepository.findById(id);
+    }
+
+    /**
+     * Return a JPA reference to the Usuario with given id. This does not trigger
+     * an immediate select and is useful when only the id is needed for relations.
+     */
+    public Usuario getUsuarioReference(Long id) {
+        return usuarioRepository.getReferenceById(id);
     }
 
     @Transactional

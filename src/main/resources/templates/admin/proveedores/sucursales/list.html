@@ -1,84 +1,171 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{shared/layouts/admin}" lang="es">
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" 
+      layout:decorate="~{shared/layouts/admin}" 
+      lang="es">
 <head>
     <title>Sucursales</title>
+    <link rel="stylesheet" th:href="@{/css/modules/proveedores.css}">
 </head>
 <body>
 <div layout:fragment="content">
     <div class="header-with-actions">
         <div class="title-group">
-            <h1 class="page-title" th:text="${proveedor.nombre} + ' — Sucursales'">Sucursales</h1>
-            <p class="page-subtitle">Gestiona las sucursales del proveedor</p>
+            <h1 class="page-title">
+                <i class="fas fa-store-alt"></i>
+                <span>Sucursales</span>
+            </h1>
+            <p class="page-subtitle">
+                <strong th:text="${proveedor.nombre}">Proveedor</strong> — 
+                <span th:text="${#lists.size(branches)} + ' sucursal' + (${#lists.size(branches)} != 1 ? 'es' : '')">0 sucursales</span>
+            </p>
         </div>
         <div class="actions">
-            <!-- Volver a la lista principal de proveedores (icono) -->
-            <a th:href="@{/admin/proveedores}" class="btn btn-secondary btn-icon-only" title="Volver a proveedores">
-                <i class="fas fa-arrow-left" aria-hidden="true"></i>
-                <span class="sr-only">Volver a proveedores</span>
+            <a th:href="@{/admin/proveedores}" 
+               class="btn btn-secondary" 
+               title="Volver a proveedores">
+                <i class="fas fa-arrow-left"></i>
+                <span class="hide-sm">Volver</span>
+            </a>
+            
+            <a th:href="@{/admin/proveedores/ver/{id}(id=${proveedor.id})}" 
+               class="btn btn-secondary hide-sm" 
+               title="Ver proveedor">
+                <i class="fas fa-eye"></i> Ver proveedor
             </a>
 
-            <!-- Nueva sucursal (icono) -->
-            <a th:href="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales/nuevo'}" class="btn btn-primary btn-icon-only" title="Nueva sucursal">
-                <i class="fas fa-plus" aria-hidden="true"></i>
-                <span class="sr-only">Nueva sucursal</span>
+            <a th:href="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales/nuevo'}" 
+               class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                <span class="hide-sm">Nueva sucursal</span>
             </a>
         </div>
     </div>
 
-    <div class="form-container">
-        <div th:if="${#lists.isEmpty(branches)}" class="alert alert-info">No hay sucursales registradas para este proveedor.</div>
-        <div th:if="${!#lists.isEmpty(branches)}">
+    <div class="content-container">
+        <!-- Estado vacío -->
+        <div th:if="${#lists.isEmpty(branches)}" class="empty-state">
+            <div class="empty-state-icon">
+                <i class="fas fa-store-slash"></i>
+            </div>
+            <h3 class="empty-state-title">No hay sucursales registradas</h3>
+            <p class="empty-state-text">
+                Este proveedor no tiene sucursales asociadas. Crea la primera sucursal para comenzar.
+            </p>
+            <a th:href="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales/nuevo'}" 
+               class="btn btn-primary btn-lg">
+                <i class="fas fa-plus"></i> Crear primera sucursal
+            </a>
+        </div>
+
+        <!-- Tabla de sucursales -->
+        <div th:if="${!#lists.isEmpty(branches)}" class="table-wrapper">
+            <div class="table-controls">
+                <div class="table-controls-left">
+                    <span class="results-count">
+                        <i class="fas fa-list"></i>
+                        <span th:text="${#lists.size(branches)} + ' sucursal' + (${#lists.size(branches)} != 1 ? 'es' : '')">0 sucursales</span>
+                    </span>
+                </div>
+                <div class="table-controls-right">
+                    <label for="toggleDenseSucursales" class="hide-sm">
+                        <input type="checkbox" id="toggleDenseSucursales" /> Vista compacta
+                    </label>
+                </div>
+            </div>
+
             <div class="table-container table-scroll">
-                <table class="table-admin">
+                <table class="table-admin" id="tablaSucursales">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Dirección</th>
-                            <th>Teléfono</th>
-                            <th>Ciudad</th>
-                            <th>País</th>
-                            <th>Activo</th>
+                            <th class="col-id">ID</th>
+                            <th class="col-nombre">Nombre</th>
+                            <th class="col-ubicacion hide-md">Ubicación</th>
+                            <th class="col-telefono hide-sm">Teléfono</th>
+                            <th class="col-estado">Estado</th>
+                            <th class="col-stats hide-md">Productos</th>
                             <th class="actions-col">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr th:each="b : ${branches}">
-                            <td th:text="${b.id}">1</td>
-                            <td>
+                            <td class="col-id" th:text="${b.id}">1</td>
+                            <td class="col-nombre">
                                 <div class="cell-text-ellipsis">
-                                    <div class="cell-title" th:text="${b.nombre}">Sucursal</div>
-                                    <small class="cell-subtitle" th:text="${b.direccion}">Dirección</small>
+                                    <div class="cell-title">
+                                        <i class="fas fa-store text-muted"></i>
+                                        <strong th:text="${b.nombre}">Sucursal</strong>
+                                    </div>
+                                    <small class="cell-subtitle" th:if="${b.direccion != null}" th:text="${b.direccion}">Dirección</small>
                                 </div>
                             </td>
-                            <td th:text="${b.direccion}">Dirección</td>
-                            <td th:text="${b.telefono}">Tel</td>
-                            <td th:text="${b.ciudad}">Ciudad</td>
-                            <td th:text="${b.pais}">País</td>
-                            <td>
-                                <span th:if="${b.activo}" class="badge badge-success">
-                                    <i class="fas fa-check-circle"></i>
+                            <td class="col-ubicacion hide-md">
+                                <span th:if="${b.ciudad != null or b.pais != null}">
+                                    <i class="fas fa-map-marker-alt text-muted"></i>
+                                    <span th:text="${b.ciudad != null ? b.ciudad : ''} + ${b.ciudad != null and b.pais != null ? ', ' : ''} + ${b.pais != null ? b.pais : ''}">Ciudad, País</span>
                                 </span>
-                                <span th:unless="${b.activo}" class="badge badge-danger">
-                                    <i class="fas fa-times-circle"></i>
+                                <span th:unless="${b.ciudad != null or b.pais != null}" class="text-muted">—</span>
+                            </td>
+                            <td class="col-telefono hide-sm">
+                                <span th:if="${b.telefono != null}">
+                                    <i class="fas fa-phone text-muted"></i>
+                                    <span th:text="${b.telefono}">Tel</span>
+                                </span>
+                                <span th:unless="${b.telefono != null}" class="text-muted">—</span>
+                            </td>
+                            <td class="col-estado">
+                                <span th:if="${b.activo}" class="badge badge-success" title="Sucursal activa">
+                                    <i class="fas fa-check-circle"></i> Activa
+                                </span>
+                                <span th:unless="${b.activo}" class="badge badge-secondary" title="Sucursal inactiva">
+                                    <i class="fas fa-times-circle"></i> Inactiva
+                                </span>
+                            </td>
+                            <td class="col-stats hide-md">
+                                <span class="badge badge-info">
+                                    <i class="fas fa-box"></i>
+                                    <span th:text="${productCounts[b.id] != null ? productCounts[b.id] : 0}">0</span>
                                 </span>
                             </td>
                             <td class="actions-col">
                                 <div class="actions-cell">
-                                    <!-- Agregar producto ligado a esta sucursal (abre formulario de producto con proveedor+branch preseleccionados) -->
-                                    <a th:href="@{/admin/productos/nuevo(proveedorId=${proveedor.id},branchId=${b.id})}"
-                                       class="btn-icon btn-icon-primary" title="Agregar producto a sucursal">
-                                        <i class="fas fa-plus"></i>
+                                    <!-- Ver detalles de la sucursal -->
+                                    <a th:href="@{/admin/sucursales/ver/{id}(id=${b.id})}"
+                                       class="btn-icon btn-icon-info" 
+                                       title="Ver detalles">
+                                        <i class="fas fa-eye"></i>
                                     </a>
 
-                                    <a th:href="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales/editar/' + ${b.id}}" class="btn-icon btn-icon-primary" title="Editar sucursal">
+                                    <!-- Editar sucursal -->
+                                    <a th:href="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales/editar/' + ${b.id}}" 
+                                       class="btn-icon btn-icon-primary" 
+                                       title="Editar">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <a th:href="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales/' + ${b.id} + '/contactos'}" class="btn-icon btn-icon-secondary" title="Contactos">
+
+                                    <!-- Gestionar contactos -->
+                                    <a th:href="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales/' + ${b.id} + '/contactos'}" 
+                                       class="btn-icon btn-icon-secondary" 
+                                       title="Gestionar contactos">
                                         <i class="fas fa-address-book"></i>
                                     </a>
-                                    <form th:action="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales/' + ${b.id} + '/eliminar'}" method="post" style="display:inline">
-                                        <button type="submit" class="btn-icon btn-icon-danger" title="Eliminar" onclick="return confirm('¿Eliminar sucursal?')">
+
+                                    <!-- Agregar producto -->
+                                    <a th:href="@{/admin/productos/nuevo(proveedorId=${proveedor.id},branchId=${b.id})}"
+                                       class="btn-icon btn-icon-success" 
+                                       title="Agregar producto">
+                                        <i class="fas fa-box-open"></i>
+                                    </a>
+
+                                    <!-- Eliminar -->
+                                    <form th:action="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales/' + ${b.id} + '/eliminar'}" 
+                                          method="post" 
+                                          style="display:inline" 
+                                          class="delete-form">
+                                        <button type="submit" 
+                                                class="btn-icon btn-icon-danger" 
+                                                title="Eliminar" 
+                                                onclick="return confirm('¿Está seguro de eliminar esta sucursal?\n\nEsta acción no se puede deshacer.')">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
@@ -91,5 +178,14 @@
         </div>
     </div>
 </div>
+
+<th:block layout:fragment="scripts">
+    <script>
+        // Toggle vista compacta
+        document.getElementById('toggleDenseSucursales')?.addEventListener('change', function(e) {
+            document.getElementById('tablaSucursales')?.classList.toggle('table-dense', e.target.checked);
+        });
+    </script>
+</th:block>
 </body>
 </html>

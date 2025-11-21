@@ -29,9 +29,9 @@
                 <tbody>
                     <tr th:each="producto : ${productos}">
                         <td th:text="${producto.nombre}"></td>
-                        <td th:text="${#numbers.formatDecimal(producto.precio, 1, 'COMMA', 2, 'POINT')}"></td>
-                        <td th:text="${producto.stock}"></td>
-                        <td th:text="${producto.categoria}"></td>
+                        <td th:text="${#numbers.formatDecimal(producto.precioVenta, 1, 'COMMA', 2, 'POINT')}"></td>
+                        <td th:text="${availableStockByProductId[producto.id]}" ></td>
+                        <td th:text="${producto.categoria != null ? producto.categoria.nombre : ''}"></td>
                         <td>
                             <a th:href="@{/admin/productos/editar/{id}(id=${producto.id})}" 
                                class="btn-action btn-edit">

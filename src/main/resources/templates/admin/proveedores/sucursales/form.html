@@ -1,81 +1,216 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{shared/layouts/admin}" lang="es">
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" 
+      layout:decorate="~{shared/layouts/admin}" 
+      lang="es">
 <head>
     <title>Formulario sucursal</title>
+    <link rel="stylesheet" th:href="@{/css/modules/proveedores.css}">
 </head>
 <body>
 <div layout:fragment="content">
     <div class="header-with-actions">
         <div class="title-group">
-            <h1 class="page-title" th:text="${proveedor.nombre} + ' — Sucursal'">Sucursal</h1>
-            <p class="page-subtitle">Crear / editar sucursal</p>
+            <h1 class="page-title">
+                <i class="fas fa-store"></i>
+                <span th:text="${branch.id != null ? 'Editar' : 'Nueva'} + ' Sucursal'">Nueva Sucursal</span>
+            </h1>
+            <p class="page-subtitle">
+                <span th:text="${proveedor.nombre}">Proveedor</span>
+            </p>
         </div>
         <div class="actions">
-            <a th:href="@{/admin/proveedores/{id}(id=${proveedor.id})}" class="btn btn-secondary">Volver al proveedor</a>
+            <a th:href="@{/admin/proveedores/{id}/sucursales(id=${proveedor.id})}" 
+               class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver a sucursales
+            </a>
         </div>
     </div>
 
-    <div class="form-container">
-        <form th:action="${accion}" th:object="${branch}" method="post">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="nombre">Nombre</label>
-                    <input type="text" id="nombre" th:field="*{nombre}" class="form-control" required />
-                </div>
-                <div class="form-group">
-                    <label for="direccion">Dirección</label>
-                    <input type="text" id="direccion" th:field="*{direccion}" class="form-control" />
-                </div>
-                <div class="form-group">
-                    <label for="telefono">Teléfono</label>
-                    <input type="text" id="telefono" th:field="*{telefono}" class="form-control" />
-                </div>
-                <div class="form-group">
-                    <label for="ciudad">Ciudad</label>
-                    <input type="text" id="ciudad" th:field="*{ciudad}" class="form-control" />
-                </div>
-                <div class="form-group">
-                    <label for="pais">País</label>
-                    <input type="text" id="pais" th:field="*{pais}" class="form-control" />
-                </div>
-                <div class="form-group">
-                    <label for="activo">Activo</label>
-                    <input type="checkbox" id="activo" th:field="*{activo}" />
+    <div class="form-container sucursal-form">
+        <form th:action="${accion}" th:object="${branch}" method="post" class="admin-form">
+            
+            <!-- Sección: Información básica -->
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    <i class="fas fa-info-circle"></i> Información Básica
+                </h3>
+                
+                <div class="form-grid form-grid-2">
+                    <div class="form-group">
+                        <label for="nombre" class="form-label required">
+                            <i class="fas fa-building"></i> Nombre de la sucursal
+                        </label>
+                        <input type="text" 
+                               id="nombre" 
+                               th:field="*{nombre}" 
+                               class="form-control" 
+                               placeholder="Ej: Sucursal Centro"
+                               required 
+                               maxlength="100" />
+                        <small class="form-help">Nombre identificativo de la sucursal</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="telefono" class="form-label">
+                            <i class="fas fa-phone"></i> Teléfono
+                        </label>
+                        <input type="tel" 
+                               id="telefono" 
+                               th:field="*{telefono}" 
+                               class="form-control" 
+                               placeholder="Ej: +57 300 123 4567"
+                               maxlength="20" />
+                        <small class="form-help">Número de contacto principal</small>
+                    </div>
+
+                    <div class="form-group form-group-full">
+                        <label for="direccion" class="form-label">
+                            <i class="fas fa-map-marker-alt"></i> Dirección
+                        </label>
+                        <input type="text" 
+                               id="direccion" 
+                               th:field="*{direccion}" 
+                               class="form-control" 
+                               placeholder="Ej: Calle 123 #45-67"
+                               maxlength="200" />
+                        <small class="form-help">Dirección física de la sucursal</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ciudad" class="form-label">
+                            <i class="fas fa-city"></i> Ciudad
+                        </label>
+                        <input type="text" 
+                               id="ciudad" 
+                               th:field="*{ciudad}" 
+                               class="form-control" 
+                               placeholder="Ej: Bogotá"
+                               maxlength="50" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pais" class="form-label">
+                            <i class="fas fa-globe-americas"></i> País
+                        </label>
+                        <input type="text" 
+                               id="pais" 
+                               th:field="*{pais}" 
+                               class="form-control" 
+                               placeholder="Ej: Colombia"
+                               maxlength="50" />
+                    </div>
+
+                    <div class="form-group form-group-checkbox">
+                        <label for="activo" class="checkbox-label">
+                            <input type="checkbox" 
+                                   id="activo" 
+                                   th:field="*{activo}" 
+                                   class="form-checkbox" />
+                            <span class="checkbox-text">
+                                <i class="fas fa-check-circle"></i> Sucursal activa
+                            </span>
+                        </label>
+                        <small class="form-help">Las sucursales inactivas no aparecerán disponibles</small>
+                    </div>
                 </div>
             </div>
 
-            <hr />
-            <h3>Contacto principal de la sucursal</h3>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="contactNombre">Nombre</label>
-                    <input type="text" id="contactNombre" th:field="*{contacts[0].nombre}" class="form-control" />
-                </div>
-                <div class="form-group">
-                    <label for="contactRol">Rol</label>
-                    <input type="text" id="contactRol" th:field="*{contacts[0].rol}" class="form-control" />
-                </div>
-                <div class="form-group">
-                    <label for="contactTelefono">Teléfono</label>
-                    <input type="text" id="contactTelefono" th:field="*{contacts[0].telefono}" class="form-control" />
-                </div>
-                <div class="form-group">
-                    <label for="contactEmail">Email</label>
-                    <input type="email" id="contactEmail" th:field="*{contacts[0].email}" class="form-control" />
-                </div>
-                <div class="form-group" style="grid-column: 1 / -1;">
-                    <label for="contactNotas">Notas</label>
-                    <textarea id="contactNotas" th:field="*{contacts[0].notas}" class="form-control"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="contactIsPrimary">Contacto principal</label>
-                    <input type="checkbox" id="contactIsPrimary" th:field="*{contacts[0].isPrimary}" />
+            <!-- Sección: Contacto principal -->
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    <i class="fas fa-user"></i> Contacto Principal
+                </h3>
+                <p class="form-section-description">
+                    Persona de contacto principal para esta sucursal (opcional, puede agregarse después)
+                </p>
+                
+                <div class="form-grid form-grid-2">
+                    <div class="form-group">
+                        <label for="contactNombre" class="form-label">
+                            <i class="fas fa-user-circle"></i> Nombre completo
+                        </label>
+                        <input type="text" 
+                               id="contactNombre" 
+                               th:field="*{contacts[0].nombre}" 
+                               class="form-control" 
+                               placeholder="Ej: Juan Pérez"
+                               maxlength="100" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contactRol" class="form-label">
+                            <i class="fas fa-briefcase"></i> Cargo / Rol
+                        </label>
+                        <input type="text" 
+                               id="contactRol" 
+                               th:field="*{contacts[0].rol}" 
+                               class="form-control" 
+                               placeholder="Ej: Gerente de sucursal"
+                               maxlength="50" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contactTelefono" class="form-label">
+                            <i class="fas fa-mobile-alt"></i> Teléfono
+                        </label>
+                        <input type="tel" 
+                               id="contactTelefono" 
+                               th:field="*{contacts[0].telefono}" 
+                               class="form-control" 
+                               placeholder="Ej: +57 300 999 8888"
+                               maxlength="20" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contactEmail" class="form-label">
+                            <i class="fas fa-envelope"></i> Correo electrónico
+                        </label>
+                        <input type="email" 
+                               id="contactEmail" 
+                               th:field="*{contacts[0].email}" 
+                               class="form-control" 
+                               placeholder="Ej: contacto@empresa.com"
+                               maxlength="100" />
+                    </div>
+
+                    <div class="form-group form-group-full">
+                        <label for="contactNotas" class="form-label">
+                            <i class="fas fa-sticky-note"></i> Notas adicionales
+                        </label>
+                        <textarea id="contactNotas" 
+                                  th:field="*{contacts[0].notas}" 
+                                  class="form-control" 
+                                  rows="3"
+                                  placeholder="Información adicional sobre el contacto..."
+                                  maxlength="500"></textarea>
+                    </div>
+
+                    <div class="form-group form-group-checkbox">
+                        <label for="contactIsPrimary" class="checkbox-label">
+                            <input type="checkbox" 
+                                   id="contactIsPrimary" 
+                                   th:field="*{contacts[0].isPrimary}" 
+                                   class="form-checkbox" 
+                                   checked />
+                            <span class="checkbox-text">
+                                <i class="fas fa-star"></i> Marcar como contacto principal
+                            </span>
+                        </label>
+                    </div>
                 </div>
             </div>
 
+            <!-- Acciones del formulario -->
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Guardar</button>
-                <a th:href="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales'}" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-save"></i> 
+                    <span th:text="${branch.id != null ? 'Actualizar' : 'Crear'} + ' Sucursal'">Guardar Sucursal</span>
+                </button>
+                <a th:href="@{'/admin/proveedores/' + ${proveedor.id} + '/sucursales'}" 
+                   class="btn btn-secondary btn-lg">
+                    <i class="fas fa-times"></i> Cancelar
+                </a>
             </div>
         </form>
     </div>

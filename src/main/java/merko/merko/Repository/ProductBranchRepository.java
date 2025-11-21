@@ -13,8 +13,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public interface ProductBranchRepository extends JpaRepository<ProductBranch, Long> {
     Optional<ProductBranch> findByProductoIdAndBranchId(Long productoId, Long branchId);
-    java.util.List<ProductBranch> findByBranchId(Long branchId);
+    
+    // Consulta mejorada: solo trae ProductBranch donde el producto existe (INNER JOIN)
+    // Esto evita FetchNotFoundException cuando hay referencias a productos eliminados
+    @Query("SELECT pb FROM ProductBranch pb JOIN FETCH pb.producto p WHERE pb.branch.id = :branchId")
+    java.util.List<ProductBranch> findByBranchId(@Param("branchId") Long branchId);
+    
     java.util.List<ProductBranch> findByProductoId(Long productoId);
+    
+    // Consulta con eager loading de branch para evitar LazyInitializationException
+    @Query("SELECT pb FROM ProductBranch pb JOIN FETCH pb.branch b WHERE pb.producto.id = :productoId")
+    java.util.List<ProductBranch> findByProductoIdWithBranch(@Param("productoId") Long productoId);
 
     @Modifying
     @Transactional
@@ -25,4 +34,10 @@ public interface ProductBranchRepository extends JpaRepository<ProductBranch, Lo
     @Transactional
     @Query("DELETE FROM ProductBranch pb WHERE pb.producto.id = :productoId")
     void deleteByProductoId(@Param("productoId") Long productoId);
+    
+    // Consulta para limpiar registros huérfanos (ProductBranch que referencian productos que no existen)
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM product_branch WHERE producto_id NOT IN (SELECT id FROM producto)", nativeQuery = true)
+    int deleteOrphanedProductBranches();
 }

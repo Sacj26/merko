@@ -103,31 +103,7 @@
             </div>
         </fieldset>
 
-        <!-- Sección: Contacto -->
-        <fieldset class="form-section">
-            <legend><i class="fas fa-address-book"></i> Contacto</legend>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="nombreContacto">Persona de Contacto:</label>
-                    <input type="text" id="nombreContacto" th:field="*{nombreContacto}" class="form-control" />
-                </div>
-
-                <div class="form-group">
-                    <label for="cargoContacto">Cargo:</label>
-                    <input type="text" id="cargoContacto" th:field="*{cargoContacto}" class="form-control" />
-                </div>
-
-                <div class="form-group">
-                    <label for="telefonoContacto">Teléfono Contacto:</label>
-                    <input type="text" id="telefonoContacto" th:field="*{telefonoContacto}" class="form-control" />
-                </div>
-
-                <div class="form-group">
-                    <label for="emailContacto">Email Contacto:</label>
-                    <input type="email" id="emailContacto" th:field="*{emailContacto}" class="form-control" />
-                </div>
-            </div>
-        </fieldset>
+        <!-- Contacto: managed at branch level, removed form fields here to avoid binding to non-existent properties -->
 
         <!-- Sección: Metadatos -->
         <fieldset class="form-section">

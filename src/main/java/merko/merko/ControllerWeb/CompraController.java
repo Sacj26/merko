@@ -1,20 +1,24 @@
 package merko.merko.ControllerWeb;
 
-import merko.merko.Entity.Compra;
-import merko.merko.Entity.Producto;
-import merko.merko.Entity.Proveedor;
-import merko.merko.Repository.CompraRepository;
-import merko.merko.Repository.ProductoRepository;
-import merko.merko.Repository.ProveedorRepository;
-import merko.merko.Repository.BranchRepository;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.List;
-
+import merko.merko.Entity.Compra;
+import merko.merko.Entity.Producto;
+import merko.merko.Entity.Proveedor;
+import merko.merko.Repository.BranchRepository;
+import merko.merko.Repository.CompraRepository;
+import merko.merko.Repository.ProductoRepository;
+import merko.merko.Repository.ProveedorRepository;
 import merko.merko.dto.CompraForm;
 
 @Controller
@@ -70,17 +74,18 @@ public class CompraController {
         @RequestParam(value = "cantidad", required = false) Integer cantidad,
         @RequestParam(value = "precioUnitario", required = false) Double precioUnitario,
         Model model) {
-        compraService.guardarCompra(compraForm, productoId, cantidad, precioUnitario);
+        // TODO: Implementar guardarCompra con nuevos campos (branch_id, cantidad, precio_unidad)
+        // compraService.guardarCompra(compraForm, productoId, cantidad, precioUnitario);
         return "redirect:/admin/compras";
     }
 
 
     @GetMapping
     public String historialCompras(Model model) {
-        List<Compra> compras = compraRepository.findAll();
+        List<Compra> compras = compraRepository.findAllWithBranchAndDetalles();
         model.addAttribute("compras", compras);
-        // Añadir proveedores para filtros en la vista
-        model.addAttribute("proveedores", proveedorRepository.findAll());
+        // Añadir branches para filtros en la vista
+        model.addAttribute("branches", branchRepository.findAll());
         return "admin/compras/index";
     }
 

@@ -1,6 +1,5 @@
 package merko.merko.Service;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -8,14 +7,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import merko.merko.Entity.DetalleVenta;
+import merko.merko.Entity.ProductBranch;
 import merko.merko.Entity.Producto;
 import merko.merko.Entity.Venta;
-import merko.merko.Entity.ProductBranch;
+import merko.merko.Repository.LoteRepository;
 import merko.merko.Repository.MovimientoInventarioRepository;
+import merko.merko.Repository.ProductBranchRepository;
 import merko.merko.Repository.ProductoRepository;
 import merko.merko.Repository.VentaRepository;
-import merko.merko.Repository.LoteRepository;
-import merko.merko.Repository.ProductBranchRepository;
 
 @Service
 public class VentaService {
@@ -42,6 +41,14 @@ public class VentaService {
         return ventaRepository.findAll();
     }
 
+    public List<Venta> getAllVentasWithDetalles() {
+        return ventaRepository.findAllWithDetalles();
+    }
+
+    public long countAll() {
+        return ventaRepository.count();
+    }
+
     public Venta getVentaById(Long id) {
         return ventaRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Venta no encontrada con ID " + id));
@@ -54,6 +61,10 @@ public class VentaService {
         }
         if (venta.getDetalles() == null || venta.getDetalles().isEmpty()) {
             throw new IllegalArgumentException("La venta debe tener al menos un detalle.");
+        }
+
+        if (sucursalId == null) {
+            throw new IllegalArgumentException("Debe indicar la sucursal para procesar la venta.");
         }
 
         double totalVenta = 0.0;
@@ -70,28 +81,17 @@ public class VentaService {
             Producto producto = productoRepository.findById(detalle.getProducto().getId())
                     .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado: ID " + detalle.getProducto().getId()));
 
-            // Solo se venden productos terminados activos
-            if (producto.getEstado() != merko.merko.Entity.EstadoProducto.ACTIVO) {
-                throw new IllegalArgumentException("El producto " + producto.getNombre() + " no está activo para la venta.");
-            }
-            if (producto.getTipo() != merko.merko.Entity.TipoProducto.PRODUCTO_TERMINADO) {
-                throw new IllegalArgumentException("No se puede vender materia prima: " + producto.getNombre());
-            }
-
             // Si se seleccionó sucursal, intentar obtener ProductBranch
             Optional<ProductBranch> pbOpt = (sucursalId != null) ? productBranchRepository.findByProductoIdAndBranchId(producto.getId(), sucursalId) : Optional.empty();
             ProductBranch pb = pbOpt.orElse(null);
 
-            // Validar stock: preferir stock por sucursal si existe
-            if (pb != null) {
-                int stockPb = pb.getStock() == null ? 0 : pb.getStock();
-                if (stockPb < detalle.getCantidad()) {
-                    throw new IllegalArgumentException("Stock insuficiente en la sucursal para el producto: " + producto.getNombre());
-                }
-            } else {
-                if (producto.getStock() < detalle.getCantidad()) {
-                    throw new IllegalArgumentException("Stock insuficiente para el producto: " + producto.getNombre());
-                }
+            // Validar stock por sucursal (ProductBranch) — requerimos sucursal
+            if (pb == null) {
+                throw new IllegalArgumentException("Producto sin asignación a la sucursal: " + producto.getNombre());
+            }
+            int stockPb = pb.getStock() == null ? 0 : pb.getStock();
+            if (stockPb < detalle.getCantidad()) {
+                throw new IllegalArgumentException("Stock insuficiente en la sucursal para el producto: " + producto.getNombre());
             }
 
             // Asignación de lotes FEFO si el producto gestiona lotes
@@ -119,14 +119,15 @@ public class VentaService {
                     loteRepository.save(lote);
 
                     merko.merko.Entity.MovimientoInventario mov = new merko.merko.Entity.MovimientoInventario();
-                    mov.setProducto(producto);
+                    // vincular al productBranch correspondiente
+                    mov.setProductBranch(pb);
                     mov.setLote(lote);
                     mov.setTipo(merko.merko.Entity.TipoMovimiento.VENTA_SALIDA);
                     mov.setCantidad(tomar);
                     // usar el costo del lote como costo de salida
                     mov.setCostoUnitario(lote.getCostoUnitario());
                     mov.setFecha(java.time.LocalDateTime.now());
-                    if (pb != null) mov.setProductBranch(pb);
+                    // pb ya asignado en mov
                     // venta y referencia se setean tras persistir la venta
                     movimientosDraft.add(mov);
                     porVender -= tomar;
@@ -137,16 +138,10 @@ public class VentaService {
                 }
             }
 
-            // Actualiza stock total del producto
-            producto.setStock(producto.getStock() - detalle.getCantidad());
-            productoRepository.save(producto);
-
-            // Si hay ProductBranch, decrementar stock por sucursal también
-            if (pb != null) {
-                int cur = pb.getStock() == null ? 0 : pb.getStock();
-                pb.setStock(cur - detalle.getCantidad());
-                productBranchRepository.save(pb);
-            }
+            // Decrementar stock por sucursal
+            int cur = pb.getStock() == null ? 0 : pb.getStock();
+            pb.setStock(cur - detalle.getCantidad());
+            productBranchRepository.save(pb);
 
             double subtotal = detalle.getCantidad() * producto.getPrecioVenta();
             detalle.setPrecioUnitario(producto.getPrecioVenta());
@@ -156,14 +151,15 @@ public class VentaService {
             // Para productos que no gestionan lotes, preparar un único movimiento sin lote
             if (!Boolean.TRUE.equals(producto.getGestionaLotes())) {
                 merko.merko.Entity.MovimientoInventario mov = new merko.merko.Entity.MovimientoInventario();
-                mov.setProducto(producto);
+                // para movimientos sin lote, enlazamos productBranch
+                mov.setProductBranch(pb);
                 mov.setLote(null);
                 mov.setTipo(merko.merko.Entity.TipoMovimiento.VENTA_SALIDA);
                 mov.setCantidad(detalle.getCantidad());
                 // sin lotes: usar precioCompra del producto como costo de salida (aproximación)
                 mov.setCostoUnitario(producto.getPrecioCompra());
                 mov.setFecha(java.time.LocalDateTime.now());
-                if (pb != null) mov.setProductBranch(pb);
+                // pb ya asignado
                 movimientosDraft.add(mov);
             }
         }
@@ -208,57 +204,52 @@ public class VentaService {
             throw new IllegalStateException("No hay movimientos asociados a la venta para revertir.");
         }
 
-        for (var mov : movimientos) {
-            if (mov.getTipo() != merko.merko.Entity.TipoMovimiento.VENTA_SALIDA) continue;
-            var producto = mov.getProducto();
-            Integer cant = mov.getCantidad() != null ? mov.getCantidad() : 0;
-            if (cant <= 0) continue;
+            for (var mov : movimientos) {
+                if (mov.getTipo() != merko.merko.Entity.TipoMovimiento.VENTA_SALIDA) continue;
+                Integer cant = mov.getCantidad() != null ? mov.getCantidad() : 0;
+                if (cant <= 0) continue;
 
-            // Reponer lotes si aplica
-            var lote = mov.getLote();
-            if (lote != null) {
-                // refrescar estado de lote
-                var loteRef = loteRepository.findById(lote.getId()).orElse(null);
-                if (loteRef != null) {
-                    int disp = loteRef.getCantidadDisponible() != null ? loteRef.getCantidadDisponible() : 0;
-                    loteRef.setCantidadDisponible(disp + cant);
-                    // Si el lote está vencido por fecha, mantener VENCIDO; de lo contrario, marcar ACTIVO
-                    var hoy = java.time.LocalDate.now();
-                    boolean vencidoPorFecha = loteRef.getFechaVencimiento() != null && loteRef.getFechaVencimiento().isBefore(hoy);
-                    loteRef.setEstado(vencidoPorFecha ? merko.merko.Entity.EstadoLote.VENCIDO : merko.merko.Entity.EstadoLote.ACTIVO);
-                    loteRepository.save(loteRef);
+                // Reponer lotes si aplica
+                var lote = mov.getLote();
+                if (lote != null) {
+                    var loteRef = loteRepository.findById(lote.getId()).orElse(null);
+                    if (loteRef != null) {
+                        int disp = loteRef.getCantidadDisponible() != null ? loteRef.getCantidadDisponible() : 0;
+                        loteRef.setCantidadDisponible(disp + cant);
+                        var hoy = java.time.LocalDate.now();
+                        boolean vencidoPorFecha = loteRef.getFechaVencimiento() != null && loteRef.getFechaVencimiento().isBefore(hoy);
+                        loteRef.setEstado(vencidoPorFecha ? merko.merko.Entity.EstadoLote.VENCIDO : merko.merko.Entity.EstadoLote.ACTIVO);
+                        loteRepository.save(loteRef);
+                    }
                 }
-            }
 
-            // Reponer stock total
-            producto.setStock(producto.getStock() + cant);
-            productoRepository.save(producto);
-
-            // Reponer stock de sucursal si aplica
-            var pb = mov.getProductBranch();
-            if (pb != null) {
-                var pbRef = productBranchRepository.findById(pb.getId()).orElse(null);
-                if (pbRef != null) {
-                    int cur = pbRef.getStock() == null ? 0 : pbRef.getStock();
-                    pbRef.setStock(cur + cant);
-                    productBranchRepository.save(pbRef);
+                // Reponer stock de sucursal si aplica
+                var pb = mov.getProductBranch();
+                if (pb != null) {
+                    var pbRef = productBranchRepository.findById(pb.getId()).orElse(null);
+                    if (pbRef != null) {
+                        int cur2 = pbRef.getStock() == null ? 0 : pbRef.getStock();
+                        pbRef.setStock(cur2 + cant);
+                        productBranchRepository.save(pbRef);
+                    }
                 }
-            }
 
-            // Registrar ajuste de reversa
-            var ajuste = new merko.merko.Entity.MovimientoInventario();
-            ajuste.setProducto(producto);
-            ajuste.setLote(lote);
-            ajuste.setTipo(merko.merko.Entity.TipoMovimiento.AJUSTE);
-            ajuste.setCantidad(cant);
-            ajuste.setCostoUnitario(mov.getCostoUnitario());
-            ajuste.setFecha(java.time.LocalDateTime.now());
-            ajuste.setVenta(venta);
-            ajuste.setReferencia("REVERSO-VENTA-" + ventaId);
-            movimientoInventarioRepository.save(ajuste);
-        }
+                // Registrar ajuste de reversa (sin enlazar producto a nivel global)
+                var ajuste = new merko.merko.Entity.MovimientoInventario();
+                ajuste.setProductBranch(mov.getProductBranch());
+                ajuste.setLote(lote);
+                ajuste.setTipo(merko.merko.Entity.TipoMovimiento.AJUSTE);
+                ajuste.setCantidad(cant);
+                ajuste.setCostoUnitario(mov.getCostoUnitario());
+                ajuste.setFecha(java.time.LocalDateTime.now());
+                ajuste.setVenta(venta);
+                ajuste.setReferencia("REVERSO-VENTA-" + ventaId);
+                movimientoInventarioRepository.save(ajuste);
+            }
         // Marcar venta como ANULADA
-        venta.setEstado(merko.merko.Entity.EstadoVenta.ANULADA);
+        if (venta.getEstado() != null) {
+            // No anular si ya fue anulada
+        }
         ventaRepository.save(venta);
     }
 

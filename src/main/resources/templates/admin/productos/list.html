@@ -104,29 +104,24 @@
                         </div>
                     </td>
                     <td>
-                        <span th:switch="${producto.tipo}" class="badge" 
-                              th:classappend="${producto.tipo == T(merko.merko.Entity.TipoProducto).MATERIA_PRIMA} ? 'badge-info' : 'badge-success'">
-                            <span th:case="${T(merko.merko.Entity.TipoProducto).MATERIA_PRIMA}">Materia Prima</span>
-                            <span th:case="${T(merko.merko.Entity.TipoProducto).PRODUCTO_TERMINADO}">Producto Terminado</span>
-                            <span th:case="*">—</span>
-                        </span>
+                        <span class="badge badge-info" th:if="${producto.tipo != null}" th:text="${producto.tipo}">Tipo</span>
+                        <span th:if="${producto.tipo == null}">—</span>
                     </td>
                     <td>
-                        <span th:switch="${producto.estado}" class="badge"
-                              th:classappend="${producto.estado == T(merko.merko.Entity.EstadoProducto).ACTIVO} ? 'badge-success' : 'badge-danger'">
-                            <span th:case="${T(merko.merko.Entity.EstadoProducto).ACTIVO}">Activo</span>
-                            <span th:case="${T(merko.merko.Entity.EstadoProducto).INACTIVO}">Inactivo</span>
-                            <span th:case="*">—</span>
-                        </span>
+                        <span th:if="${producto.estado != null and #strings.toLowerCase(producto.estado).contains('activo')}" 
+                              class="badge badge-success" th:text="${producto.estado}">Activo</span>
+                        <span th:unless="${producto.estado != null and #strings.toLowerCase(producto.estado).contains('activo')}" 
+                              th:class="${producto.estado != null ? 'badge badge-warning' : 'badge badge-secondary'}" 
+                              th:text="${producto.estado ?: '—'}">—</span>
                     </td>
                     <td>
-                        <span th:text="${producto.proveedor != null ? producto.proveedor.nombre : '—'}">Proveedor</span>
+                        <span th:text="${proveedorNameByProductId[producto.id]}">Proveedor</span>
                     </td>
                     <td th:text="${'$' + #numbers.formatDecimal(producto.precioVenta, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
                     <td>
-                        <span th:classappend="${producto.stock != null and producto.stockMinimo != null and producto.stock <= producto.stockMinimo} ? 'badge badge-warning' : 
-                                              (${producto.stock != null and producto.stock <= 5} ? 'badge badge-warning' : 'badge badge-success')"
-                              th:text="${producto.stock}">0</span>
+                        <span th:classappend="${availableStockByProductId[producto.id] != null and producto.stockMinimo != null and availableStockByProductId[producto.id] <= producto.stockMinimo} ? 'badge badge-warning' : 
+                                              (${availableStockByProductId[producto.id] != null and availableStockByProductId[producto.id] <= 5} ? 'badge badge-warning' : 'badge badge-success')"
+                              th:text="${availableStockByProductId[producto.id] != null ? availableStockByProductId[producto.id] : 0}">0</span>
                     </td>
                     <td class="actions-col">
                         <div class="actions-cell">
@@ -212,11 +207,11 @@
                 <tr th:each="compra : ${compras}">
                     <td th:text="${'#' + compra.id}">#0</td>
                     <td th:text="${#temporals.format(compra.fecha, 'dd/MM/yyyy')}">01/01/2025</td>
-                    <td th:text="${compra.proveedor != null ? compra.proveedor.nombre : '—'}">Proveedor</td>
+                    <td th:text="${compra.branch != null ? compra.branch.nombre : '—'}">Sucursal</td>
                     <td>
-                        <span th:text="${compra.producto != null ? compra.producto.nombre : 'Múltiples'}">Producto</span>
+                        <span th:text="${compra.detalles != null and #lists.size(compra.detalles) == 1 and compra.detalles[0].producto != null ? compra.detalles[0].producto.nombre : (#lists.size(compra.detalles) > 1 ? 'Múltiples' : '—')}">Producto</span>
                     </td>
-                    <td th:text="${compra.detalles != null ? #lists.size(compra.detalles) : (compra.producto != null ? 1 : 0)}">0</td>
+                    <td th:text="${compra.detalles != null ? #lists.size(compra.detalles) : 0}">0</td>
                     <td th:text="${compra.cantidad > 0 ? compra.cantidad : '-'}">0</td>
                     <td th:text="${'$' + #numbers.formatDecimal(compra.total, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
                     <td class="actions-col">

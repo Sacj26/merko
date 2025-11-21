@@ -25,6 +25,7 @@ public class ProductCreateDto {
     public Integer vidaUtilDias;
     public String almacenamiento;
     public String registroSanitario;
+    public Long categoriaId;
     public String tipo; // Enum name expected
     public String estado; // Enum name expected
     public String unidadMedida; // Enum name expected
