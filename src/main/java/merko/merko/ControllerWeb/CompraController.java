@@ -37,11 +37,6 @@ public class CompraController {
     @Autowired
     private BranchRepository branchRepository;
 
-
-
-    @Autowired
-    private merko.merko.Service.CompraService compraService;
-    
     @Autowired
     private merko.merko.Repository.MovimientoInventarioRepository movimientoInventarioRepository;
 
