@@ -17,8 +17,8 @@ public interface CompraRepository extends JpaRepository<Compra, Long> {
     @Query("SELECT DISTINCT c FROM Compra c LEFT JOIN FETCH c.branch LEFT JOIN FETCH c.detalles d LEFT JOIN FETCH d.producto ORDER BY c.fecha DESC")
     List<Compra> findAllWithBranchAndDetalles();
 
-    @Query(value = "SELECT DISTINCT c FROM Compra c LEFT JOIN FETCH c.branch LEFT JOIN FETCH c.detalles d LEFT JOIN FETCH d.producto ORDER BY c.fecha DESC")
-    List<Compra> findTop10ByOrderByFechaDesc(org.springframework.data.domain.Pageable pageable);
+    @Query(value = "SELECT c.* FROM compra c ORDER BY c.fecha DESC LIMIT 10", nativeQuery = true)
+    List<Compra> findTop10ByOrderByFechaDesc();
 
     @Query("select coalesce(sum(c.total),0) from Compra c where c.fecha between :start and :end")
     Double sumTotalBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);

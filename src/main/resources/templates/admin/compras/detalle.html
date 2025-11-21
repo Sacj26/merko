@@ -30,7 +30,7 @@
                     </div>
                     <div class="detail-item">
                         <strong>Proveedor</strong>
-                        <span th:text="${compra.branch != null ? compra.branch.name : '—'}">Sucursal</span>
+                        <span th:text="${compra.branch != null and compra.branch.proveedor != null ? compra.branch.proveedor.nombre : '—'}">Proveedor</span>
                     </div>
                     <div class="detail-item">
                         <strong>Sucursal</strong>
