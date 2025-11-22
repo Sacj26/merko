@@ -34,7 +34,7 @@
                     </div>
                     <div class="detail-item">
                         <strong>Sucursal</strong>
-                        <span th:text="${compra.sucursal != null ? (compra.sucursal.nombre + (compra.sucursal.ciudad != null ? ' — ' + compra.sucursal.ciudad : '') + (compra.sucursal.pais != null ? ', ' + compra.sucursal.pais : '')) : '—'}">Sucursal</span>
+                        <span th:text="${compra.branch != null ? (compra.branch.nombre + (compra.branch.ciudad != null ? ' — ' + compra.branch.ciudad : '') + (compra.branch.pais != null ? ', ' + compra.branch.pais : '')) : '—'}">Sucursal</span>
                     </div>
                     <div class="detail-item">
                         <strong>Total</strong>
@@ -44,51 +44,78 @@
             </div>
 
             <div class="detail-section">
-                <h2>Detalle(s) de la Compra</h2>
+                <h2>Productos Comprados 
+                    <span th:if="${compra.detalles != null}" style="font-size: 0.85rem; color: #666; font-weight: normal;">
+                        (<span th:text="${#lists.size(compra.detalles)}">0</span> ítems)
+                    </span>
+                </h2>
 
-                <div th:if="${compra.detalles != null && !#lists.isEmpty(compra.detalles)}">
+                <!-- Mostrar tabla de detalles si existen -->
+                <div th:if="${compra.detalles != null and !#lists.isEmpty(compra.detalles)}">
                     <table class="table-admin">
                         <thead>
                             <tr>
-                                <th>Producto</th>
-                                <th>Cantidad</th>
-                                <th>Precio unitario</th>
-                                <th>Subtotal</th>
+                                <th style="width: 40%;">Producto</th>
+                                <th style="width: 15%; text-align: center;">Cantidad</th>
+                                <th style="width: 20%; text-align: right;">Precio Unitario</th>
+                                <th style="width: 25%; text-align: right;">Subtotal</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr th:each="det : ${compra.detalles}">
-                                <td th:text="${det.producto != null ? det.producto.nombre : '—'}">Producto</td>
-                                <td th:text="${det.cantidad}">1</td>
-                                <td th:text="${'$' + #numbers.formatDecimal(det.precioUnitario != null ? det.precioUnitario : 0, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
-                                <td th:text="${'$' + #numbers.formatDecimal((det.cantidad != null && det.precioUnitario != null ? det.cantidad * det.precioUnitario : 0), 1, 'COMMA', 2, 'POINT')}">$0.00</td>
+                                <td>
+                                    <span th:if="${det.producto != null}" th:text="${det.producto.nombre}">Producto</span>
+                                    <span th:if="${det.producto == null}" style="color: #999; font-style: italic;">
+                                        Producto no encontrado (ID del detalle: <span th:text="${det.id}">-</span>)
+                                    </span>
+                                </td>
+                                <td style="text-align: center;">
+                                    <strong th:text="${#numbers.formatInteger(det.cantidad, 1, 'COMMA')}">1</strong> unidades
+                                </td>
+                                <td style="text-align: right;">
+                                    <!-- Mostrar precio unitario: si existe precioUnitario usarlo, sino calcular desde precioCompra/cantidad -->
+                                    <span th:text="${'$' + #numbers.formatDecimal(
+                                        det.precioUnitario != null and det.precioUnitario > 0 ? det.precioUnitario : 
+                                        (det.precioCompra != null and det.cantidad != null and det.cantidad > 0 ? det.precioCompra / det.cantidad : 0), 
+                                        1, 'COMMA', 2, 'POINT')}">$0.00</span>
+                                </td>
+                                <td style="text-align: right;">
+                                    <!-- Subtotal: usar precioCompra directamente si existe, sino calcular -->
+                                    <strong th:text="${'$' + #numbers.formatDecimal(
+                                        det.precioCompra != null ? det.precioCompra : 
+                                        (det.cantidad != null and det.precioUnitario != null ? det.cantidad * det.precioUnitario : 0), 
+                                        1, 'COMMA', 2, 'POINT')}">$0.00</strong>
+                                </td>
                             </tr>
                         </tbody>
                         <tfoot>
-                            <tr>
-                                <td colspan="3" style="text-align:right"><strong>Total</strong></td>
-                                <td th:text="${'$' + #numbers.formatDecimal(compra.total, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
+                            <tr style="border-top: 2px solid #ddd; background-color: #f8f9fa; font-weight: bold;">
+                                <td colspan="3" style="text-align:right; padding: 1rem; font-size: 1.1rem;">TOTAL:</td>
+                                <td style="text-align: right; padding: 1rem; font-size: 1.1rem; color: #2196F3;" 
+                                    th:text="${'$' + #numbers.formatDecimal(compra.total, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
                             </tr>
                         </tfoot>
                     </table>
                 </div>
 
-                <div class="detail-grid" th:if="${compra.detalles == null || #lists.isEmpty(compra.detalles)}">
-                    <div class="detail-item">
-                        <strong>Producto</strong>
-                        <span th:text="${compra.detalles != null and #lists.size(compra.detalles) == 1 ? compra.detalles[0].producto.nombre : 'Múltiples productos'}"></span>
+                <!-- Mostrar información legacy si no hay detalles -->
+                <div th:if="${compra.detalles == null or #lists.isEmpty(compra.detalles)}">
+                    <div class="alert alert-info" style="margin-bottom: 1rem; padding: 1rem; background-color: #e7f3ff; border-left: 4px solid #2196F3;">
+                        <i class="fas fa-info-circle"></i> Esta es una compra registrada en el formato anterior (sin detalles de productos).
                     </div>
-                    <div class="detail-item">
-                        <strong>Cantidad</strong>
-                        <span th:text="${(compra.cantidad != null ? compra.cantidad : 0) + ' unidades'}"></span>
-                    </div>
-                    <div class="detail-item">
-                        <strong>Precio Unitario</strong>
-                        <span th:text="${'$' + #numbers.formatDecimal(compra.precioUnidad != null ? compra.precioUnidad : 0, 1, 'COMMA', 2, 'POINT')}"></span>
-                    </div>
-                    <div class="detail-item">
-                        <strong>Total</strong>
-                        <span th:text="${'$' + #numbers.formatDecimal(compra.total, 1, 'COMMA', 2, 'POINT')}"></span>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <strong>Cantidad Total</strong>
+                            <span th:text="${(compra.cantidad != null ? compra.cantidad : 0) + ' unidades'}">0 unidades</span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Precio Unitario</strong>
+                            <span th:text="${'$' + #numbers.formatDecimal(compra.precioUnidad != null ? compra.precioUnidad : 0, 1, 'COMMA', 2, 'POINT')}">$0.00</span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Total</strong>
+                            <span th:text="${'$' + #numbers.formatDecimal(compra.total, 1, 'COMMA', 2, 'POINT')}">$0.00</span>
+                        </div>
                     </div>
                 </div>
             </div>

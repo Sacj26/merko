@@ -30,12 +30,43 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Filtros existentes
-  document.getElementById('filterCliente')?.addEventListener('change', function() {
-    // TODO: Implementar filtrado por cliente
-  });
+  // Filtros dinámicos
+  const filterCliente = document.getElementById('filterCliente');
+  const filterSucursal = document.getElementById('filterSucursal');
+  const filterFecha = document.getElementById('filterFecha');
+  const filterForm = document.querySelector('.filters-modern');
 
-  document.getElementById('filterFecha')?.addEventListener('change', function() {
-    // TODO: Implementar filtrado por fecha
-  });
+  // Auto-submit al cambiar filtros
+  if (filterCliente) {
+    filterCliente.addEventListener('change', () => {
+      if (filterForm) filterForm.submit();
+    });
+  }
+
+  if (filterSucursal) {
+    filterSucursal.addEventListener('change', () => {
+      if (filterForm) filterForm.submit();
+    });
+  }
+
+  if (filterFecha) {
+    filterFecha.addEventListener('change', () => {
+      if (filterForm) filterForm.submit();
+    });
+  }
+
+  // Feedback visual
+  const showFilteringFeedback = () => {
+    const btn = filterForm?.querySelector('button[type="submit"]');
+    if (btn) {
+      const icon = btn.querySelector('i');
+      const originalClass = icon.className;
+      icon.className = 'fas fa-spinner fa-spin';
+      setTimeout(() => { icon.className = originalClass; }, 500);
+    }
+  };
+
+  if (filterForm) {
+    filterForm.addEventListener('submit', showFilteringFeedback);
+  }
 });

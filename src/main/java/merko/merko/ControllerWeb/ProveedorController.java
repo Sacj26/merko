@@ -1,22 +1,34 @@
 package merko.merko.ControllerWeb;
 
-import jakarta.validation.Valid;
-import merko.merko.Entity.*;
-import merko.merko.Service.ProductoService;
-import merko.merko.Service.ProveedorService;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import jakarta.validation.Valid;
+import merko.merko.Entity.Branch;
+import merko.merko.Entity.Producto;
+import merko.merko.Entity.Proveedor;
+import merko.merko.Entity.TipoAlmacenamiento;
+import merko.merko.Service.ProductoService;
+import merko.merko.Service.ProveedorService;
 
 @Controller
 @RequestMapping("/admin/proveedores")
@@ -30,8 +42,16 @@ public class ProveedorController {
 
     @GetMapping
     public String listarProveedores(Model model) {
-        model.addAttribute("proveedores", proveedorService.getAllProveedores());
-        return "admin/proveedores/list";
+        List<Proveedor> proveedores = proveedorService.getAllProveedores();
+        model.addAttribute("proveedores", proveedores);
+        
+        // Calcular total de sucursales
+        int totalSucursales = proveedores.stream()
+            .mapToInt(p -> p.getBranches() != null ? p.getBranches().size() : 0)
+            .sum();
+        model.addAttribute("totalSucursales", totalSucursales);
+        
+        return "admin/proveedores/index";
     }
 
     @GetMapping("/ver/{id}")
@@ -373,12 +393,6 @@ public class ProveedorController {
         return proveedor.getActivo() ? "Activado" : "Desactivado";
     }
 
-    @GetMapping("/nuevoo")
-    public String mostrarFormularioAgregarProducto(Model model) {
-        model.addAttribute("proveedores", proveedorService.getAllProveedores());
-        return "admin/proveedores/registrar-producto-a-proveedor";
-    }
-
     @GetMapping("/agregar-productos/{id}")
     public String mostrarFormularioAgregarProductosAProveedor(@PathVariable Long id, Model model) {
         Proveedor proveedor = proveedorService.getProveedorById(id)
@@ -592,5 +606,23 @@ public class ProveedorController {
         }
     }
 
+    // API endpoint para búsqueda de proveedores (DTO simple para evitar ciclos)
+    @GetMapping("/api/todos")
+    @ResponseBody
+    public List<Map<String, Object>> obtenerTodosProveedoresAPI() {
+        return proveedorService.getAllProveedores().stream()
+            .map(p -> {
+                Map<String, Object> dto = new HashMap<>();
+                dto.put("id", p.getId());
+                dto.put("nombre", p.getNombre());
+                dto.put("email", p.getEmail());
+                dto.put("telefono", p.getTelefono());
+                // Contar sucursales del proveedor
+                int totalSucursales = p.getBranches() != null ? p.getBranches().size() : 0;
+                dto.put("totalSucursales", totalSucursales);
+                return dto;
+            })
+            .collect(Collectors.toList());
+    }
     
 }

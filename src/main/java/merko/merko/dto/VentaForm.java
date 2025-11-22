@@ -5,6 +5,7 @@ import java.util.List;
 public class VentaForm {
 
     private Long clienteId;
+    private Long proveedorId;
     private Long sucursalId;
     private List<DetalleVentaForm> detalles;
 
@@ -15,6 +16,14 @@ public class VentaForm {
 
     public void setClienteId(Long clienteId) {
         this.clienteId = clienteId;
+    }
+
+    public Long getProveedorId() {
+        return proveedorId;
+    }
+
+    public void setProveedorId(Long proveedorId) {
+        this.proveedorId = proveedorId;
     }
 
     public Long getSucursalId() {

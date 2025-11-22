@@ -1,6 +1,9 @@
 /* Ventas List - Estilos modernos */
 
-/* Filtros */
+/* Importar estilos de filtros modernos de compras */
+@import url('./compras-list.css');
+
+/* Filtros legacy */
 .filters {
     display: flex;
     gap: 1rem;

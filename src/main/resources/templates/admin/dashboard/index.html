@@ -201,9 +201,9 @@
                             <td th:text="${#temporals.format(venta.fecha, 'dd/MM/yyyy HH:mm')}">01/01/2024 10:30</td>
                             <td th:text="'$' + ${#numbers.formatDecimal(venta.total, 1, 'COMMA', 0, 'POINT')}">$0</td>
                             <td>
-                                <span class="badge"
-                                      th:classappend="${venta.estado == T(merko.merko.Entity.EstadoVenta).ACTIVA ? 'badge-success' : 'badge-danger'}"
-                                      th:text="${venta.estado != null ? venta.estado.getDisplayName() : '—'}">Estado</span>
+                                <span th:if="${venta.estado == T(merko.merko.Entity.EstadoVenta).ACTIVA}" class="badge badge-success">Activa</span>
+                                <span th:if="${venta.estado == T(merko.merko.Entity.EstadoVenta).ANULADA}" class="badge badge-danger">Anulada</span>
+                                <span th:if="${venta.estado == null}" class="badge badge-secondary">—</span>
                             </td>
                             <td>
                                 <a th:href="@{/admin/ventas/{id}(id=${venta.id})}" 

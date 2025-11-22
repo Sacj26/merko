@@ -1,5 +1,6 @@
 package merko.merko.ControllerWeb;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import merko.merko.Entity.Venta;
 import merko.merko.Service.DashboardService;
 import merko.merko.Service.ProductoService;
 import merko.merko.Service.UsuarioService;
@@ -31,17 +33,20 @@ public class AdminController {
     private final DashboardService dashboardService;
     private final merko.merko.Repository.CompraRepository compraRepository;
     private final merko.merko.Repository.DetalleCompraRepository detalleCompraRepository;
+    private final merko.merko.Repository.VentaRepository ventaRepository;
 
     public AdminController(VentaService ventaService, ProductoService productoService, UsuarioService usuarioService, 
                           DashboardService dashboardService,
                           merko.merko.Repository.CompraRepository compraRepository,
-                          merko.merko.Repository.DetalleCompraRepository detalleCompraRepository) {
+                          merko.merko.Repository.DetalleCompraRepository detalleCompraRepository,
+                          merko.merko.Repository.VentaRepository ventaRepository) {
         this.ventaService = ventaService;
         this.productoService = productoService;
         this.usuarioService = usuarioService;
         this.dashboardService = dashboardService;
         this.compraRepository = compraRepository;
         this.detalleCompraRepository = detalleCompraRepository;
+        this.ventaRepository = ventaRepository;
     }
 
 
@@ -70,13 +75,11 @@ public class AdminController {
         model.addAttribute("totalProductos", totalProductos);
         model.addAttribute("totalClientes", totalClientes);
 
-        // Últimas ventas (limitar a 5) - usar query optimizada
-        var ventas = ventaService.getAllVentasWithDetalles();
-        if (ventas.size() > 5) {
-            model.addAttribute("ultimasVentas", ventas.subList(0, 5));
-        } else {
-            model.addAttribute("ultimasVentas", ventas);
-        }
+        // Últimas ventas (solo 5) - OPTIMIZADO: no carga todas las ventas
+        List<Long> ventaIds = ventaRepository.findTop5IdsByOrderByFechaDesc();
+        List<Venta> ultimasVentas = ventaIds.isEmpty() ? Collections.emptyList() : 
+            ventaRepository.findByIdsWithAllRelations(ventaIds);
+        model.addAttribute("ultimasVentas", ultimasVentas);
 
     // Nuevos KPIs
         Map<String, Object> kpis = dashboardService.kpis();
@@ -197,52 +200,30 @@ public class AdminController {
                                                             @RequestParam(defaultValue = "5") int n) {
         logger.info("=== API top-productos-compras llamada con dias={}, n={}", dias, n);
         
-        // Implementación directa y simple
+        // Convertir LocalDate a LocalDateTime para la consulta optimizada
         java.time.LocalDate fin = java.time.LocalDate.now();
         java.time.LocalDate inicio = fin.minusDays(dias - 1L);
+        java.time.LocalDateTime start = inicio.atStartOfDay();
+        java.time.LocalDateTime end = fin.atTime(23, 59, 59, 999_999_999);
         
-        // Obtener todos los detalles de compra del periodo (comparar por LocalDate)
-        List<merko.merko.Entity.DetalleCompra> detalles = detalleCompraRepository.findAll().stream()
-            .filter(dc -> dc.getCompra() != null && dc.getCompra().getFecha() != null)
-            .filter(dc -> {
-                java.time.LocalDate fecha = dc.getCompra().getFecha().toLocalDate();
-                return !fecha.isBefore(inicio) && !fecha.isAfter(fin);
-            })
-            .toList();
+        // OPTIMIZADO: Usar query SQL que filtra en la base de datos
+        List<Object[]> rows = detalleCompraRepository.topProductosCompradosPorCantidad(start, end);
         
-        logger.info("=== Detalles de compra encontrados en el periodo: {}", detalles.size());
+        logger.info("=== Productos encontrados: {}", rows.size());
         
-        // Agrupar por producto y sumar cantidades
-        Map<Long, Integer> cantidadPorProducto = new java.util.HashMap<>();
-        Map<Long, String> nombrePorProducto = new java.util.HashMap<>();
-        
-        for (merko.merko.Entity.DetalleCompra dc : detalles) {
-            if (dc.getProducto() != null) {
-                Long prodId = dc.getProducto().getId();
-                String prodNombre = dc.getProducto().getNombre();
-                int cantidad = dc.getCantidad();
-                
-                cantidadPorProducto.merge(prodId, cantidad, Integer::sum);
-                nombrePorProducto.put(prodId, prodNombre);
-                
-                logger.debug("Detalle - Producto: {} - Cantidad: {}", prodNombre, cantidad);
-            }
-        }
-        
-        // Ordenar por cantidad descendente y tomar los top N
-        List<Map<String, Object>> result = cantidadPorProducto.entrySet().stream()
-            .sorted((a, b) -> b.getValue().compareTo(a.getValue()))
+        // Convertir resultado a formato esperado y tomar top N
+        List<Map<String, Object>> resultado = rows.stream()
             .limit(n)
-            .map(entry -> {
-                Map<String, Object> m = new java.util.HashMap<>();
-                m.put("productoId", entry.getKey());
-                m.put("nombre", nombrePorProducto.get(entry.getKey()));
-                m.put("cantidad", entry.getValue());
-                return m;
+            .map(row -> {
+                Map<String, Object> map = new java.util.HashMap<>();
+                map.put("productoId", row[0]);
+                map.put("nombre", row[1]);
+                map.put("cantidad", ((Number) row[2]).intValue());
+                return map;
             })
-            .toList();
+            .collect(java.util.stream.Collectors.toList());
         
-        logger.info("=== API top-productos-compras retorna {} productos", result.size());
-        return result;
+        logger.info("=== Top {} productos comprados devueltos", resultado.size());
+        return resultado;
     }
 }

@@ -1,17 +1,22 @@
 package merko.merko.ControllerWeb;
 
+import java.util.List;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import merko.merko.Entity.Branch;
 import merko.merko.Entity.ContactPerson;
 import merko.merko.Entity.Proveedor;
 import merko.merko.Repository.BranchRepository;
 import merko.merko.Repository.ContactPersonRepository;
 import merko.merko.Service.ProveedorService;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import java.util.List;
 
 @Controller
 @RequestMapping("/admin/proveedores/{proveedorId}/sucursales/{branchId}/contactos")
@@ -38,7 +43,7 @@ public class ProveedorBranchContactController {
         model.addAttribute("proveedor", proveedor);
         model.addAttribute("branch", branch);
         model.addAttribute("contacts", contacts);
-        return "admin/proveedores/sucursales/contactos/list";
+        return "admin/proveedores/sucursales/contactos/index";
     }
 
     @GetMapping("/nuevo")

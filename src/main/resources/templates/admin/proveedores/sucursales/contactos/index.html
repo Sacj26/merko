@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{shared/layouts/admin}"
+      lang="es">
+<head>
+    <title>Contactos</title>
+    <link rel="stylesheet" th:href="@{/css/pages/compras-list.css}">
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="header-with-actions">
+            <div class="title-group">
+                <h1 class="page-title">Contactos</h1>
+                <p class="page-subtitle">
+                    Sucursal: <strong th:text="${branch.nombre}">Sucursal</strong> • 
+                    Proveedor: <span th:text="${proveedor.nombre}">Proveedor</span>
+                </p>
+            </div>
+            <div class="actions">
+                <a th:href="@{/admin/proveedores/{provId}/sucursales/{branchId}/contactos/nuevo(provId=${proveedor.id},branchId=${branch.id})}" 
+                   class="btn-nuevo" title="Nuevo Contacto">
+                    <i class="fas fa-plus"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="table-controls">
+            <div class="table-controls-left">
+                <label class="hide-sm">Mostrar</label>
+                <select id="pageSizeSelector" class="form-control size-selector">
+                    <option value="10">10</option>
+                    <option value="25" selected>25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+                <span class="hide-sm">registros</span>
+            </div>
+            <div class="table-controls-right">
+                <label for="toggleDenseContactos" class="hide-sm">Vista compacta</label>
+                <input id="toggleDenseContactos" type="checkbox" />
+            </div>
+        </div>
+
+        <div class="table-container table-scroll">
+            <table class="table-admin" id="tablaContactos">
+                <thead>
+                    <tr>
+                        <th># ID</th>
+                        <th>Nombre</th>
+                        <th class="hide-sm">Rol</th>
+                        <th class="hide-sm">Teléfono</th>
+                        <th class="hide-sm">Email</th>
+                        <th>Principal</th>
+                        <th class="actions-col">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="contact : ${contacts}">
+                        <td th:text="${'#' + contact.id}">#0</td>
+                        <td>
+                            <strong th:text="${contact.nombre}">Nombre</strong>
+                            <br class="hide-sm"/>
+                            <small class="hide-sm" style="color: #666;" th:text="${contact.notas}">Notas</small>
+                        </td>
+                        <td class="hide-sm" th:text="${contact.rol}">Rol</td>
+                        <td class="hide-sm">
+                            <a th:if="${contact.telefono}" 
+                               th:href="'tel:' + ${contact.telefono}" 
+                               style="color: #4caf50;">
+                                <i class="fas fa-phone"></i>
+                                <span th:text="${contact.telefono}">Teléfono</span>
+                            </a>
+                            <span th:unless="${contact.telefono}">—</span>
+                        </td>
+                        <td class="hide-sm">
+                            <a th:if="${contact.email}" 
+                               th:href="'mailto:' + ${contact.email}"
+                               style="color: #2196f3;">
+                                <i class="fas fa-envelope"></i>
+                                <span th:text="${contact.email}">Email</span>
+                            </a>
+                            <span th:unless="${contact.email}">—</span>
+                        </td>
+                        <td>
+                            <span th:if="${contact.isPrimary}" class="badge badge-warning">
+                                <i class="fas fa-star"></i> Sí
+                            </span>
+                            <span th:unless="${contact.isPrimary}" class="badge badge-secondary">No</span>
+                        </td>
+                        <td class="actions-col">
+                            <div class="actions-cell">
+                                <a th:href="@{/admin/proveedores/{provId}/sucursales/{branchId}/contactos/editar/{contactId}(provId=${proveedor.id},branchId=${branch.id},contactId=${contact.id})}"
+                                   class="btn-icon btn-icon-primary" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form th:action="@{/admin/proveedores/{provId}/sucursales/{branchId}/contactos/{contactId}/eliminar(provId=${proveedor.id},branchId=${branch.id},contactId=${contact.id})}" 
+                                      method="post" 
+                                      style="display: inline;"
+                                      onsubmit="return confirm('¿Estás seguro de eliminar este contacto?');">
+                                    <button type="submit" class="btn-icon btn-icon-danger" title="Eliminar">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(contacts)}">
+                        <td colspan="7" class="empty-message">
+                            No hay contactos registrados.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <script th:inline="javascript">
+            document.addEventListener('DOMContentLoaded', function() {
+                const toggleDense = document.getElementById('toggleDenseContactos');
+                const tabla = document.getElementById('tablaContactos');
+                
+                const isDense = localStorage.getItem('contactosDenseMode') === 'true';
+                if (isDense) {
+                    toggleDense.checked = true;
+                    tabla.classList.add('table-dense');
+                }
+                
+                toggleDense.addEventListener('change', function() {
+                    if (this.checked) {
+                        tabla.classList.add('table-dense');
+                        localStorage.setItem('contactosDenseMode', 'true');
+                    } else {
+                        tabla.classList.remove('table-dense');
+                        localStorage.setItem('contactosDenseMode', 'false');
+                    }
+                });
+            });
+        </script>
+    </th:block>
+</body>
+</html>

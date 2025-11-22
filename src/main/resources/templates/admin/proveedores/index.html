@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{shared/layouts/admin}"
+      lang="es">
+<head>
+    <title>Proveedores</title>
+    <link rel="stylesheet" th:href="@{/css/pages/compras-list.css}">
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="header-with-actions">
+            <div class="title-group">
+                <h1 class="page-title">Proveedores</h1>
+                <p class="page-subtitle">Gestiona tus proveedores y sus sucursales</p>
+            </div>
+            <div class="actions">
+                <a th:href="@{/admin/proveedores/nuevo}" class="btn-nuevo" title="Nuevo Proveedor">
+                    <i class="fas fa-plus"></i>
+                </a>
+            </div>
+        </div>
+
+        <form method="get" th:action="@{/admin/proveedores}" class="filters-modern">
+            <div class="filter-group">
+                <label for="filterNombre" class="filter-label">
+                    <i class="fas fa-search"></i> Buscar
+                </label>
+                <input type="text" name="nombre" id="filterNombre" class="form-control filter-input" 
+                       placeholder="Nombre o NIT" th:value="${nombreFiltro}">
+            </div>
+            
+            <div class="filter-group">
+                <label for="filterCiudad" class="filter-label">
+                    <i class="fas fa-map-marker-alt"></i> Ciudad
+                </label>
+                <input type="text" name="ciudad" id="filterCiudad" class="form-control filter-input" 
+                       placeholder="Ciudad" th:value="${ciudadFiltro}">
+            </div>
+            
+            <div class="filter-group">
+                <label for="filterEstado" class="filter-label">
+                    <i class="fas fa-filter"></i> Estado
+                </label>
+                <select name="activo" id="filterEstado" class="form-control filter-input">
+                    <option value="">Todos</option>
+                    <option value="true" th:selected="${activoFiltro == 'true'}">Activo</option>
+                    <option value="false" th:selected="${activoFiltro == 'false'}">Inactivo</option>
+                </select>
+            </div>
+            
+            <div class="filter-actions">
+                <button type="submit" class="btn btn-primary" title="Buscar">
+                    <i class="fas fa-search"></i>
+                </button>
+                <a th:href="@{/admin/proveedores}" class="btn btn-secondary" title="Limpiar filtros">
+                    <i class="fas fa-eraser"></i>
+                </a>
+            </div>
+        </form>
+
+        <div class="table-controls">
+            <div class="table-controls-left">
+                <label class="hide-sm">Mostrar</label>
+                <select id="pageSizeSelector" class="form-control size-selector">
+                    <option value="10">10</option>
+                    <option value="25" selected>25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+                <span class="hide-sm">registros</span>
+            </div>
+            <div class="table-controls-right">
+                <label for="toggleDenseProveedores" class="hide-sm">Vista compacta</label>
+                <input id="toggleDenseProveedores" type="checkbox" />
+            </div>
+        </div>
+
+        <div class="table-container table-scroll">
+            <table class="table-admin" id="tablaProveedores">
+                <thead>
+                    <tr>
+                        <th># ID</th>
+                        <th>NIT</th>
+                        <th>Nombre</th>
+                        <th class="hide-sm">Ciudad</th>
+                        <th class="hide-sm">Contacto</th>
+                        <th>Sucursales</th>
+                        <th>Estado</th>
+                        <th class="actions-col">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="prov : ${proveedores}">
+                        <td th:text="${'#' + prov.id}">#0</td>
+                        <td th:text="${prov.nit}">123456789</td>
+                        <td>
+                            <strong th:text="${prov.nombre}">Nombre</strong>
+                            <br class="hide-sm"/>
+                            <small class="hide-sm" style="color: #666;" th:text="${prov.direccion}">Dirección</small>
+                        </td>
+                        <td class="hide-sm" th:text="${prov.ciudad}">Ciudad</td>
+                        <td class="hide-sm">
+                            <div th:if="${prov.telefono}">
+                                <i class="fas fa-phone" style="color: #4caf50;"></i>
+                                <span th:text="${prov.telefono}">Teléfono</span>
+                            </div>
+                            <div th:if="${prov.email}" style="font-size: 0.85rem;">
+                                <i class="fas fa-envelope" style="color: #2196f3;"></i>
+                                <span th:text="${prov.email}">Email</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge badge-info" 
+                                  th:text="${prov.branches != null ? #lists.size(prov.branches) : 0}">0</span>
+                        </td>
+                        <td>
+                            <span th:if="${prov.activo}" class="badge badge-success">
+                                <i class="fas fa-check"></i> Activo
+                            </span>
+                            <span th:unless="${prov.activo}" class="badge badge-danger">
+                                <i class="fas fa-times"></i> Inactivo
+                            </span>
+                        </td>
+                        <td class="actions-col">
+                            <div class="actions-cell">
+                                <a th:href="@{/admin/proveedores/ver/{id}(id=${prov.id})}"
+                                   class="btn-icon btn-icon-secondary" title="Ver información">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a th:href="@{/admin/proveedores/{id}/sucursales(id=${prov.id})}"
+                                   class="btn-icon btn-icon-info" title="Ver sucursales">
+                                    <i class="fas fa-store"></i>
+                                </a>
+                                <a th:href="@{/admin/proveedores/editar/{id}(id=${prov.id})}"
+                                   class="btn-icon btn-icon-primary" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a th:href="@{/admin/proveedores/eliminar/{id}(id=${prov.id})}"
+                                   class="btn-icon btn-icon-danger" title="Eliminar"
+                                   onclick="return confirm('¿Estás seguro de eliminar este proveedor?');">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(proveedores)}">
+                        <td colspan="8" class="empty-message">
+                            No hay proveedores registrados.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <script th:inline="javascript">
+            document.addEventListener('DOMContentLoaded', function() {
+                const toggleDense = document.getElementById('toggleDenseProveedores');
+                const tabla = document.getElementById('tablaProveedores');
+                
+                // Cargar preferencia guardada
+                const isDense = localStorage.getItem('proveedoresDenseMode') === 'true';
+                if (isDense) {
+                    toggleDense.checked = true;
+                    tabla.classList.add('table-dense');
+                }
+                
+                // Guardar cambios
+                toggleDense.addEventListener('change', function() {
+                    if (this.checked) {
+                        tabla.classList.add('table-dense');
+                        localStorage.setItem('proveedoresDenseMode', 'true');
+                    } else {
+                        tabla.classList.remove('table-dense');
+                        localStorage.setItem('proveedoresDenseMode', 'false');
+                    }
+                });
+            });
+        </script>
+    </th:block>
+</body>
+</html>

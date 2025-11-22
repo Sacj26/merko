@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 
 import merko.merko.Entity.DetalleCompra;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -18,8 +17,8 @@ public interface DetalleCompraRepository extends JpaRepository<DetalleCompra, Lo
 	    "where c.fecha between :start and :end " +
 	    "group by dc.producto.id, dc.producto.nombre " +
 	    "order by cantidad desc")
-    List<Object[]> topProductosCompradosPorCantidad(@Param("start") LocalDate start,
-					    @Param("end") LocalDate end);
+    List<Object[]> topProductosCompradosPorCantidad(@Param("start") java.time.LocalDateTime start,
+					    @Param("end") java.time.LocalDateTime end);
 
     // Contar total de detalles de compra en un rango de fechas
     @Query("select count(dc) from DetalleCompra dc join dc.compra c where c.fecha between :start and :end")

@@ -16,6 +16,7 @@ import lombok.ToString;
 @Setter
 @Getter
 @Entity
+@jakarta.persistence.Table(name = "detalle_compra")
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
@@ -33,10 +34,16 @@ public class DetalleCompra {
     @JoinColumn(name = "producto_id")
     private Producto producto;
 
+    @ManyToOne
+    @JoinColumn(name = "branch_id")
+    private Branch branch;
+
     @Column(nullable = false)
     private Integer cantidad;
 
+    @Column(name = "precio_unitario")
     private Double precioUnitario;
 
+    @Column(name = "precio_compra")
     private Double precioCompra;
 }

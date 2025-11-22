@@ -208,7 +208,9 @@ public class DashboardService {
         LocalDate fin = LocalDate.now();
         LocalDate inicio = fin.minusDays(dias - 1L);
         logger.info("Consultando top productos comprados desde {} hasta {}", inicio, fin);
-        List<Object[]> rows = detalleCompraRepository.topProductosCompradosPorCantidad(inicio, fin);
+        java.time.LocalDateTime start = inicio.atStartOfDay();
+        java.time.LocalDateTime end = fin.atTime(23, 59, 59, 999_999_999);
+        List<Object[]> rows = detalleCompraRepository.topProductosCompradosPorCantidad(start, end);
         logger.info("Top productos comprados encontrados: {} productos", rows.size());
         return rows.stream().limit(n).map(r -> {
             Map<String, Object> m = new HashMap<>();

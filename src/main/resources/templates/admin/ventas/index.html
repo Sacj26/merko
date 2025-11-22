@@ -15,21 +15,56 @@
                 <p class="page-subtitle">Gestiona y consulta el historial de ventas</p>
             </div>
             <div class="actions">
-                <a th:href="@{/admin/ventas/crear}" class="btn-nuevo">
-                    <i class="fas fa-plus"></i> Nueva Venta
+                <a th:href="@{/admin/ventas/crear}" class="btn-nuevo" title="Nueva Venta">
+                    <i class="fas fa-plus"></i>
                 </a>
             </div>
         </div>
 
-        <div class="filters">
-            <select id="filterCliente" class="form-control">
-                <option value="">Todos los clientes</option>
-                <option th:each="cliente : ${clientes}" 
-                        th:value="${cliente.id}" 
-                        th:text="${cliente.nombre}"></option>
-            </select>
-            <input type="date" id="filterFecha" class="form-control" placeholder="Filtrar por fecha">
-        </div>
+        <form method="get" th:action="@{/admin/ventas}" class="filters-modern">
+            <div class="filter-group">
+                <label for="filterCliente" class="filter-label">
+                    <i class="fas fa-user"></i> Cliente
+                </label>
+                <select name="clienteId" id="filterCliente" class="form-control filter-input">
+                    <option value="">Todos los clientes</option>
+                    <option th:each="cliente : ${clientes}" 
+                            th:value="${cliente.id}" 
+                            th:text="${cliente.nombre}"
+                            th:selected="${clienteIdFiltro != null and clienteIdFiltro == cliente.id}"></option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="filterSucursal" class="filter-label">
+                    <i class="fas fa-building"></i> Sucursal
+                </label>
+                <select name="sucursalId" id="filterSucursal" class="form-control filter-input">
+                    <option value="">Todas las sucursales</option>
+                    <option th:each="sucursal : ${sucursales}" 
+                            th:value="${sucursal.id}" 
+                            th:text="${sucursal.nombre + ' - ' + sucursal.ciudad}"
+                            th:selected="${sucursalIdFiltro != null and sucursalIdFiltro == sucursal.id}"></option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="filterFecha" class="filter-label">
+                    <i class="fas fa-calendar"></i> Fecha
+                </label>
+                <input type="date" name="fecha" id="filterFecha" class="form-control filter-input" 
+                       th:value="${fechaFiltro}">
+            </div>
+            
+            <div class="filter-actions">
+                <button type="submit" class="btn btn-primary" title="Buscar">
+                    <i class="fas fa-search"></i>
+                </button>
+                <a th:href="@{/admin/ventas}" class="btn btn-secondary" title="Limpiar filtros">
+                    <i class="fas fa-eraser"></i>
+                </a>
+            </div>
+        </form>
 
         <div class="table-controls">
             <div class="table-controls-left">
@@ -89,7 +124,7 @@
                         </td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(ventas)}">
-                        <td colspan="8" class="empty-message">
+                        <td colspan="9" class="empty-message">
                             No hay ventas registradas.
                         </td>
                     </tr>

@@ -3,8 +3,10 @@ package merko.merko.dto;
 public class DetalleVentaForm {
 
     private Long productoId;
+    private Long branchId;
     private int cantidad;
     private double precioUnitario;
+    private Double precioVenta;
 
 
     public Long getProductoId() {
@@ -13,6 +15,14 @@ public class DetalleVentaForm {
 
     public void setProductoId(Long productoId) {
         this.productoId = productoId;
+    }
+
+    public Long getBranchId() {
+        return branchId;
+    }
+
+    public void setBranchId(Long branchId) {
+        this.branchId = branchId;
     }
 
     public int getCantidad() {
@@ -29,5 +39,13 @@ public class DetalleVentaForm {
 
     public void setPrecioUnitario(double precioUnitario) {
         this.precioUnitario = precioUnitario;
+    }
+
+    public Double getPrecioVenta() {
+        return precioVenta;
+    }
+
+    public void setPrecioVenta(Double precioVenta) {
+        this.precioVenta = precioVenta;
     }
 }

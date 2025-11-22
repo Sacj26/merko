@@ -5,90 +5,418 @@
       lang="es">
 <head>
     <title>Agregar Productos</title>
-    <link rel="stylesheet" th:href="@{/css/pages/proveedores.css}">
+    <link rel="stylesheet" th:href="@{/css/pages/proveedores.css}" />
+    <link rel="stylesheet" th:href="@{/css/components/forms.css}" />
+    <link rel="stylesheet" th:href="@{/css/components/buttons.css}" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Inline override to ensure provider product form uses compact row layout (override cached/preceding CSS) -->
-    <style>
-        @media (min-width: 768px) {
-            .proveedor-form .form-grid { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:1.25rem 2rem; }
-            .proveedor-form .form-group { display:flex !important; flex-direction:row !important; align-items:center !important; gap:0.75rem !important; margin-bottom:1rem !important; width:100%; }
-            .proveedor-form .form-group label{ flex:0 0 160px; margin:0; font-weight:600; }
-            .proveedor-form .form-group .form-control{ flex:1 1 auto !important; width:auto !important; max-width:none !important; }
-            .proveedor-form .form-group.full-width{ display:block !important; width:100% !important; grid-column:1 / -1 !important; }
-        }
-    </style>
 </head>
 <body>
 <div layout:fragment="content">
     <div class="header-with-actions">
         <div class="title-group">
             <h1 class="page-title">
-                Agregar Productos a 
-                <span th:text="${proveedor.nombre}">Proveedor</span>
-                <span th:if="${branch != null}"> — <span th:text="${branch.nombre}">Sucursal</span></span>
+                <i class="fas fa-box-open"></i>
+                Agregar Productos
             </h1>
-            <p class="page-subtitle" th:text="${branch != null} ? 'Agrega uno o más productos a la sucursal' : 'Agrega uno o más productos al proveedor'">Agrega productos</p>
+            <p class="page-subtitle">
+                <span th:if="${branch != null}">
+                    <i class="fas fa-store"></i> Sucursal: <strong th:text="${branch.nombre}">Sucursal</strong> • 
+                </span>
+                <i class="fas fa-building"></i> Proveedor: <strong th:text="${proveedor.nombre}">Proveedor</strong>
+            </p>
+        </div>
+        <div class="actions">
+            <a th:href="${branch != null ? '/admin/proveedores/' + proveedor.id + '/sucursales/' + branch.id + '/productos' : '/admin/proveedores'}" 
+               class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
         </div>
     </div>
 
-    
-
     <div class="form-container">
-    <form id="form-productos" th:action="${accion != null} ? ${accion} : @{/admin/proveedores/agregar-productos/{id}(id=${proveedor.id})}"
-        method="post" enctype="multipart/form-data" class="form-admin proveedor-form" >
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-        <input type="hidden" name="proveedorId" th:value="${proveedor != null ? proveedor.id : ''}" />
-        <input type="hidden" name="branchId" th:value="${branch != null ? branch.id : ''}" />
+        <form id="form-productos" th:action="${accion != null} ? ${accion} : @{/admin/proveedores/agregar-productos/{id}(id=${proveedor.id})}"
+            method="post" enctype="multipart/form-data" class="form-admin">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <input type="hidden" name="proveedorId" th:value="${proveedor != null ? proveedor.id : ''}" />
+            <input type="hidden" name="branchId" th:value="${branch != null ? branch.id : ''}" />
 
-        <!-- Sección: Productos -->
-        <fieldset class="form-section">
-                <legend>
-                <i class="fas fa-box"></i> Productos
-                <button type="button" class="btn-add-producto" onclick="agregarProducto()" title="Agregar producto">
-                    <i class="fas fa-plus-circle" aria-hidden="true"></i> Agregar producto
-                </button>
-            </legend>
+            <!-- Mensaje de error -->
+            <div th:if="${error}" class="alert alert-error">
+                <span class="alert-icon"><i class="fas fa-exclamation-circle"></i></span>
+                <div class="alert-content">
+                    <strong>Error:</strong> <span th:text="${error}">Error</span>
+                </div>
+            </div>
+
+            <button type="button" class="btn-add-producto" onclick="agregarProducto()">
+                <i class="fas fa-plus-circle"></i> Agregar Producto
+            </button>
 
             <div id="productos-container">
                 <div class="producto-item" data-producto-index="0">
                     <div class="producto-header">
-                        <h4>Producto #1</h4>
-                        <button type="button" class="btn-remove-producto" onclick="eliminarProducto(0)" title="Eliminar producto" aria-label="Eliminar producto">
-                            <i class="fas fa-trash-alt" aria-hidden="true"></i>
+                        <h4><i class="fas fa-box"></i> Producto #1</h4>
+                        <button type="button" class="btn-remove-producto" onclick="eliminarProducto(0)" style="display: none;">
+                            <i class="fas fa-trash-alt"></i> Eliminar
                         </button>
                     </div>
-                    <div th:replace="~{shared/fragments/product-form-fields :: indexed('productos[0]')}"></div>
+                    
+                    <!-- Información Básica -->
+                    <div class="section-title">
+                        <i class="fas fa-info-circle"></i> Información Básica
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">
+                                <i class="fas fa-tag"></i> Nombre del Producto <span class="required">*</span>
+                            </label>
+                            <input type="text" name="productos[0].nombre" class="form-control-modern" 
+                                   placeholder="Ej: Leche Entera 1L" required />
+                        </div>
+                        
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">
+                                <i class="fas fa-barcode"></i> SKU
+                            </label>
+                            <input type="text" name="productos[0].sku" class="form-control-modern" 
+                                   placeholder="Código único" />
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">
+                                <i class="fas fa-qrcode"></i> Código de Barras
+                            </label>
+                            <input type="text" name="productos[0].codigoBarras" class="form-control-modern" 
+                                   placeholder="Código de barras" />
+                        </div>
+                        
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">
+                                <i class="fas fa-copyright"></i> Marca
+                            </label>
+                            <input type="text" name="productos[0].marca" class="form-control-modern" 
+                                   placeholder="Marca del producto" />
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">
+                                <i class="fas fa-layer-group"></i> Tipo
+                            </label>
+                            <input type="text" name="productos[0].tipo" class="form-control-modern" 
+                                   placeholder="Ej: Simple, Compuesto, Servicio" />
+                            <small class="form-help">Ejemplos: Simple, Compuesto, Servicio, Materia Prima</small>
+                        </div>
+                        
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">
+                                <i class="fas fa-circle-check"></i> Estado
+                            </label>
+                            <input type="text" name="productos[0].estado" class="form-control-modern" 
+                                   placeholder="Ej: ACTIVO, INACTIVO" value="ACTIVO" />
+                            <small class="form-help">Estados: ACTIVO, INACTIVO, AGOTADO</small>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group-modern" style="grid-column: 1 / -1;">
+                            <label class="form-label-modern">
+                                <i class="fas fa-align-left"></i> Descripción
+                            </label>
+                            <textarea name="productos[0].descripcion" class="form-control-modern" 
+                                      rows="2" placeholder="Descripción del producto"></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- Presentación y Unidades -->
+                    <div class="section-title">
+                        <i class="fas fa-box"></i> Presentación y Unidades
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">
+                                <i class="fas fa-ruler"></i> Unidad de Medida
+                            </label>
+                            <input type="text" name="productos[0].unidadMedida" class="form-control-modern" 
+                                   placeholder="Ej: KG, L, UNIDAD" />
+                            <small class="form-help">Ejemplos: KG, L, ML, UNIDAD, CAJA</small>
+                        </div>
+                        
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">
+                                <i class="fas fa-weight"></i> Contenido Neto
+                            </label>
+                            <input type="number" name="productos[0].contenidoNeto" class="form-control-modern" 
+                                   step="0.01" min="0" placeholder="1.0" />
+                        </div>
+                        
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">
+                                <i class="fas fa-balance-scale"></i> Unidad del Contenido
+                            </label>
+                            <input type="text" name="productos[0].contenidoUom" class="form-control-modern" 
+                                   placeholder="Ej: KG, L, ML" />
+                        </div>
+                    </div>
+                    
+                    <!-- Precios e Inventario -->
+                    <div class="section-title">
+                        <i class="fas fa-dollar-sign"></i> Precios e Inventario
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">
+                                <i class="fas fa-shopping-cart"></i> Precio de Compra <span class="required">*</span>
+                            </label>
+                            <input type="number" name="productos[0].precioCompra" class="form-control-modern" 
+                                   step="0.01" min="0" placeholder="0.00" required />
+                        </div>
+                        
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">
+                                <i class="fas fa-tag"></i> Precio de Venta <span class="required">*</span>
+                            </label>
+                            <input type="number" name="productos[0].precioVenta" class="form-control-modern" 
+                                   step="0.01" min="0" placeholder="0.00" required />
+                        </div>
+                        
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">
+                                <i class="fas fa-boxes"></i> Stock Inicial
+                            </label>
+                            <input type="number" name="productos[0].stock" class="form-control-modern" 
+                                   step="1" min="0" placeholder="0" value="0" />
+                        </div>
+                    </div>
+                    
+                    <!-- Reabastecimiento -->
+                    <div class="section-title">
+                        <i class="fas fa-truck"></i> Control de Reabastecimiento
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">
+                                <i class="fas fa-exclamation-triangle"></i> Stock Mínimo
+                            </label>
+                            <input type="number" name="productos[0].stockMinimo" class="form-control-modern" 
+                                   step="1" min="0" placeholder="10" />
+                            <small class="form-help">Nivel mínimo antes de alerta</small>
+                        </div>
+                        
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">
+                                <i class="fas fa-bell"></i> Punto de Reorden
+                            </label>
+                            <input type="number" name="productos[0].puntoReorden" class="form-control-modern" 
+                                   step="1" min="0" placeholder="20" />
+                            <small class="form-help">Stock para realizar nuevo pedido</small>
+                        </div>
+                        
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">
+                                <i class="fas fa-clock"></i> Lead Time (días)
+                            </label>
+                            <input type="number" name="productos[0].leadTimeDias" class="form-control-modern" 
+                                   step="1" min="0" placeholder="7" />
+                            <small class="form-help">Días de entrega del proveedor</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Lotes y Vencimientos -->
+                    <div class="section-title">
+                        <i class="fas fa-calendar-alt"></i> Gestión de Lotes y Vencimientos
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group-modern">
+                            <div class="checkbox-group">
+                                <input type="checkbox" name="productos[0].gestionaLotes" id="gestionaLotes_0" />
+                                <label for="gestionaLotes_0">
+                                    <i class="fas fa-box-open"></i> Gestiona Lotes
+                                </label>
+                            </div>
+                            <small class="form-help">El producto maneja números de lote</small>
+                        </div>
+                        
+                        <div class="form-group-modern">
+                            <div class="checkbox-group">
+                                <input type="checkbox" name="productos[0].requiereVencimiento" id="requiereVencimiento_0" />
+                                <label for="requiereVencimiento_0">
+                                    <i class="fas fa-calendar-times"></i> Requiere Vencimiento
+                                </label>
+                            </div>
+                            <small class="form-help">El producto tiene fecha de vencimiento</small>
+                        </div>
+                        
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">
+                                <i class="fas fa-hourglass-half"></i> Vida Útil (días)
+                            </label>
+                            <input type="number" name="productos[0].vidaUtilDias" class="form-control-modern" 
+                                   step="1" min="0" placeholder="180" />
+                            <small class="form-help">Días de duración del producto</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Almacenamiento y Regulaciones -->
+                    <div class="section-title">
+                        <i class="fas fa-warehouse"></i> Almacenamiento y Regulaciones
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">
+                                <i class="fas fa-temperature-low"></i> Tipo de Almacenamiento
+                            </label>
+                            <select name="productos[0].almacenamiento" class="form-control-modern">
+                                <option value="">Seleccione...</option>
+                                <option value="AMBIENTE">Ambiente</option>
+                                <option value="REFRIGERADO">Refrigerado</option>
+                                <option value="CONGELADO">Congelado</option>
+                            </select>
+                            <small class="form-help">Condiciones de almacenamiento requeridas</small>
+                        </div>
+                        
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">
+                                <i class="fas fa-certificate"></i> Registro Sanitario
+                            </label>
+                            <input type="text" name="productos[0].registroSanitario" class="form-control-modern" 
+                                   placeholder="RSA-123456-2024" />
+                            <small class="form-help">Número de registro sanitario</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Imagen -->
+                    <div class="section-title">
+                        <i class="fas fa-image"></i> Imagen del Producto
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group-modern" style="grid-column: 1 / -1;">
+                            <label class="form-label-modern">
+                                <i class="fas fa-upload"></i> Subir Imagen
+                            </label>
+                            <input type="file" name="productos[0].imagenUrl" class="form-control-modern" 
+                                   accept="image/*" />
+                            <small class="form-help">Formatos: JPG, PNG, GIF. Tamaño máximo: 5MB</small>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </fieldset>
 
-        <!-- Botones -->
-        <div class="form-actions">
-            <button type="submit" class="btn btn-primary" title="Guardar productos">
-                <i class="fas fa-save" aria-hidden="true"></i> Guardar productos
-            </button>
-            <a th:href="@{/admin/proveedores}" class="btn btn-secondary" title="Cancelar" style="margin-left:8px;">
-                <i class="fas fa-times-circle" aria-hidden="true"></i> Cancelar
-            </a>
-        </div>
-
-        <!-- Mensaje de error -->
-        <div th:if="${error}" class="alert alert-error">
-            <span class="alert-icon"><i class="fas fa-exclamation-circle"></i></span>
-            <div class="alert-content">
-                <p class="alert-message" th:text="${error}">Error</p>
+            <!-- Botones de Acción -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Guardar Productos
+                </button>
+                <a th:href="${branch != null ? '/admin/proveedores/' + proveedor.id + '/sucursales/' + branch.id + '/productos' : '/admin/proveedores'}" 
+                   class="btn btn-secondary">
+                    <i class="fas fa-times-circle"></i> Cancelar
+                </a>
             </div>
-        </div>
-
-    </form>
-    </div>
+        </form>
     </div>
 </div>
 
-<div layout:fragment="scripts">
-    <script th:src="@{/js/pages/proveedores/agregar-productos.js}"></script>
-</div>
+<th:block layout:fragment="scripts">
+    <script>
+        let productoIndex = 1;
+        
+        function agregarProducto() {
+            const container = document.getElementById('productos-container');
+            const newItem = container.querySelector('.producto-item').cloneNode(true);
+            
+            // Actualizar index
+            newItem.setAttribute('data-producto-index', productoIndex);
+            
+            // Actualizar título
+            newItem.querySelector('h4').innerHTML = '<i class="fas fa-box"></i> Producto #' + (productoIndex + 1);
+            
+            // Mostrar botón eliminar
+            newItem.querySelector('.btn-remove-producto').style.display = 'flex';
+            newItem.querySelector('.btn-remove-producto').setAttribute('onclick', 'eliminarProducto(' + productoIndex + ')');
+            
+            // Actualizar nombres de inputs y checkboxes
+            const inputs = newItem.querySelectorAll('input, textarea, select');
+            inputs.forEach(input => {
+                const name = input.getAttribute('name');
+                const id = input.getAttribute('id');
+                
+                if (name) {
+                    const newName = name.replace(/\[0\]/, '[' + productoIndex + ']');
+                    input.setAttribute('name', newName);
+                    
+                    if (input.type === 'checkbox') {
+                        input.checked = false;
+                        if (id) {
+                            const newId = id.replace(/_0$/, '_' + productoIndex);
+                            input.setAttribute('id', newId);
+                            const label = newItem.querySelector('label[for="' + id + '"]');
+                            if (label) {
+                                label.setAttribute('for', newId);
+                            }
+                        }
+                    } else if (input.type === 'file') {
+                        input.value = '';
+                    } else if (input.type === 'number') {
+                        if (name.includes('stock') || name.includes('Stock')) {
+                            input.value = '0';
+                        } else {
+                            input.value = '';
+                        }
+                    } else {
+                        input.value = '';
+                        // Valores por defecto
+                        if (name.includes('estado')) {
+                            input.value = 'ACTIVO';
+                        }
+                    }
+                }
+            });
+            
+            container.appendChild(newItem);
+            productoIndex++;
+            
+            // Scroll al nuevo producto
+            newItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        
+        function eliminarProducto(index) {
+            const items = document.querySelectorAll('.producto-item');
+            if (items.length > 1) {
+                const item = document.querySelector('.producto-item[data-producto-index="' + index + '"]');
+                if (item) {
+                    item.remove();
+                    actualizarNumeracion();
+                }
+            } else {
+                alert('Debe mantener al menos un producto');
+            }
+        }
+        
+        function actualizarNumeracion() {
+            const items = document.querySelectorAll('.producto-item');
+            items.forEach((item, idx) => {
+                item.querySelector('h4').innerHTML = '<i class="fas fa-box"></i> Producto #' + (idx + 1);
+            });
+        }
+        
+        // Ocultar botón eliminar del primer producto si solo hay uno
+        document.addEventListener('DOMContentLoaded', function() {
+            const items = document.querySelectorAll('.producto-item');
+            if (items.length === 1) {
+                items[0].querySelector('.btn-remove-producto').style.display = 'none';
+            }
+        });
+    </script>
+</th:block>
 </body>
 </html>

@@ -14,11 +14,18 @@ import merko.merko.Entity.Venta;
 
 @Repository
 public interface VentaRepository extends JpaRepository<Venta, Long> {
-    @Query("SELECT v FROM Venta v LEFT JOIN FETCH v.detalles d LEFT JOIN FETCH d.producto LEFT JOIN FETCH v.cliente LEFT JOIN FETCH v.branch WHERE v.id = :id")
+    @Query("SELECT v FROM Venta v LEFT JOIN FETCH v.detalles d LEFT JOIN FETCH d.producto LEFT JOIN FETCH d.branch LEFT JOIN FETCH v.cliente LEFT JOIN FETCH v.branch WHERE v.id = :id")
     Optional<Venta> findByIdWithDetalles(@Param("id") Long id);
 
-    @Query("SELECT DISTINCT v FROM Venta v LEFT JOIN FETCH v.detalles d LEFT JOIN FETCH d.producto LEFT JOIN FETCH v.cliente LEFT JOIN FETCH v.branch ORDER BY v.fecha DESC")
+    @Query("SELECT DISTINCT v FROM Venta v LEFT JOIN FETCH v.detalles d LEFT JOIN FETCH d.producto LEFT JOIN FETCH d.branch LEFT JOIN FETCH v.cliente LEFT JOIN FETCH v.branch ORDER BY v.fecha DESC")
     List<Venta> findAllWithDetalles();
+
+    // Optimizado: Solo las últimas 5 ventas para el dashboard
+    @Query(value = "SELECT v.id FROM venta v WHERE v.estado = 'ACTIVA' OR v.estado IS NULL ORDER BY v.fecha DESC LIMIT 5", nativeQuery = true)
+    List<Long> findTop5IdsByOrderByFechaDesc();
+
+    @Query("SELECT DISTINCT v FROM Venta v LEFT JOIN FETCH v.detalles d LEFT JOIN FETCH d.producto LEFT JOIN FETCH d.branch LEFT JOIN FETCH v.cliente LEFT JOIN FETCH v.branch WHERE v.id IN :ids ORDER BY v.fecha DESC")
+    List<Venta> findByIdsWithAllRelations(@Param("ids") List<Long> ids);
 
     // VIEJO: Suma desde campo v.total (puede contener valores incorrectos)
     @Query("select coalesce(sum(v.total),0) from Venta v where (v.estado = :estado OR (v.estado IS NULL AND :estado = 'ACTIVA')) and v.fecha between :start and :end")
@@ -46,4 +53,11 @@ public interface VentaRepository extends JpaRepository<Venta, Long> {
     List<Object[]> dailyTotalsBetween(@Param("start") LocalDateTime start,
                                       @Param("end") LocalDateTime end,
                                       @Param("estado") EstadoVenta estado);
+    
+    // Consultas optimizadas para listado paginado
+    @Query(value = "SELECT v.id FROM venta v ORDER BY v.fecha DESC LIMIT :limit", nativeQuery = true)
+    List<Long> findTopIdsByOrderByFechaDesc(@Param("limit") int limit);
+    
+    @Query(value = "SELECT v.id FROM venta v WHERE DATE(v.fecha) = :fecha ORDER BY v.fecha DESC LIMIT :limit", nativeQuery = true)
+    List<Long> findIdsByFechaBetween(@Param("fecha") String fecha, @Param("limit") int limit);
 }

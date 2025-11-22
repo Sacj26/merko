@@ -3,6 +3,7 @@ package merko.merko.dto;
 public class DetalleCompraForm {
     
     private Long productoId;
+    private Long branchId;
     private int cantidad;
     private double precioUnitario;
 
@@ -11,6 +12,12 @@ public class DetalleCompraForm {
     }
     public void setProductoId(Long productoId) {
         this.productoId = productoId;
+    }
+    public Long getBranchId() {
+        return branchId;
+    }
+    public void setBranchId(Long branchId) {
+        this.branchId = branchId;
     }
     public int getCantidad() {
         return cantidad;

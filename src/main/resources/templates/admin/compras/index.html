@@ -15,30 +15,66 @@
                 <p class="page-subtitle">Gestiona y consulta el historial de compras a proveedores</p>
             </div>
             <div class="actions">
-                <a th:href="@{/admin/compras/crear}" class="btn-nuevo">
-                    <i class="fas fa-plus"></i> Nueva Compra
+                <a th:href="@{/admin/compras/crear}" class="btn-nuevo" title="Nueva Compra">
+                    <i class="fas fa-plus"></i>
                 </a>
             </div>
         </div>
 
-        <div class="filters">
-            <select id="filterBranch" class="form-control">
-                <option value="">Todas las sucursales</option>
-                <option th:each="branch : ${branches}" 
-                        th:value="${branch.id}" 
-                        th:text="${branch.nombre + ' (' + (branch.proveedor != null ? branch.proveedor.nombre : 'Sin proveedor') + ')'}"></option>
-            </select>
-            <input type="date" id="filterFecha" class="form-control" placeholder="Filtrar por fecha">
-        </div>
+        <form method="get" th:action="@{/admin/compras}" class="filters-modern">
+            <div class="filter-group">
+                <label for="filterProveedor" class="filter-label">
+                    <i class="fas fa-truck"></i> Proveedor
+                </label>
+                <select name="proveedorId" id="filterProveedor" class="form-control filter-input">
+                    <option value="">Todos los proveedores</option>
+                    <option th:each="proveedor : ${proveedores}" 
+                            th:value="${proveedor.id}" 
+                            th:text="${proveedor.nombre}"
+                            th:selected="${proveedorIdFiltro != null and proveedorIdFiltro == proveedor.id}"></option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="filterBranch" class="filter-label">
+                    <i class="fas fa-building"></i> Sucursal
+                </label>
+                <select name="branchId" id="filterBranch" class="form-control filter-input">
+                    <option value="">Todas las sucursales</option>
+                    <option th:each="branch : ${branches}" 
+                            th:value="${branch.id}" 
+                            th:text="${branch.nombre + ' - ' + branch.ciudad}"
+                            th:selected="${branchIdFiltro != null and branchIdFiltro == branch.id}"></option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="filterFecha" class="filter-label">
+                    <i class="fas fa-calendar"></i> Fecha
+                </label>
+                <input type="date" name="fecha" id="filterFecha" class="form-control filter-input" 
+                       th:value="${fechaFiltro}">
+            </div>
+            
+            <div class="filter-actions">
+                <button type="submit" class="btn btn-primary" title="Buscar">
+                    <i class="fas fa-search"></i>
+                </button>
+                <a th:href="@{/admin/compras}" class="btn btn-secondary" title="Limpiar filtros">
+                    <i class="fas fa-eraser"></i>
+                </a>
+            </div>
+        </form>
 
         <div class="table-controls">
             <div class="table-controls-left">
                 <label class="hide-sm">Mostrar</label>
-                <select id="pageSizeSelector" class="form-control size-selector">
-                    <option value="10">10</option>
-                    <option value="25">25</option>
-                    <option value="50">50</option>
-                    <option value="100">100</option>
+                <select id="pageSizeSelector" class="form-control size-selector" onchange="this.form.submit()">
+                    <option value="10" th:selected="${limitActual == 10}">10</option>
+                    <option value="25" th:selected="${limitActual == 25}">25</option>
+                    <option value="50" th:selected="${limitActual == 50}">50</option>
+                    <option value="100" th:selected="${limitActual == 100}">100</option>
+                    <option value="500" th:selected="${limitActual == 500}">500</option>
                 </select>
                 <span class="hide-sm">registros</span>
             </div>

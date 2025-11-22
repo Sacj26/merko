@@ -1,6 +1,9 @@
 package merko.merko.ControllerWeb;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,5 +52,46 @@ public class SucursalController {
             return "redirect:/admin/proveedores/editar/" + branch.getProveedor().getId() + "?sucursalId=" + id;
         }
         return "redirect:/admin/proveedores";
+    }
+
+    // API endpoint para búsqueda de sucursales (DTO simple para evitar ciclos)
+    @GetMapping("/api/todas")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public List<Map<String, Object>> obtenerTodasSucursalesAPI(
+            @org.springframework.web.bind.annotation.RequestParam(required = false) Long proveedorId) {
+        
+        java.util.stream.Stream<Branch> sucursales;
+        
+        if (proveedorId != null) {
+            // Filtrar por proveedor
+            sucursales = branchRepository.findAll().stream()
+                .filter(s -> s.getProveedor() != null && s.getProveedor().getId().equals(proveedorId));
+        } else {
+            // Todas las sucursales
+            sucursales = branchRepository.findAll().stream();
+        }
+        
+        return sucursales
+            .map(s -> {
+                Map<String, Object> dto = new HashMap<>();
+                dto.put("id", s.getId());
+                dto.put("nombre", s.getNombre());
+                dto.put("ciudad", s.getCiudad());
+                dto.put("pais", s.getPais());
+                dto.put("direccion", s.getDireccion());
+                if (s.getProveedor() != null) {
+                    dto.put("proveedorId", s.getProveedor().getId());
+                    dto.put("proveedorNombre", s.getProveedor().getNombre());
+                }
+                // Contar productos de la sucursal
+                try {
+                    int totalProductos = productBranchRepository.findByBranchId(s.getId()).size();
+                    dto.put("totalProductos", totalProductos);
+                } catch (Exception e) {
+                    dto.put("totalProductos", 0);
+                }
+                return dto;
+            })
+            .collect(Collectors.toList());
     }
 }

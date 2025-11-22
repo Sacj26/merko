@@ -37,6 +37,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import merko.merko.Entity.Producto;
+import merko.merko.Entity.ProductoProveedor;
 import merko.merko.Entity.Proveedor;
 import merko.merko.Repository.ProductBranchRepository;
 import merko.merko.Repository.ProductoProveedorRepository;
@@ -448,15 +449,13 @@ public class ProductoController {
         return "redirect:/admin/productos";
     }
 
-    // Nuevo: API para cargar productos por proveedor (JSON liviano)
-    @GetMapping(value = "/por-proveedor/{proveedorId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    // API para obtener TODOS los productos (para flujo flexible)
+    @GetMapping(value = "/api/todos", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public List<Map<String, Object>> productosPorProveedor(@PathVariable("proveedorId") Long proveedorId) {
-        // Obtener productos asociados al proveedor mediante la tabla de relación
-        var relaciones = productoProveedorRepository.findByProveedorId(proveedorId);
-        return relaciones.stream()
-                .map(rel -> rel.getProducto())
-                .filter(p -> p != null && p.getEstado() != null)
+    public List<Map<String, Object>> obtenerTodosLosProductos() {
+        var productos = productoService.getAllProductos();
+        return productos.stream()
+                .filter(p -> p.getEstado() != null && !p.getEstado().isEmpty())
                 .map(p -> {
                     Map<String, Object> m = new HashMap<>();
                     m.put("id", p.getId());
@@ -464,8 +463,50 @@ public class ProductoController {
                     m.put("precioVenta", p.getPrecioVenta());
                     m.put("precioCompra", p.getPrecioCompra());
                     m.put("tipo", p.getTipo());
-                    int totalStock = productBranchRepository.findByProductoId(p.getId()).stream().mapToInt(pb -> pb.getStock() == null ? 0 : pb.getStock()).sum();
-                    m.put("stock", totalStock);
+                    m.put("descripcion", p.getDescripcion());
+                    
+                    // Agregar información del proveedor principal
+                    var proveedorPrincipal = productoProveedorRepository.findByProductoId(p.getId())
+                            .stream()
+                            .findFirst()
+                            .map(ProductoProveedor::getProveedor)
+                            .orElse(null);
+                    
+                    if (proveedorPrincipal != null) {
+                        Map<String, Object> proveedorDto = new HashMap<>();
+                        proveedorDto.put("id", proveedorPrincipal.getId());
+                        proveedorDto.put("nombre", proveedorPrincipal.getNombre());
+                        m.put("proveedor", proveedorDto);
+                    }
+                    
+                    return m;
+                })
+                .collect(Collectors.toList());
+    }
+
+    // Nuevo: API para cargar productos por proveedor (JSON liviano)
+    @GetMapping(value = "/por-proveedor/{proveedorId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public List<Map<String, Object>> productosPorProveedor(@PathVariable("proveedorId") Long proveedorId) {
+        // Obtener productos asociados al proveedor mediante query que evita lazy loading de productos eliminados
+        var relaciones = productoProveedorRepository.findByProveedorIdWithProducto(proveedorId);
+        return relaciones.stream()
+                .map(ProductoProveedor::getProducto)
+                .filter(p -> p != null && p.getEstado() != null && !p.getEstado().isEmpty())
+                .map(p -> {
+                    Map<String, Object> m = new HashMap<>();
+                    m.put("id", p.getId());
+                    m.put("nombre", p.getNombre());
+                    m.put("precioVenta", p.getPrecioVenta());
+                    m.put("precioCompra", p.getPrecioCompra());
+                    m.put("tipo", p.getTipo());
+                    try {
+                        int totalStock = productBranchRepository.findByProductoId(p.getId()).stream()
+                            .mapToInt(pb -> pb.getStock() == null ? 0 : pb.getStock()).sum();
+                        m.put("stock", totalStock);
+                    } catch (Exception e) {
+                        m.put("stock", 0);
+                    }
                     return m;
                 })
                 .collect(Collectors.toList());

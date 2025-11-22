@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{shared/layouts/admin}"
+      lang="es">
+<head>
+    <title>Nueva Venta</title>
+    <link rel="stylesheet" th:href="@{/css/pages/ventas-crear.css}">
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="header-with-actions">
+            <div class="title-group">
+                <h1 class="page-title">Registrar Nueva Venta</h1>
+                <p class="page-subtitle">Selecciona el cliente y los productos para la venta</p>
+            </div>
+        </div>
+
+        <form th:action="@{/admin/ventas/guardar}" method="post" id="ventaForm">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <input type="hidden" id="hiddenClienteId" name="clienteId" />
+            <input type="hidden" id="hiddenProveedorId" name="proveedorId" />
+            <input type="hidden" id="hiddenSucursalId" name="sucursalId" />
+
+            <div class="venta-layout">
+                <!-- Panel principal izquierdo -->
+                <div class="main-form-section">
+                    <!-- Selector de Cliente -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-user"></i> Cliente
+                        </h3>
+                        
+                        <div class="search-container">
+                            <div class="search-input-wrapper">
+                                <input type="text" 
+                                       id="searchCliente" 
+                                       class="search-input" 
+                                       placeholder="Buscar cliente por nombre, email o teléfono..."
+                                       autocomplete="off">
+                                <i class="fas fa-search search-icon"></i>
+                                <div id="dropdownCliente" class="dropdown-results"></div>
+                            </div>
+                            
+                            <div id="selectedCliente" class="selected-item" style="display: none;">
+                                <div class="selected-item-content">
+                                    <div class="selected-item-icon">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div class="selected-item-info">
+                                        <div class="selected-item-name" id="clienteNombre"></div>
+                                        <div class="selected-item-detail" id="clienteEmail"></div>
+                                    </div>
+                                </div>
+                                <button type="button" class="selected-item-remove" onclick="clearCliente()" title="Cambiar cliente">
+                                    <i class="fas fa-times"></i>
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selector de Proveedor -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-truck"></i> Proveedor
+                    </h3>
+                    
+                    <div class="search-container">
+                        <div class="search-input-wrapper">
+                                <input type="text" 
+                                       id="searchProveedor" 
+                                       class="search-input" 
+                                       placeholder="Buscar proveedor por nombre..."
+                                       autocomplete="off"
+                                       disabled>
+                                <i class="fas fa-search search-icon"></i>
+                                <div id="dropdownProveedor" class="dropdown-results"></div>
+                            </div>
+                            
+                            <div id="selectedProveedor" class="selected-item" style="display: none;">
+                                <div class="selected-item-content">
+                                    <div class="selected-item-icon">
+                                        <i class="fas fa-truck"></i>
+                                    </div>
+                                    <div class="selected-item-info">
+                                        <div class="selected-item-name" id="proveedorNombre"></div>
+                                        <div class="selected-item-detail" id="proveedorContacto"></div>
+                                    </div>
+                                </div>
+                                <button type="button" class="selected-item-remove" onclick="clearProveedor()" title="Cambiar proveedor">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <p class="help-text">
+                                <i class="fas fa-info-circle"></i> Selecciona un cliente primero para habilitar este campo
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Selector de Sucursal -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-store"></i> Sucursal
+                        </h3>
+                        
+                        <div class="search-container">
+                            <div class="search-input-wrapper">
+                                <input type="text" 
+                                       id="searchSucursal" 
+                                       class="search-input" 
+                                       placeholder="Buscar sucursal por nombre o ciudad..."
+                                       autocomplete="off"
+                                       disabled>
+                                <i class="fas fa-search search-icon"></i>
+                                <div id="dropdownSucursal" class="dropdown-results"></div>
+                            </div>
+                            
+                            <div id="selectedSucursal" class="selected-item" style="display: none;">
+                                <div class="selected-item-content">
+                                    <div class="selected-item-icon">
+                                        <i class="fas fa-store"></i>
+                                    </div>
+                                    <div class="selected-item-info">
+                                        <div class="selected-item-name" id="sucursalNombre"></div>
+                                        <div class="selected-item-detail" id="sucursalCiudad"></div>
+                                    </div>
+                                </div>
+                                <button type="button" class="selected-item-remove" onclick="clearSucursal()" title="Cambiar sucursal">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <p class="help-text">
+                                <i class="fas fa-info-circle"></i> Selecciona un proveedor primero para habilitar este campo
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Selector de Productos (se habilita después de seleccionar cliente) -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-box"></i> Productos Disponibles
+                        </h3>
+                        
+                        <div class="search-container">
+                            <div class="search-input-wrapper">
+                                <input type="text" 
+                                       id="searchProducto" 
+                                       class="search-input" 
+                                       placeholder="Buscar por nombre de producto..."
+                                       autocomplete="off"
+                                       disabled>
+                                <i class="fas fa-search search-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="productosGrid" class="productos-grid">
+                        <div class="empty-cart">
+                            <i class="fas fa-box-open" style="font-size: 2rem; color: #ddd; margin-bottom: 0.5rem;"></i>
+                            <p>Selecciona un cliente para ver los productos disponibles</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel del carrito -->
+                <div class="cart-panel">
+                    <h3 style="margin-top: 0; display: flex; justify-content: space-between; align-items: center;">
+                        <span><i class="fas fa-shopping-cart"></i> Carrito</span>
+                        <span class="cart-count" id="cartCount">0</span>
+                    </h3>
+
+                    <div id="cartItems" class="cart-items">
+                        <div class="empty-cart">
+                            <i class="fas fa-shopping-cart" style="font-size: 2rem; color: #ddd; margin-bottom: 0.5rem;"></i>
+                            <p>Carrito vacío</p>
+                        </div>
+                    </div>
+
+                    <div id="cartSummary" class="cart-summary" style="display: none;">
+                        <div class="cart-summary-row">
+                            <span>Productos:</span>
+                            <span id="summaryItemCount">0</span>
+                        </div>
+                        <div class="cart-summary-row">
+                            <span>Unidades totales:</span>
+                            <span id="summaryTotalUnits">0</span>
+                        </div>
+                        <div class="cart-summary-row cart-summary-total">
+                            <span>Total:</span>
+                            <span id="summaryTotal">$0.00</span>
+                        </div>
+                    </div>
+
+                    <div class="btn-container" style="margin-top: 1.5rem; display: flex; gap: 0.75rem;">
+                        <button type="submit" class="btn btn-primary" style="flex: 1; display: flex; align-items: center; justify-content: center;" id="btnSubmit" disabled title="Guardar Venta">
+                            <i class="fas fa-save"></i>
+                        </button>
+                        <a th:href="@{/admin/ventas}" class="btn btn-secondary" style="flex: 1; display: flex; align-items: center; justify-content: center;" title="Cancelar">
+                            <i class="fas fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <script th:src="@{/js/pages/ventas/crear-mejorado.js}"></script>
+    </th:block>
+</body>
+</html>
