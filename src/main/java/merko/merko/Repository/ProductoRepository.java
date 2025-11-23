@@ -16,9 +16,11 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
 
 	    @Query("select p from Producto p left join ProductoProveedor pp on pp.producto = p " +
 		    "where (:proveedorId is null or pp.proveedor.id = :proveedorId) " +
+		    "and (:categoriaId is null or p.categoria.id = :categoriaId) " +
 		    "and (:q is null or lower(p.nombre) like lower(concat('%',:q,'%')) " +
 		    "or lower(p.descripcion) like lower(concat('%',:q,'%')))" )
 	    Page<Producto> search(@Param("proveedorId") Long proveedorId,
+			  @Param("categoriaId") Long categoriaId,
 			  @Param("q") String q,
 			  Pageable pageable);
 

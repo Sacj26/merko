@@ -15,12 +15,20 @@ import merko.merko.Entity.Usuario;
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     Optional<Usuario> findByCorreo(String correo);
+    
+    // Alias para OAuth2 (correo = email)
+    default Optional<Usuario> findByEmail(String email) {
+        return findByCorreo(email);
+    }
 
     Optional<Usuario> findByUsername(String username);
     
     // Query optimizada para login: busca username O correo en una sola consulta
     @Query("SELECT u FROM Usuario u WHERE u.username = :login OR u.correo = :login")
     Optional<Usuario> findByUsernameOrCorreo(@org.springframework.data.repository.query.Param("login") String login);
+    
+    // Para OAuth2: buscar por Google ID
+    Optional<Usuario> findByGoogleId(String googleId);
 
     List<Usuario> findByRol(Rol rol);
 

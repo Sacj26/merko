@@ -4,69 +4,264 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Mi Perfil - Merko</title>
-    <link rel="stylesheet" th:href="@{/css/publico/productos.css}">
+    <link rel="stylesheet" th:href="@{/css/publico/perfil.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+
+<!-- HEADER -->
 <header class="public-header">
     <div class="container header-inner">
-        <a th:href="@{/}" class="brand">Merko</a>
+        <a th:href="@{/}" class="brand">
+            <i class="fas fa-store"></i>
+            Merko
+        </a>
         <nav class="public-nav">
-            <a th:href="@{/publico/productos}">Tienda</a>
-            <a th:href="@{/carrito}">Carrito</a>
-            <a th:href="@{/logout}">Salir</a>
+            <a th:href="@{/publico/productos}">
+                <i class="fas fa-shopping-bag"></i>
+                Tienda
+            </a>
+            <a th:href="@{/carrito}">
+                <i class="fas fa-shopping-cart"></i>
+                Carrito
+            </a>
+            <form th:action="@{/logout}" method="post" style="display: inline;">
+                <button type="submit">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Salir
+                </button>
+            </form>
         </nav>
     </div>
 </header>
 
-<main class="container perfil-container">
-    <h1>Mi perfil</h1>
-    <div th:if="${param.success}">
-        <div class="alert success">Perfil actualizado correctamente.</div>
-    </div>
+<!-- MAIN CONTENT -->
+<main class="perfil-wrapper">
+    <div class="container">
+        
+        <!-- Header Section -->
+        <div class="perfil-header">
+            <h1>
+                <i class="fas fa-user-circle"></i>
+                Mi Perfil
+            </h1>
+            <p>Gestiona tu información personal y preferencias</p>
+        </div>
 
-    <form th:action="@{/publico/perfil}" th:object="${usuario}" method="post" enctype="multipart/form-data" class="perfil-form">
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-        <div class="form-row">
-            <label>Nombre</label>
-            <input type="text" th:field="*{nombre}" />
+        <!-- Success/Error Messages -->
+        <div th:if="${param.success}" class="alert success">
+            <i class="fas fa-check-circle"></i>
+            <span>¡Perfil actualizado correctamente!</span>
         </div>
-        <div class="form-row">
-            <label>Apellido</label>
-            <input type="text" th:field="*{apellido}" />
+
+        <div th:if="${param.error}" class="alert error">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>Hubo un error al actualizar tu perfil. Intenta de nuevo.</span>
         </div>
-        <div class="form-row">
-            <label>Teléfono</label>
-            <input type="text" th:field="*{telefono}" />
-        </div>
-        <div class="form-row">
-            <label>Dirección</label>
-            <input type="text" th:field="*{direccion}" />
-        </div>
-        <div class="form-row">
-            <label>Correo</label>
-            <input type="email" th:value="${usuario.correo}" disabled />
-        </div>
-        <div class="form-row avatar-row">
-            <label>Foto de perfil</label>
-            <div class="avatar-wrap">
-                <img th:if="${usuario.fotoPerfil != null}" th:src="@{${usuario.fotoPerfil}}" alt="Avatar" class="avatar-img" />
-                <img th:if="${usuario.fotoPerfil == null}" th:src="@{/img/placeholder.png}" alt="Avatar" class="avatar-img" />
+
+        <!-- Profile Card -->
+        <div class="perfil-card">
+            
+            <!-- Card Header with Avatar -->
+            <div class="perfil-card-header">
+                <div class="perfil-avatar-section">
+                    <div class="avatar-wrapper">
+                        <img 
+                            th:if="${usuario.fotoPerfil != null}" 
+                            th:src="@{${usuario.fotoPerfil}}" 
+                            alt="Avatar" 
+                            class="avatar-display" 
+                        />
+                        <img 
+                            th:if="${usuario.fotoPerfil == null}" 
+                            src="https://ui-avatars.com/api/?name=Usuario&background=16a34a&color=fff&size=200" 
+                            alt="Avatar" 
+                            class="avatar-display" 
+                        />
+                        <div class="avatar-badge">
+                            <i class="fas fa-check"></i>
+                        </div>
+                    </div>
+                    <div class="perfil-user-info">
+                        <h2 th:text="${usuario.nombre + ' ' + (usuario.apellido != null ? usuario.apellido : '')}">Usuario</h2>
+                        <div class="perfil-user-email">
+                            <i class="fas fa-envelope"></i>
+                            <span th:text="${usuario.correo}">correo@ejemplo.com</span>
+                        </div>
+                        <div class="oauth-badge" th:if="${usuario.oauth2User}">
+                            <i class="fab fa-google"></i>
+                            <span>Google Account</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <input type="file" name="avatar" accept="image/*" />
-        </div>
 
-        <div class="form-actions">
-            <button class="btn">Guardar cambios</button>
-            <a th:href="@{/publico/productos}" class="btn btn-secondary">Volver a la tienda</a>
+            <!-- Form -->
+            <form th:action="@{/publico/perfil}" th:object="${usuario}" method="post" enctype="multipart/form-data" class="perfil-form">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                
+                <div class="form-grid">
+                    
+                    <!-- Nombre -->
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-user"></i>
+                            Nombre
+                        </label>
+                        <input 
+                            type="text" 
+                            th:field="*{nombre}" 
+                            placeholder="Tu nombre"
+                            required
+                        />
+                    </div>
+
+                    <!-- Apellido -->
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-user-tag"></i>
+                            Apellido
+                        </label>
+                        <input 
+                            type="text" 
+                            th:field="*{apellido}" 
+                            placeholder="Tu apellido"
+                        />
+                    </div>
+
+                    <!-- Teléfono -->
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-phone"></i>
+                            Teléfono
+                        </label>
+                        <input 
+                            type="tel" 
+                            th:field="*{telefono}" 
+                            placeholder="+57 300 123 4567"
+                        />
+                    </div>
+
+                    <!-- Correo (disabled) -->
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-envelope"></i>
+                            Correo Electrónico
+                        </label>
+                        <input 
+                            type="email" 
+                            th:value="${usuario.correo}" 
+                            disabled 
+                        />
+                    </div>
+
+                    <!-- Dirección (full width) -->
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>
+                            <i class="fas fa-map-marker-alt"></i>
+                            Dirección
+                        </label>
+                        <textarea 
+                            th:field="*{direccion}" 
+                            placeholder="Calle, número, ciudad, código postal..."
+                            rows="3"
+                        ></textarea>
+                    </div>
+
+                    <!-- Avatar Upload -->
+                    <div class="avatar-upload-section">
+                        <div class="avatar-upload-content">
+                            <img 
+                                th:if="${usuario.fotoPerfil != null}" 
+                                th:src="@{${usuario.fotoPerfil}}" 
+                                alt="Avatar actual" 
+                                class="current-avatar" 
+                            />
+                            <img 
+                                th:if="${usuario.fotoPerfil == null}" 
+                                src="https://ui-avatars.com/api/?name=Usuario&background=e2e8f0&color=64748b&size=160" 
+                                alt="Avatar actual" 
+                                class="current-avatar" 
+                            />
+                            <div class="upload-info">
+                                <h4>Cambiar foto de perfil</h4>
+                                <p>JPG, PNG o GIF. Tamaño máximo 5MB</p>
+                                <div class="file-input-wrapper">
+                                    <input type="file" name="avatar" accept="image/*" id="avatar-input" />
+                                    <label for="avatar-input" class="file-input-label">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        Seleccionar imagen
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        Guardar cambios
+                    </button>
+                    <a th:href="@{/publico/productos}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i>
+                        Volver a la tienda
+                    </a>
+                </div>
+            </form>
+
+            <!-- Stats Section -->
+            <div class="perfil-stats">
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-shopping-bag"></i>
+                    </div>
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Compras realizadas</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Productos favoritos</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Puntos de fidelidad</div>
+                </div>
+            </div>
+
         </div>
-    </form>
+    </div>
 </main>
 
+<!-- FOOTER -->
 <footer class="public-footer">
     <div class="container">
-        <p>© <span th:text="${T(java.time.Year).now().value}"></span> Merko</p>
+        <p>© <span th:text="${T(java.time.Year).now().value}">2025</span> Merko - Todos los derechos reservados</p>
     </div>
 </footer>
+
+<script>
+// Preview de imagen al seleccionar
+document.getElementById('avatar-input').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.querySelector('.current-avatar').src = e.target.result;
+            document.querySelector('.avatar-display').src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+});
+</script>
 
 </body>
 </html>

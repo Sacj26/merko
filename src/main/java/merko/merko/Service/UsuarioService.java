@@ -53,13 +53,19 @@ public class UsuarioService {
         if (usuario.getCorreo() == null || usuario.getCorreo().trim().isEmpty()) {
             throw new IllegalArgumentException("El correo no puede estar vacío");
         }
-        if (usuario.getPassword() == null || usuario.getPassword().trim().isEmpty()) {
-            throw new IllegalArgumentException("La contraseña no puede estar vacía");
-        }
-        // Ensure password is encoded before saving. If it's already encoded (startsWith $2a$ or $2b$), assume it's ok.
-        String raw = usuario.getPassword();
-        if (!(raw.startsWith("$2a$") || raw.startsWith("$2b$") || raw.startsWith("$2y$"))) {
-            usuario.setPassword(passwordEncoder.encode(raw));
+        
+        // Para usuarios OAuth2, la contraseña puede ser null
+        boolean isOAuth2 = usuario.getOauth2User() != null && usuario.getOauth2User();
+        
+        if (usuario.getPassword() != null && !usuario.getPassword().trim().isEmpty()) {
+            // Ensure password is encoded before saving. If it's already encoded (startsWith $2a$ or $2b$), assume it's ok.
+            String raw = usuario.getPassword();
+            if (!(raw.startsWith("$2a$") || raw.startsWith("$2b$") || raw.startsWith("$2y$"))) {
+                usuario.setPassword(passwordEncoder.encode(raw));
+            }
+        } else if (!isOAuth2) {
+            // Solo validar contraseña vacía para usuarios NO OAuth2
+            throw new IllegalArgumentException("La contraseña no puede estar vacía para usuarios regulares");
         }
         if (usuario.getRol() == null) {
             throw new IllegalArgumentException("El rol es obligatorio");
@@ -76,8 +82,8 @@ public class UsuarioService {
         usuarioRepository.deleteById(id);
     }
 
-    public Optional<Optional<Usuario>> findByCorreo(String correo) {
-        return Optional.ofNullable(usuarioRepository.findByCorreo(correo));
+    public Optional<Usuario> findByCorreo(String correo) {
+        return usuarioRepository.findByCorreo(correo);
     }
 
     public List<Usuario> getUsuariosByRol(Rol rol) {

@@ -1,5 +1,6 @@
 package merko.merko.Config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,12 +13,19 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 import merko.merko.Entity.Usuario;
+import merko.merko.Repository.UsuarioRepository;
+import merko.merko.Service.CustomOAuth2UserService;
 import merko.merko.Service.UserDetailsServicelmpl;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    // UserDetailsService se usa automáticamente por Spring Security, no necesita inyección aquí
+    
+    @Autowired
+    private CustomOAuth2UserService customOAuth2UserService;
+    
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -29,8 +37,9 @@ public class SecurityConfig {
                         // Sólo accesible para administradores
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
-                        // Rutas para clientes
-                        .requestMatchers("/cliente/**", "/carrito/**").hasRole("CLIENTE")
+                        // Rutas para clientes - carrito accesible para cualquier usuario autenticado
+                        .requestMatchers("/cliente/**").hasRole("CLIENTE")
+                        .requestMatchers("/carrito/**").authenticated()
 
                         .anyRequest().authenticated()
                 )
@@ -39,13 +48,24 @@ public class SecurityConfig {
                         .permitAll()
                         .successHandler(successHandler())
                 )
+                // Configuración OAuth2 para Google
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login")
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService)
+                        )
+                        .successHandler(oauth2SuccessHandler())
+                        .failureUrl("/login?error=oauth2")
+                )
                 .exceptionHandling(ex -> ex
                         .accessDeniedPage("/error")
                 )
-
                 .logout(logout -> logout
                         .permitAll()
                         .logoutSuccessUrl("/login?logout")
+                        .invalidateHttpSession(true)
+                        .clearAuthentication(true)
+                        .deleteCookies("JSESSIONID")
                 );
 
         return http.build();
@@ -79,6 +99,56 @@ public class SecurityConfig {
                 response.sendRedirect("/publico/productos");
             } else {
                 response.sendRedirect("/");
+            }
+        };
+    }
+
+    /**
+     * Success handler para OAuth2 (Google)
+     */
+    @Bean
+    public AuthenticationSuccessHandler oauth2SuccessHandler() {
+        return (request, response, authentication) -> {
+            // Obtener información del usuario OAuth2
+            org.springframework.security.oauth2.core.user.OAuth2User oauth2User = 
+                    (org.springframework.security.oauth2.core.user.OAuth2User) authentication.getPrincipal();
+            
+            String email = oauth2User.getAttribute("email");
+            String googleId = oauth2User.getAttribute("sub");
+            
+            System.out.println("[OAUTH2 LOGIN] Google ID: " + googleId);
+            System.out.println("[OAUTH2 LOGIN] Email: " + email);
+            System.out.println("[OAUTH2 LOGIN] auth.getName(): " + authentication.getName());
+            
+            // Buscar usuario en BD por email (OAuth2 siempre usa email)
+            Usuario usuario = usuarioRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("Usuario OAuth2 no encontrado en BD: " + email));
+            
+            System.out.println("[OAUTH2 LOGIN] Usuario encontrado: " + usuario.getNombre() + " (ID: " + usuario.getId() + ")");
+            
+            // IMPORTANTE: Guardar el EMAIL en la sesión como identificador principal
+            // Esto hace que auth.getName() devuelva el email en lugar del Google ID
+            merko.merko.dto.SessionUser sessionUser = new merko.merko.dto.SessionUser(
+                    usuario.getId(), 
+                    email,  // Usar email como username para consistencia
+                    usuario.getNombre(), 
+                    usuario.getCorreo(), 
+                    usuario.getFotoPerfil(),
+                    usuario.getRol()
+            );
+            request.getSession().setAttribute("usuarioLogueado", sessionUser);
+            
+            // CRÍTICO: También guardamos el email como atributo para que auth.getName() lo use
+            request.getSession().setAttribute("oauth2Email", email);
+            
+            // Redirigir según el rol
+            boolean isAdmin = authentication.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+            
+            if (isAdmin) {
+                response.sendRedirect("/admin");
+            } else {
+                response.sendRedirect("/publico/productos");
             }
         };
     }

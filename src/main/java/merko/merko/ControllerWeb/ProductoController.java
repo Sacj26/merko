@@ -86,7 +86,7 @@ public class ProductoController {
         }
         Pageable pageable = PageRequest.of(Math.max(page, 0), Math.max(size, 1), Sort.by(direction, sort));
 
-        Page<Producto> pageProductos = productoService.getProductos(query, proveedorId, pageable);
+        Page<Producto> pageProductos = productoService.getProductos(query, proveedorId, null, pageable);
 
         model.addAttribute("page", pageProductos);
         model.addAttribute("productos", pageProductos.getContent());

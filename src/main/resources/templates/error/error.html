@@ -11,8 +11,12 @@
     <div layout:fragment="content">
         <div class="error-container">
             <h1>Oops! Ha ocurrido un error</h1>
-            <p th:text="${mensaje}">Mensaje de error</p>
-            <a th:href="@{/tienda/productos}">Volver al inicio</a>
+            <p th:if="${mensaje}" th:text="${mensaje}">Ha ocurrido un error inesperado</p>
+            <p th:unless="${mensaje}">Ha ocurrido un error inesperado. Por favor, intenta de nuevo.</p>
+            <div style="margin-top: 20px;">
+                <a th:href="@{/publico/productos}" class="btn" style="margin-right: 10px;">Ir a Productos</a>
+                <a th:href="@{/login}" class="btn">Iniciar Sesión</a>
+            </div>
         </div>
     </div>
 </body>

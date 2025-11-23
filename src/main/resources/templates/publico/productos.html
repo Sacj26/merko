@@ -3,94 +3,502 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>Productos - Merko</title>
     <link rel="stylesheet" th:href="@{/css/publico/productos.css}">
+    <!-- Iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
 <header class="public-header">
     <div class="container header-inner">
-        <a th:href="@{/}" class="brand">Merko</a>
+        <a th:href="@{/}" class="brand">
+            <i class="fas fa-store"></i>
+            <span>Merko</span>
+        </a>
         <nav class="public-nav">
-            <div th:if="${clienteLogueado != null}">
-                <a th:href="@{/publico/perfil}" th:text="${clienteLogueado.nombre}">Perfil</a>
-                <a th:href="@{/carrito}">Carrito</a>
+            <div th:if="${clienteLogueado != null}" class="nav-logged">
+                <a th:href="@{/publico/perfil}" class="nav-link">
+                    <i class="fas fa-user-circle"></i>
+                    <span th:text="${clienteLogueado.nombre}">Perfil</span>
+                </a>
+                <a th:href="@{/carrito}" class="nav-link cart-link">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Carrito</span>
+                    <span class="cart-badge" id="cartCount" th:text="${cartCount != null ? cartCount : 0}">0</span>
+                </a>
+                <form th:action="@{/logout}" method="post" style="display: inline;">
+                    <button type="submit" class="nav-link" style="background: none; border: none; cursor: pointer; padding: 0; color: inherit;">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </form>
             </div>
-            <div th:if="${clienteLogueado == null}">
-                <a th:href="@{/login}">Ingresar</a>
+            <div th:if="${clienteLogueado == null}" class="nav-guest">
+                <a th:href="@{/login}" class="btn-login">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Ingresar
+                </a>
+                <a th:href="@{/registro}" class="btn-register">Registrarse</a>
             </div>
         </nav>
     </div>
 </header>
 
-<main class="container">
+<main class="main-content">
+    <!-- Hero Section -->
     <section class="hero">
-        <div class="hero-inner">
-            <h1>Alimentos frescos y seleccionados</h1>
-            <p>Compra productos de calidad, directo a tu mesa. Explora por categoría, marca o precio.</p>
-            <div class="hero-actions">
-                <input id="searchInput" type="search" placeholder="Buscar productos, ej. 'manzana'" th:value="${q}" />
-                <button id="searchBtn" class="btn">Buscar</button>
-            </div>
-        </div>
-    </section>
-
-    <section class="filters">
-        <div class="filter-row">
-            <select id="categoriaFilter">
-                <option value="">Todas las categorías</option>
-                <option value="frutas" th:selected="${categoria == 'frutas'}">Frutas</option>
-                <option value="verduras" th:selected="${categoria == 'verduras'}">Verduras</option>
-                <option value="lacteos" th:selected="${categoria == 'lacteos'}">Lácteos</option>
-                <option value="carnes" th:selected="${categoria == 'carnes'}">Carnes</option>
-            </select>
-
-            <select id="ordenFilter">
-                <option value="default" th:selected="${orden == null or orden == 'default'}">Ordenar por</option>
-                <option value="precioAsc" th:selected="${orden == 'precioAsc'}">Precio: menor a mayor</option>
-                <option value="precioDesc" th:selected="${orden == 'precioDesc'}">Precio: mayor a menor</option>
-            </select>
-        </div>
-    </section>
-
-    <section class="product-grid" id="productGrid">
-        <!-- Thymeleaf renderiza lista de productos desde el modelo 'productosPage' -->
-        <div th:if="${productosPage == null or #lists.isEmpty(productosPage.content)}" class="empty">No hay productos disponibles.</div>
-
-        <div th:each="p : ${productosPage.content}" class="product-card">
-            <div class="product-image">
-                <img th:src="@{${p.imagenUrl != null ? p.imagenUrl : '/img/placeholder.png'}}" th:alt="${p.nombre}"/>
-            </div>
-            <div class="product-body">
-                <h3 th:text="${p.nombre}">Nombre producto</h3>
-                <p class="product-desc" th:text="${p.descripcion}">Descripción breve</p>
-                <div class="product-meta">
-                    <span class="price" th:text="${#numbers.formatDecimal(p.precioVenta, 0, 'COMMA', 2, 'POINT')} + ' COP'">$0</span>
-                    <button class="btn btn-outline add-to-cart" th:attr="data-id=${p.id}">Agregar</button>
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1><i class="fas fa-leaf"></i> Alimentos frescos y seleccionados</h1>
+                    <p>Descubre productos de calidad premium directamente a tu mesa. Frescura garantizada en cada compra.</p>
+                    <div class="hero-stats">
+                        <div class="stat-item">
+                            <i class="fas fa-box"></i>
+                            <div>
+                                <strong th:text="${productosPage != null ? productosPage.totalElements : 0}">0</strong>
+                                <span>Productos</span>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-truck"></i>
+                            <div>
+                                <strong>Envío Gratis</strong>
+                                <span>Compras +$50,000</span>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-shield-alt"></i>
+                            <div>
+                                <strong>100% Seguro</strong>
+                                <span>Compra protegida</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <img th:src="@{/img/hero-products.jpg}" alt="Productos frescos" onerror="this.style.display='none'">
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="pagination" th:if="${productosPage != null and productosPage.totalPages > 1}">
-        <div class="container">
-            <div class="pager">
-                <a th:if="${productosPage.hasPrevious()}" th:href="@{/publico/productos(page=${productosPage.number - 1}, q=${q}, categoria=${categoria}, orden=${orden})}" class="btn">Anterior</a>
-                <span th:each="i : ${#numbers.sequence(0, productosPage.totalPages - 1)}">
-                    <a th:href="@{/publico/productos(page=${i}, q=${q}, categoria=${categoria}, orden=${orden})}"
-                       th:text="${i + 1}"
-                       th:classappend="${i == productosPage.number} ? ' active' : ''">1</a>
-                </span>
-                <a th:if="${productosPage.hasNext()}" th:href="@{/publico/productos(page=${productosPage.number + 1}, q=${q}, categoria=${categoria}, orden=${orden})}" class="btn">Siguiente</a>
+    <div class="container main-layout">
+        <!-- SIDEBAR DE NAVEGACIÓN (Estilo Amazon/MercadoLibre) -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <h3><i class="fas fa-bars"></i> Categorías</h3>
+                <ul class="category-list">
+                    <li>
+                        <a th:href="@{/publico/productos}" th:classappend="${categoriaId == null} ? 'active' : ''">
+                            <i class="fas fa-th"></i>
+                            <span>Todas las Categorías</span>
+                        </a>
+                    </li>
+                    <!-- Categorías dinámicas desde la tabla categoria -->
+                    <li th:each="cat : ${categorias}">
+                        <a th:href="@{/publico/productos(categoriaId=${cat.id})}" 
+                           th:classappend="${categoriaId != null && categoriaId == cat.id} ? 'active' : ''">
+                            <!-- Mapeo de iconos según el nombre de la categoría -->
+                            <i th:class="${
+                                #strings.containsIgnoreCase(cat.nombre, 'FRUTA') ? 'fas fa-apple-alt' :
+                                #strings.containsIgnoreCase(cat.nombre, 'VERDURA') ? 'fas fa-carrot' :
+                                #strings.containsIgnoreCase(cat.nombre, 'LACTEO') or #strings.containsIgnoreCase(cat.nombre, 'LECHE') ? 'fas fa-cheese' :
+                                #strings.containsIgnoreCase(cat.nombre, 'CARNE') ? 'fas fa-drumstick-bite' :
+                                #strings.containsIgnoreCase(cat.nombre, 'BEBIDA') ? 'fas fa-wine-bottle' :
+                                #strings.containsIgnoreCase(cat.nombre, 'PAN') or #strings.containsIgnoreCase(cat.nombre, 'PANADERIA') ? 'fas fa-bread-slice' :
+                                #strings.containsIgnoreCase(cat.nombre, 'GRANO') or #strings.containsIgnoreCase(cat.nombre, 'CEREAL') ? 'fas fa-seedling' :
+                                #strings.containsIgnoreCase(cat.nombre, 'ENLATA') ? 'fas fa-can-food' :
+                                #strings.containsIgnoreCase(cat.nombre, 'SNACK') or #strings.containsIgnoreCase(cat.nombre, 'DULCE') ? 'fas fa-cookie-bite' :
+                                #strings.containsIgnoreCase(cat.nombre, 'CONGELA') ? 'fas fa-snowflake' :
+                                #strings.containsIgnoreCase(cat.nombre, 'ASEO') or #strings.containsIgnoreCase(cat.nombre, 'LIMPIEZA') ? 'fas fa-soap' :
+                                #strings.containsIgnoreCase(cat.nombre, 'HIGIENE') or #strings.containsIgnoreCase(cat.nombre, 'CUIDADO') ? 'fas fa-hand-sparkles' :
+                                'fas fa-box'
+                            }"></i>
+                            <!-- Mostrar nombre de la categoría -->
+                            <span th:text="${cat.nombre}">Categoría</span>
+                        </a>
+                    </li>
+                </ul>
             </div>
-        </div>
-    </section>
 
+            <div class="sidebar-section">
+                <h3><i class="fas fa-filter"></i> Filtrar por Precio</h3>
+                <div class="price-range">
+                    <input type="range" id="priceRange" min="0" max="100000" step="1000" value="100000">
+                    <div class="price-labels">
+                        <span>$0</span>
+                        <span id="priceValue">$100,000</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3><i class="fas fa-star"></i> Destacados</h3>
+                <ul class="feature-list">
+                    <li>
+                        <i class="fas fa-fire"></i>
+                        <span>Más Vendidos</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-tag"></i>
+                        <span>Ofertas</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-star"></i>
+                        <span>Nuevos</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section promo-banner">
+                <i class="fas fa-gift"></i>
+                <h4>¡Envío Gratis!</h4>
+                <p>En compras mayores a $50,000</p>
+            </div>
+        </aside>
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <div class="main-content-area">
+            <!-- Search Bar -->
+            <section class="search-section">
+                <div class="search-wrapper">
+                    <i class="fas fa-search search-icon"></i>
+                    <input id="searchInput" 
+                           type="search" 
+                           placeholder="Buscar productos (ej. manzana, leche, carne...)" 
+                           th:value="${q}" />
+                    <button id="searchBtn" class="btn-search">
+                        <i class="fas fa-search"></i>
+                        Buscar
+                    </button>
+                </div>
+            </section>
+
+            <!-- Filters -->
+            <section class="filters-section">
+            <div class="filters-header">
+                <h2><i class="fas fa-filter"></i> Filtros y Ordenamiento</h2>
+                <button class="btn-clear-filters" onclick="clearFilters()">
+                    <i class="fas fa-times"></i>
+                    Limpiar filtros
+                </button>
+            </div>
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label><i class="fas fa-list"></i> Categoría</label>
+                    <select id="categoriaFilter" class="filter-select">
+                        <option value="">Todas las categorías</option>
+                        <option value="FRUTA" th:selected="${categoria == 'FRUTA'}">🍎 Frutas</option>
+                        <option value="VERDURA" th:selected="${categoria == 'VERDURA'}">🥬 Verduras</option>
+                        <option value="LACTEO" th:selected="${categoria == 'LACTEO'}">🥛 Lácteos</option>
+                        <option value="CARNE" th:selected="${categoria == 'CARNE'}">🥩 Carnes</option>
+                        <option value="BEBIDA" th:selected="${categoria == 'BEBIDA'}">🥤 Bebidas</option>
+                        <option value="PANADERIA" th:selected="${categoria == 'PANADERIA'}">🍞 Panadería</option>
+                        <option value="GRANOS" th:selected="${categoria == 'GRANOS'}">🌾 Granos</option>
+                        <option value="ENLATADO" th:selected="${categoria == 'ENLATADO'}">🥫 Enlatados</option>
+                        <option value="OTRO" th:selected="${categoria == 'OTRO'}">📦 Otros</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label><i class="fas fa-sort"></i> Ordenar por</label>
+                    <select id="ordenFilter" class="filter-select">
+                        <option value="default" th:selected="${orden == null or orden == 'default'}">Más relevantes</option>
+                        <option value="precioAsc" th:selected="${orden == 'precioAsc'}">💰 Precio: Menor a Mayor</option>
+                        <option value="precioDesc" th:selected="${orden == 'precioDesc'}">💎 Precio: Mayor a Menor</option>
+                        <option value="nombre" th:selected="${orden == 'nombre'}">🔤 Nombre A-Z</option>
+                        <option value="nuevo" th:selected="${orden == 'nuevo'}">✨ Más nuevos</option>
+                    </select>
+                </div>
+
+                <div class="view-toggle">
+                    <label><i class="fas fa-th"></i> Vista</label>
+                    <div class="toggle-buttons">
+                        <button class="btn-view active" data-view="grid" title="Vista de cuadrícula">
+                            <i class="fas fa-th"></i>
+                        </button>
+                        <button class="btn-view" data-view="list" title="Vista de lista">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Products Grid -->
+        <section class="products-section">
+            <div class="products-header">
+                <h2>
+                    <i class="fas fa-shopping-basket"></i> 
+                    <span th:if="${q != null and q != ''}" th:text="'Resultados para: ' + ${q}">Todos los Productos</span>
+                    <span th:if="${q == null or q == ''}">Todos los Productos</span>
+                </h2>
+                <span class="product-count" th:if="${productosPage != null}">
+                    Mostrando 
+                    <strong th:text="${productosPage.numberOfElements}">0</strong> 
+                    de 
+                    <strong th:text="${productosPage.totalElements}">0</strong> 
+                    productos
+                </span>
+            </div>
+
+            <!-- Empty State -->
+            <div th:if="${productosPage == null or #lists.isEmpty(productosPage.content)}" class="empty-state">
+                <i class="fas fa-box-open"></i>
+                <h3>No hay productos disponibles</h3>
+                <p>Intenta ajustar los filtros o realiza una búsqueda diferente</p>
+                <button class="btn-primary" onclick="clearFilters()">Ver todos los productos</button>
+            </div>
+
+            <!-- Products Grid -->
+            <div class="product-grid" id="productGrid" th:if="${productosPage != null and not #lists.isEmpty(productosPage.content)}">
+                <div th:each="p : ${productosPage.content}" class="product-card">
+                    <div class="product-badges">
+                        <span class="badge badge-new" th:if="${p.estado != null and p.estado == 'ACTIVO'}">Disponible</span>
+                    </div>
+                    
+                    <div class="product-image">
+                        <img th:src="@{${p.imagenUrl != null ? p.imagenUrl : '/img/placeholder.png'}}" 
+                             th:alt="${p.nombre}"
+                             loading="lazy"/>
+                        <div class="product-overlay">
+                            <button class="btn-icon" title="Vista rápida" onclick="quickView(this)" th:attr="data-id=${p.id}">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="product-body">
+                        <div class="product-category" th:if="${p.categoria != null}">
+                            <i class="fas fa-tag"></i>
+                            <span th:text="${p.categoria.nombre}">Categoría</span>
+                        </div>
+                        <h3 class="product-title" th:text="${p.nombre}">Nombre producto</h3>
+                        <p class="product-desc" th:text="${p.descripcion != null ? p.descripcion : 'Producto de calidad'}">Descripción breve del producto</p>
+                        
+                        <div class="product-info">
+                            <span class="product-brand" th:if="${p.marca != null}">
+                                <i class="fas fa-certificate"></i>
+                                <span th:text="${p.marca}">Marca</span>
+                            </span>
+                            <span class="product-sku" th:if="${p.sku != null}">
+                                <i class="fas fa-barcode"></i>
+                                <span th:text="${p.sku}">SKU</span>
+                            </span>
+                        </div>
+                        
+                        <div class="product-footer">
+                            <div class="product-price-section">
+                                <div class="product-price">
+                                    <span class="price-current">
+                                        $<span th:text="${#numbers.formatDecimal(p.precioVenta, 0, 'COMMA', 0, 'POINT')}">0</span>
+                                    </span>
+                                    <span class="price-currency">COP</span>
+                                </div>
+                                <!-- Badge de disponibilidad según stock real -->
+                                <div class="stock-badge">
+                                    <span th:if="${stockMap[p.id] != null and stockMap[p.id] > 0}" class="badge-stock badge-available">
+                                        <i class="fas fa-check-circle"></i> En stock (<span th:text="${stockMap[p.id]}">0</span>)
+                                    </span>
+                                    <span th:if="${stockMap[p.id] == null or stockMap[p.id] == 0}" class="badge-stock badge-unavailable">
+                                        <i class="fas fa-times-circle"></i> Agotado
+                                    </span>
+                                </div>
+                            </div>
+                            <button class="btn-add-cart add-to-cart" 
+                                    th:attr="data-id=${p.id}"
+                                    th:disabled="${stockMap[p.id] == null or stockMap[p.id] == 0}">
+                                <i class="fas fa-cart-plus"></i>
+                                <span>Agregar</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pagination -->
+        <section class="pagination-section" th:if="${productosPage != null and productosPage.totalPages > 1}">
+            <div class="pagination-container">
+                <!-- Información de paginación -->
+                <div class="pagination-info">
+                    <span>Página <strong th:text="${productosPage.number + 1}">1</strong> de <strong th:text="${productosPage.totalPages}">1</strong></span>
+                </div>
+                
+                <!-- Controles de paginación -->
+                <div class="pagination">
+                    <!-- Primera página -->
+                    <a th:if="${productosPage.number > 0}" 
+                       th:href="@{/publico/productos(page=0, q=${q}, categoria=${categoria}, orden=${orden})}" 
+                       class="page-btn page-first"
+                       title="Primera página">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                    
+                    <!-- Anterior -->
+                    <a th:if="${productosPage.hasPrevious()}" 
+                       th:href="@{/publico/productos(page=${productosPage.number - 1}, q=${q}, categoria=${categoria}, orden=${orden})}" 
+                       class="page-btn page-prev"
+                       title="Página anterior">
+                        <i class="fas fa-chevron-left"></i>
+                        <span class="btn-text">Anterior</span>
+                    </a>
+                    
+                    <!-- Números de página -->
+                    <div class="page-numbers">
+                        <!-- Lógica: mostrar páginas cercanas a la actual -->
+                        <th:block th:each="i : ${#numbers.sequence(0, productosPage.totalPages - 1)}">
+                            <!-- Primera página siempre -->
+                            <a th:if="${i == 0}"
+                               th:href="@{/publico/productos(page=${i}, q=${q}, categoria=${categoria}, orden=${orden})}"
+                               th:text="${i + 1}"
+                               class="page-num"
+                               th:classappend="${i == productosPage.number} ? 'active' : ''">1</a>
+                            
+                            <!-- Puntos suspensivos inicio -->
+                            <span th:if="${i == 1 and productosPage.number > 3}" class="page-dots">...</span>
+                            
+                            <!-- Páginas cercanas (±2 de la actual) -->
+                            <a th:if="${i > 0 and i < productosPage.totalPages - 1 and i >= productosPage.number - 2 and i <= productosPage.number + 2}"
+                               th:href="@{/publico/productos(page=${i}, q=${q}, categoria=${categoria}, orden=${orden})}"
+                               th:text="${i + 1}"
+                               class="page-num"
+                               th:classappend="${i == productosPage.number} ? 'active' : ''">1</a>
+                            
+                            <!-- Puntos suspensivos final -->
+                            <span th:if="${i == productosPage.totalPages - 2 and productosPage.number < productosPage.totalPages - 4}" class="page-dots">...</span>
+                            
+                            <!-- Última página siempre -->
+                            <a th:if="${i == productosPage.totalPages - 1 and productosPage.totalPages > 1}"
+                               th:href="@{/publico/productos(page=${i}, q=${q}, categoria=${categoria}, orden=${orden})}"
+                               th:text="${i + 1}"
+                               class="page-num"
+                               th:classappend="${i == productosPage.number} ? 'active' : ''">1</a>
+                        </th:block>
+                    </div>
+                    
+                    <!-- Siguiente -->
+                    <a th:if="${productosPage.hasNext()}" 
+                       th:href="@{/publico/productos(page=${productosPage.number + 1}, q=${q}, categoria=${categoria}, orden=${orden})}" 
+                       class="page-btn page-next"
+                       title="Página siguiente">
+                        <span class="btn-text">Siguiente</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                    
+                    <!-- Última página -->
+                    <a th:if="${productosPage.number < productosPage.totalPages - 1}" 
+                       th:href="@{/publico/productos(page=${productosPage.totalPages - 1}, q=${q}, categoria=${categoria}, orden=${orden})}" 
+                       class="page-btn page-last"
+                       title="Última página">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </div>
+                
+                <!-- Ir a página específica -->
+                <div class="page-jump">
+                    <label for="pageJump">Ir a página:</label>
+                    <input type="number" 
+                           id="pageJump" 
+                           min="1" 
+                           th:max="${productosPage.totalPages}"
+                           th:value="${productosPage.number + 1}"
+                           class="page-input">
+                    <button onclick="jumpToPage()" class="btn-jump">Ir</button>
+                </div>
+            </div>
+        </section>
+        </div><!-- Cierre main-content-area -->
+    </div><!-- Cierre main-layout -->
 </main>
 
+<!-- Toast Notification -->
+<div id="toast" class="toast">
+    <i class="fas fa-check-circle"></i>
+    <span id="toastMessage">Producto agregado al carrito</span>
+</div>
+
+<!-- Quick View Modal -->
+<div id="quickViewModal" class="modal">
+    <div class="modal-content">
+        <span class="modal-close" onclick="closeModal()">&times;</span>
+        <div class="modal-body">
+            <div class="modal-image">
+                <img id="modalImage" src="" alt="Producto">
+            </div>
+            <div class="modal-info">
+                <h2 id="modalTitle">Nombre del Producto</h2>
+                <div class="modal-rating">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star-half-alt"></i>
+                    <span>(4.5)</span>
+                </div>
+                <p id="modalDescription">Descripción del producto</p>
+                <div class="modal-price">
+                    <span class="price-label">Precio:</span>
+                    <span class="price-value" id="modalPrice">$0 COP</span>
+                </div>
+                <div class="modal-stock">
+                    <i class="fas fa-check-circle"></i>
+                    <span id="modalStock">En stock</span>
+                </div>
+                <button class="btn-primary btn-large" id="modalAddCart">
+                    <i class="fas fa-cart-plus"></i>
+                    Agregar al carrito
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <footer class="public-footer">
-    <div class="container">
-        <p>© <span th:text="${T(java.time.Year).now().value}"></span> Merko - Productos alimenticios</p>
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3><i class="fas fa-store"></i> Merko</h3>
+            <p>Tu tienda de confianza para productos frescos y de calidad</p>
+            <div class="footer-social">
+                <a href="#" title="Facebook"><i class="fab fa-facebook"></i></a>
+                <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+                <a href="#" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+            </div>
+        </div>
+        <div class="footer-section">
+            <h4>Información</h4>
+            <ul>
+                <li><a href="#"><i class="fas fa-angle-right"></i> Sobre nosotros</a></li>
+                <li><a href="#"><i class="fas fa-angle-right"></i> Términos y condiciones</a></li>
+                <li><a href="#"><i class="fas fa-angle-right"></i> Política de privacidad</a></li>
+                <li><a href="#"><i class="fas fa-angle-right"></i> Preguntas frecuentes</a></li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h4>Atención al cliente</h4>
+            <ul>
+                <li><a href="#"><i class="fas fa-angle-right"></i> Contacto</a></li>
+                <li><a href="#"><i class="fas fa-angle-right"></i> Envíos y devoluciones</a></li>
+                <li><a href="#"><i class="fas fa-angle-right"></i> Métodos de pago</a></li>
+                <li><a href="#"><i class="fas fa-angle-right"></i> Seguimiento de pedidos</a></li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h4>Contacto</h4>
+            <ul class="footer-contact">
+                <li><i class="fas fa-phone"></i> +57 123 456 7890</li>
+                <li><i class="fas fa-envelope"></i> info@merko.com</li>
+                <li><i class="fas fa-map-marker-alt"></i> Bogotá, Colombia</li>
+                <li><i class="fas fa-clock"></i> Lun - Sáb: 8:00 - 20:00</li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>© <span th:text="${T(java.time.Year).now().value}">2025</span> Merko - Todos los derechos reservados</p>
     </div>
 </footer>
 

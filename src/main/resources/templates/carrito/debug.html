@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Debug Carrito - Merko</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #252526;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        h1 {
+            color: #4ec9b0;
+            border-bottom: 2px solid #4ec9b0;
+            padding-bottom: 10px;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #1e1e1e;
+            border-left: 4px solid #007acc;
+            border-radius: 4px;
+        }
+        .label {
+            color: #569cd6;
+            font-weight: bold;
+            display: inline-block;
+            min-width: 200px;
+        }
+        .value {
+            color: #ce9178;
+        }
+        .null {
+            color: #d16969;
+            font-style: italic;
+        }
+        .success {
+            color: #4ec9b0;
+        }
+        .error {
+            color: #f48771;
+            background: rgba(244, 135, 113, 0.1);
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 4px solid #f48771;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #007acc;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            background: #005a9e;
+            transform: translateY(-2px);
+        }
+        pre {
+            background: #1e1e1e;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            border: 1px solid #3e3e3e;
+        }
+        .cart-item {
+            background: #2d2d30;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛒 Debug del Carrito - Información Detallada</h1>
+        
+        <!-- Error Messages -->
+        <div th:if="${error}" class="error">
+            <strong>❌ ERROR:</strong>
+            <pre th:text="${error}"></pre>
+        </div>
+
+        <!-- Authentication Info -->
+        <div class="section">
+            <h2>🔐 Información de Autenticación</h2>
+            <p><span class="label">Usuario Autenticado:</span> 
+               <span th:text="${auth != null and auth.authenticated ? 'Sí ✓' : 'No ✗'}" 
+                     th:class="${auth != null and auth.authenticated ? 'success' : 'null'}"></span>
+            </p>
+            <p th:if="${auth != null and auth.authenticated}">
+                <span class="label">auth.getName():</span> 
+                <span class="value" th:text="${auth.name}"></span>
+            </p>
+            <p th:if="${auth != null and auth.authenticated}">
+                <span class="label">Tipo de Autenticación:</span> 
+                <span class="value" th:text="${auth.getClass().simpleName}"></span>
+            </p>
+        </div>
+
+        <!-- Session Info -->
+        <div class="section">
+            <h2>📦 Información de Sesión</h2>
+            <p><span class="label">Session ID:</span> 
+               <span class="value" th:text="${sessionId}">N/A</span>
+            </p>
+            <p><span class="label">Usuario en Sesión:</span> 
+               <span th:if="${clienteLogueado != null}" class="success" th:text="${clienteLogueado.nombre}">Presente</span>
+               <span th:unless="${clienteLogueado != null}" class="null">NULL</span>
+            </p>
+            <p th:if="${clienteLogueado != null}">
+                <span class="label">Email Usuario Sesión:</span> 
+                <span class="value" th:text="${clienteLogueado.correo}"></span>
+            </p>
+            <p><span class="label">OAuth2 Email en Sesión:</span> 
+               <span th:if="${oauth2Email != null}" class="value" th:text="${oauth2Email}">Presente</span>
+               <span th:unless="${oauth2Email != null}" class="null">NULL</span>
+            </p>
+        </div>
+
+        <!-- Cart Info -->
+        <div class="section">
+            <h2>🛍️ Información del Carrito</h2>
+            <p><span class="label">Tamaño del Carrito:</span> 
+               <span class="value" th:text="${carrito != null ? carrito.size() : 0}">0</span>
+            </p>
+            <p><span class="label">Total:</span> 
+               <span class="value" th:text="${total != null ? '$' + total : '$0.00'}">$0.00</span>
+            </p>
+            
+            <div th:if="${carrito != null and !carrito.isEmpty()}">
+                <h3>Items en el Carrito:</h3>
+                <div th:each="item : ${carrito}" class="cart-item">
+                    <p>
+                        <strong th:text="${item.nombre}">Producto</strong> - 
+                        Cantidad: <span th:text="${item.cantidad}">0</span> - 
+                        Precio: $<span th:text="${item.precio}">0.00</span>
+                    </p>
+                </div>
+            </div>
+            <p th:if="${carrito == null or carrito.isEmpty()}" class="null">
+                Carrito vacío
+            </p>
+        </div>
+
+        <!-- Model Attributes -->
+        <div class="section">
+            <h2>📋 Atributos del Modelo</h2>
+            <p><span class="label">cartCount:</span> 
+               <span class="value" th:text="${cartCount}">N/A</span>
+            </p>
+            <p><span class="label">carrito:</span> 
+               <span th:text="${carrito != null ? 'Presente' : 'NULL'}" 
+                     th:class="${carrito != null ? 'success' : 'null'}"></span>
+            </p>
+            <p><span class="label">total:</span> 
+               <span th:text="${total != null ? '$' + total : 'NULL'}" 
+                     th:class="${total != null ? 'value' : 'null'}"></span>
+            </p>
+            <p><span class="label">clienteLogueado:</span> 
+               <span th:text="${clienteLogueado != null ? 'Presente' : 'NULL'}" 
+                     th:class="${clienteLogueado != null ? 'success' : 'null'}"></span>
+            </p>
+        </div>
+
+        <!-- Stack Trace -->
+        <div th:if="${stackTrace}" class="section error">
+            <h2>📜 Stack Trace</h2>
+            <pre th:text="${stackTrace}"></pre>
+        </div>
+
+        <!-- Actions -->
+        <div style="margin-top: 30px;">
+            <a th:href="@{/publico/productos}" class="btn">← Volver a Productos</a>
+            <a th:href="@{/carrito}" class="btn" style="background: #16a34a;">🔄 Reintentar Carrito</a>
+        </div>
+
+        <!-- Help Text -->
+        <div class="section" style="margin-top: 30px; border-left-color: #f59e0b;">
+            <h3 style="color: #f59e0b;">💡 Instrucciones de Debug</h3>
+            <p>Copia toda esta información y envíala para análisis. Incluye:</p>
+            <ul>
+                <li>Estado de autenticación</li>
+                <li>Información de sesión</li>
+                <li>Contenido del carrito</li>
+                <li>Stack trace si existe</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

@@ -34,9 +34,9 @@ public class ProductoService {
         return productoRepository.count();
     }
 
-    public Page<Producto> getProductos(String q, Long proveedorId, Pageable pageable) {
+    public Page<Producto> getProductos(String q, Long proveedorId, Long categoriaId, Pageable pageable) {
         String qParam = (q != null && !q.isBlank()) ? q : null;
-        return productoRepository.search(proveedorId, qParam, pageable);
+        return productoRepository.search(proveedorId, categoriaId, qParam, pageable);
     }
 
     public Optional<Producto> getProductoById(Long id) {

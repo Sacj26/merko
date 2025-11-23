@@ -72,6 +72,26 @@ public class Usuario {
     @Column(name = "ultimo_login")
     private LocalDateTime ultimoLogin;
 
+    // ===== Campos para OAuth2 (Google) =====
+    
+    @Column(name = "google_id", unique = true)
+    private String googleId;
+    
+    @Column(name = "profile_picture")
+    private String profilePicture;
+    
+    @Column(name = "oauth2_user")
+    private Boolean oauth2User = false;
+    
+    // Método auxiliar para compatibilidad con email
+    public String getEmail() {
+        return this.correo;
+    }
+    
+    public void setEmail(String email) {
+        this.correo = email;
+    }
+
     @PrePersist
     public void prePersist() {
         if (this.fechaCreacion == null) {
@@ -82,6 +102,9 @@ public class Usuario {
         }
         if (this.notificaciones == null) {
             this.notificaciones = true;
+        }
+        if (this.oauth2User == null) {
+            this.oauth2User = false;
         }
     }
 }
