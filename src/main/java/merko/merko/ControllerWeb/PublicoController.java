@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +28,10 @@ import jakarta.servlet.http.HttpSession;
 import merko.merko.Entity.Producto;
 import merko.merko.Entity.Rol;
 import merko.merko.Entity.Usuario;
+import merko.merko.Entity.Venta;
 import merko.merko.Repository.CategoriaRepository;
 import merko.merko.Repository.ProductBranchRepository;
+import merko.merko.Repository.VentaRepository;
 import merko.merko.Service.CarritoService;
 import merko.merko.Service.ProductoService;
 import merko.merko.Service.UsuarioService;
@@ -42,16 +45,19 @@ public class PublicoController {
     private final ProductBranchRepository productBranchRepository;
     private final UsuarioService usuarioService;
     private final CategoriaRepository categoriaRepository;
+    private final VentaRepository ventaRepository;
     
     @Autowired
     private CarritoService carritoService;
 
     public PublicoController(ProductoService productoService, UsuarioService usuarioService, 
-                             ProductBranchRepository productBranchRepository, CategoriaRepository categoriaRepository) {
+                             ProductBranchRepository productBranchRepository, CategoriaRepository categoriaRepository,
+                             VentaRepository ventaRepository) {
         this.productoService = productoService;
         this.usuarioService = usuarioService;
         this.productBranchRepository = productBranchRepository;
         this.categoriaRepository = categoriaRepository;
+        this.ventaRepository = ventaRepository;
     }
 
     @GetMapping({"/productos", ""})
@@ -169,6 +175,10 @@ public class PublicoController {
             }
             if (u != null) {
                 model.addAttribute("usuario", u);
+                // Agregar historial de compras del usuario
+                List<Venta> comprasUsuario = ventaRepository.findByClienteIdOrderByFechaDesc(u.getId());
+                model.addAttribute("compras", comprasUsuario);
+                System.out.println("[PERFIL] Usuario tiene " + comprasUsuario.size() + " compras");
                 return "publico/perfil";
             }
         }
@@ -209,6 +219,10 @@ public class PublicoController {
         }
         
         model.addAttribute("usuario", u);
+        // Agregar historial de compras del usuario
+        List<Venta> comprasUsuario = ventaRepository.findByClienteIdOrderByFechaDesc(u.getId());
+        model.addAttribute("compras", comprasUsuario);
+        System.out.println("[PERFIL] Usuario tiene " + comprasUsuario.size() + " compras");
         return "publico/perfil";
     }
 

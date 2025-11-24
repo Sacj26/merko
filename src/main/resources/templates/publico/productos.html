@@ -255,7 +255,9 @@
 
             <!-- Products Grid -->
             <div class="product-grid" id="productGrid" th:if="${productosPage != null and not #lists.isEmpty(productosPage.content)}">
-                <div th:each="p : ${productosPage.content}" class="product-card">
+                <div th:each="p : ${productosPage.content}" 
+                     class="product-card card-producto"
+                     th:attr="data-nombre=${p.nombre}, data-precio=${p.precioVenta}">
                     <div class="product-badges">
                         <span class="badge badge-new" th:if="${p.estado != null and p.estado == 'ACTIVO'}">Disponible</span>
                     </div>

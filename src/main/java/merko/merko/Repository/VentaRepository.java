@@ -60,4 +60,8 @@ public interface VentaRepository extends JpaRepository<Venta, Long> {
     
     @Query(value = "SELECT v.id FROM venta v WHERE DATE(v.fecha) = :fecha ORDER BY v.fecha DESC LIMIT :limit", nativeQuery = true)
     List<Long> findIdsByFechaBetween(@Param("fecha") String fecha, @Param("limit") int limit);
+    
+    // Query para obtener todas las compras de un usuario específico ordenadas por fecha
+    @Query("SELECT DISTINCT v FROM Venta v LEFT JOIN FETCH v.detalles d LEFT JOIN FETCH d.producto LEFT JOIN FETCH v.branch WHERE v.cliente.id = :clienteId ORDER BY v.fecha DESC")
+    List<Venta> findByClienteIdOrderByFechaDesc(@Param("clienteId") Long clienteId);
 }

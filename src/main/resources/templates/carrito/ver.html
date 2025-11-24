@@ -140,9 +140,9 @@
                         </button>
                     </form>
                     
-                    <form th:action="@{/carrito/finalizar}" method="post">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-credit-card"></i> Finalizar compra
+                    <form id="form-finalizar-compra" th:action="@{/carrito/finalizar}" method="post">
+                        <button id="btn-finalizar-compra" type="submit" class="btn btn-primary">
+                            <i class="fas fa-credit-card"></i> <span id="btn-text">Finalizar compra</span>
                         </button>
                     </form>
                 </div>
@@ -150,5 +150,53 @@
         </div>
     </div>
 </div>
+
+<script>
+// Evitar múltiples envíos del formulario de compra
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('form-finalizar-compra');
+    const btn = document.getElementById('btn-finalizar-compra');
+    const btnText = document.getElementById('btn-text');
+    
+    if (form && btn) {
+        form.addEventListener('submit', function(e) {
+            // Deshabilitar botón inmediatamente
+            if (btn.disabled) {
+                e.preventDefault();
+                return false;
+            }
+            
+            btn.disabled = true;
+            btn.style.opacity = '0.6';
+            btn.style.cursor = 'not-allowed';
+            
+            // Cambiar texto e icono
+            const icon = btn.querySelector('i');
+            if (icon) {
+                icon.className = 'fas fa-spinner fa-spin';
+            }
+            if (btnText) {
+                btnText.textContent = 'Procesando compra...';
+            }
+            
+            // Si después de 30 segundos no hay respuesta, rehabilitar (timeout de seguridad)
+            setTimeout(function() {
+                if (btn.disabled) {
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    btn.style.cursor = 'pointer';
+                    if (icon) {
+                        icon.className = 'fas fa-credit-card';
+                    }
+                    if (btnText) {
+                        btnText.textContent = 'Finalizar compra';
+                    }
+                }
+            }, 30000);
+        });
+    }
+});
+</script>
+
 </body>
 </html>
