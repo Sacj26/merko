@@ -128,14 +128,14 @@ button:hover, .btn-login:hover {
     border: none;
     border-radius: 8px;
     background-color: rgba(255, 255, 255, 0.95);
-    color: #4285F4;
+    color: #DB4437;
     font-weight: 500;
     font-size: 20px;
     text-decoration: none;
     cursor: pointer;
     transition: all 0.3s ease;
     box-sizing: border-box;
-    margin-bottom: 1rem;
+    margin-top: 1rem;
 }
 
 .btn-google:hover {

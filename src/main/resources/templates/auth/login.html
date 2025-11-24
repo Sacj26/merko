@@ -32,22 +32,16 @@
                 <button type="submit" class="btn btn-primary" style="width: 100%;">Entrar</button>
             </form>
 
-            <!-- Divider -->
-            <div class="divider" style="margin: 1.5rem 0; text-align: center; position: relative;">
-                <span style="background: rgba(255, 255, 255, 0.2); padding: 0 1rem; position: relative; z-index: 1; color: #fff; font-size: 13px;">o continúa con</span>
-                <div style="position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: rgba(255, 255, 255, 0.3); z-index: 0;"></div>
-            </div>
-
-            <!-- Google OAuth Button -->
-            <a th:href="@{/oauth2/authorization/google}" class="btn-google">
-                <i class="fab fa-google"></i>
-            </a>
-
             <div class="register-link">
                 <p>¿No tienes una cuenta?
                     <a th:href="@{/registro}">Regístrate aquí</a>
                 </p>
             </div>
+
+            <!-- Google OAuth Button -->
+            <a th:href="@{/oauth2/authorization/google}" class="btn-google" title="Iniciar sesión con Google">
+                <i class="fab fa-google"></i>
+            </a>
         </div>
 </body>
 </html>
