@@ -10,10 +10,10 @@
 <body>
     <div layout:fragment="content">
         <div class="admin-header">
-            <h1>Panel de Administración</h1>
+            <h1>Power BI Dashboard</h1>
             <p>Vista integrada del dashboard Power BI.</p>
             <a class="btn btn-secondary" th:href="@{/admin/dashboard}" title="Volver al panel">
-                <i class="fas fa-arrow-left" aria-hidden="true"></i> Volver al Panel
+                <i class="fas fa-arrow-left"></i> Volver al Panel
             </a>
         </div>
 
@@ -30,10 +30,5 @@
             </div>
         </section>
     </div>
-
-    <th:block layout:fragment="scripts">
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script th:src="@{/js/pages/admin/dashboard/index.js}"></script>
-    </th:block>
 </body>
 </html>

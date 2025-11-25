@@ -226,4 +226,11 @@ public class AdminController {
         logger.info("=== Top {} productos comprados devueltos", resultado.size());
         return resultado;
     }
+
+    @GetMapping("/dashboard/powerbi")
+public String panelPowerBI() {
+    // Solo devuelve la vista Thymeleaf con iframe
+    return "admin/dashboard/powerbi"; 
+}
+
 }
